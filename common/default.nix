@@ -1,5 +1,5 @@
 # Common configuration shared across all hosts
-{ config, pkgs, ... }:
+{ config, pkgs, zen-browser, ... }:
 
 {
   # Nix settings
@@ -48,7 +48,7 @@
   };
 
   # Common packages
-  environment.systemPackages = with pkgs; [
+  environment.systemPackages = (with pkgs; [
     # Editors
     neovim
 
@@ -62,6 +62,15 @@
     tree
     tig
 
+    # Browsers
+    google-chrome
+
+    # Communication
+    slack
+
+    # Note-taking
+    obsidian
+
     # Wayland / Hyprland
     wl-clipboard
     wlogout
@@ -74,6 +83,9 @@
     grim
     slurp
     dunst
+  ]) ++ [
+    # External flake packages
+    zen-browser.packages.${pkgs.system}.default
   ];
 
   programs.fish.enable = true;
