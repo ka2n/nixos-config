@@ -69,7 +69,6 @@ in
     neovim
 
     # CLI tools
-    git
     gh
     wget
     curl
@@ -123,6 +122,7 @@ in
   ];
 
   programs.fish.enable = true;
+  programs.git.enable = true;
   programs.neovim.enable = true;
   programs.neovim.defaultEditor = true;
   programs.neovim.viAlias = true;
