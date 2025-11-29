@@ -152,4 +152,14 @@ in
   ]) ++ [
     cica
   ];
+
+  fonts.fontconfig = {
+    enable = true;
+    defaultFonts = {
+      serif = [ "Noto Serif" "Noto Serif CJK JP" ];
+      sansSerif = [ "Noto Sans" "Noto Sans CJK JP" ];
+      monospace = [ "Cica" "Noto Sans Mono CJK JP" ];
+      emoji = [ "Noto Color Emoji" ];
+    };
+  };
 }
