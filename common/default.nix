@@ -131,8 +131,8 @@ in
     gnome-themes-extra          # Adwaita GTK theme
     yaru-theme                  # Yaru icon theme
 
-    # SKK dictionaries
-    skkDictionaries
+    # SKK dictionary
+    skkDictionaries.l
   ]) ++ [
     # External flake packages
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
