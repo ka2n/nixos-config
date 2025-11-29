@@ -44,7 +44,7 @@
   users.users.k2 = {
     isNormalUser = true;
     description = "k2";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" ];
   };
 
   # Common packages
@@ -64,12 +64,30 @@
 
     # Browsers
     google-chrome
+    firefox
 
     # Communication
     slack
 
     # Note-taking
     obsidian
+
+    # Office
+    libreoffice
+
+    # File manager
+    xfce.thunar
+
+    # Media
+    vlc
+    feh
+
+    # System utilities
+    blueman
+    pavucontrol
+
+    # Password manager
+    _1password-gui
 
     # Wayland / Hyprland
     wl-clipboard
@@ -103,6 +121,9 @@
   # Services
   services.openssh.enable = true;
   services.tailscale.enable = true;
+
+  # Docker
+  virtualisation.docker.enable = true;
 
   fonts.fonts = with pkgs; [
     noto-fonts
