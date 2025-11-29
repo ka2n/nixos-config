@@ -88,6 +88,10 @@
 
     # Password manager
     _1password-gui
+    _1password
+
+    # Music
+    spotify
 
     # Wayland / Hyprland
     wl-clipboard
