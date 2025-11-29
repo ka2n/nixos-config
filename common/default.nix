@@ -120,7 +120,13 @@ in
     swaybg
     grim
     slurp
-    dunst
+    mako                        # notification daemon (omarchy style)
+    xdg-desktop-portal-hyprland
+    xdg-desktop-portal-gtk
+
+    # Theming (omarchy style)
+    gnome-themes-extra          # Adwaita GTK theme
+    yaru-theme                  # Yaru icon theme
   ]) ++ [
     # External flake packages
     inputs.zen-browser.packages.${pkgs.system}.default
@@ -158,6 +164,14 @@ in
   services.openssh.enable = true;
   services.tailscale.enable = true;
 
+  # Audio (PipeWire)
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
+
   # Docker
   virtualisation.docker.enable = true;
 
@@ -165,6 +179,7 @@ in
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-emoji
+    nerd-fonts.jetbrains-mono   # omarchy waybar font
   ]) ++ [
     cica
   ];
