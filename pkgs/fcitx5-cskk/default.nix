@@ -6,9 +6,15 @@
 , pkg-config
 , gettext
 , fcitx5
+, fcitx5-qt
+, qtbase
+, wrapQtAppsHook
 , libcskk
 }:
 
+let
+  majorVersion = lib.versions.major qtbase.version;
+in
 stdenv.mkDerivation {
   pname = "fcitx5-cskk";
   version = "unstable-2024-12-15";
@@ -25,18 +31,20 @@ stdenv.mkDerivation {
     extra-cmake-modules
     pkg-config
     gettext
+    wrapQtAppsHook
   ];
 
   buildInputs = [
     fcitx5
+    fcitx5-qt
+    qtbase
     libcskk
   ];
 
   cmakeFlags = [
-    (lib.cmakeBool "ENABLE_QT" false)
+    (lib.cmakeBool "ENABLE_QT" true)
+    (lib.cmakeBool "USE_QT6" (majorVersion == "6"))
   ];
-
-  dontWrapQtApps = true;
 
   meta = with lib; {
     description = "Fcitx5 wrapper for libcskk";
