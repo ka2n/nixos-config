@@ -81,6 +81,7 @@ in
 
     # Development
     go
+    claude-code
 
     # Browsers
     google-chrome
@@ -132,6 +133,8 @@ in
     # External flake packages
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
+
+  programs.nix-ld.enable = true;
 
   programs.fish.enable = true;
   programs.git.enable = true;
