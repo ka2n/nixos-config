@@ -79,6 +79,7 @@ in
     tig
     ldns          # drill
     dig
+    ripgrep
 
     # Development
     go
