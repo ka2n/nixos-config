@@ -1,6 +1,22 @@
 # Common configuration shared across all hosts
 { config, pkgs, zen-browser, ... }:
 
+let
+  cica = pkgs.stdenvNoCC.mkDerivation rec {
+    pname = "cica";
+    version = "5.0.3";
+    src = pkgs.fetchzip {
+      url = "https://github.com/miiton/Cica/releases/download/v${version}/Cica_v${version}.zip";
+      hash = "sha256-XAi1XMTW3lKgz8MLcxT4VKfBvhkljUXPYAzrA3mqPLY=";
+      stripRoot = false;
+    };
+    installPhase = ''
+      runHook preInstall
+      install -Dm644 *.ttf -t $out/share/fonts/truetype
+      runHook postInstall
+    '';
+  };
+in
 {
   # Nix settings
   nix.gc.automatic = true;
@@ -129,7 +145,9 @@
   # Docker
   virtualisation.docker.enable = true;
 
-  fonts.fonts = with pkgs; [
+  fonts.fonts = (with pkgs; [
     noto-fonts
+  ]) ++ [
+    cica
   ];
 }
