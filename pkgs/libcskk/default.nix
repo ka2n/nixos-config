@@ -15,7 +15,7 @@ rustPlatform.buildRustPackage rec {
     owner = "naokiri";
     repo = "cskk";
     rev = "v${version}";
-    hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    hash = "sha256-ooAfyoHpFoMiF0ZpvasW72Xk5BZ/t3qEGxRX8keWFuA=";
   };
 
   cargoHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
