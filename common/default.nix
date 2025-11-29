@@ -129,7 +129,7 @@ in
     yaru-theme                  # Yaru icon theme
   ]) ++ [
     # External flake packages
-    inputs.zen-browser.packages.${pkgs.system}.default
+    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   programs.fish.enable = true;
@@ -175,10 +175,10 @@ in
   # Docker
   virtualisation.docker.enable = true;
 
-  fonts.fonts = (with pkgs; [
+  fonts.packages = (with pkgs; [
     noto-fonts
     noto-fonts-cjk-sans
-    noto-fonts-emoji
+    noto-fonts-color-emoji
     nerd-fonts.jetbrains-mono   # omarchy waybar font
   ]) ++ [
     cica
