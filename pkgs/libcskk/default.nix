@@ -18,6 +18,8 @@ rustPlatform.buildRustPackage rec {
     hash = "sha256-ooAfyoHpFoMiF0ZpvasW72Xk5BZ/t3qEGxRX8keWFuA=";
   };
 
+  sourceRoot = "source/cskk";
+
   cargoHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
 
   nativeBuildInputs = [
