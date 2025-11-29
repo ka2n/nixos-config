@@ -7,11 +7,16 @@
     };
   };
 
-  outputs = { self, nixpkgs, ... }@inputs: {
+  outputs = { self, nixpkgs, ... }@inputs:
+  let
+    system = "x86_64-linux";
+    overlay = import ./pkgs;
+  in {
     nixosConfigurations.vm = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
+      inherit system;
       specialArgs = { inherit inputs; };
       modules = [
+        { nixpkgs.overlays = [ overlay ]; }
         ./hosts/vm/configuration.nix
       ];
     };

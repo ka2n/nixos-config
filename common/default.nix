@@ -48,6 +48,7 @@ in
   i18n.inputMethod.type = "fcitx5";
   i18n.inputMethod.fcitx5.addons = with pkgs; [
     fcitx5-gtk
+    fcitx5-cskk
   ];
 
   # Keyboard
@@ -129,6 +130,9 @@ in
     # Theming (omarchy style)
     gnome-themes-extra          # Adwaita GTK theme
     yaru-theme                  # Yaru icon theme
+
+    # SKK dictionaries
+    skk-dicts
   ]) ++ [
     # External flake packages
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
