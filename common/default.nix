@@ -102,10 +102,6 @@ in
     blueman
     pavucontrol
 
-    # Password manager
-    _1password-gui
-    _1password
-
     # Music
     spotify
 
@@ -134,6 +130,21 @@ in
 
   # Hyprland
   programs.hyprland.enable = true;
+
+  # 1Password
+  programs._1password.enable = true;
+  programs._1password-gui = {
+    enable = true;
+    polkitPolicyOwners = [ "k2" ];
+  };
+
+  # Allow Zen Browser to connect to 1Password
+  environment.etc."1password/custom_allowed_browsers" = {
+    text = ''
+      .zen-wrapped
+    '';
+    mode = "0755";
+  };
 
   # Display manager
   services.displayManager.ly.enable = true;
