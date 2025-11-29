@@ -6,11 +6,8 @@
 , pkg-config
 , gettext
 , fcitx5
-, fcitx5-qt
-, qtbase
-, qtdeclarative
+, libsForQt5
 , libcskk
-, wrapQtAppsHook
 }:
 
 stdenv.mkDerivation {
@@ -29,14 +26,14 @@ stdenv.mkDerivation {
     extra-cmake-modules
     pkg-config
     gettext
-    wrapQtAppsHook
+    libsForQt5.wrapQtAppsHook
   ];
 
   buildInputs = [
     fcitx5
-    fcitx5-qt
-    qtbase
-    qtdeclarative
+    libsForQt5.fcitx5-qt
+    libsForQt5.qtbase
+    libsForQt5.qtdeclarative
     libcskk
   ];
 
