@@ -132,7 +132,7 @@ in
     yaru-theme                  # Yaru icon theme
 
     # SKK dictionaries
-    skk-dicts
+    skkDictionaries
   ]) ++ [
     # External flake packages
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
