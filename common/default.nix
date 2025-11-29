@@ -121,6 +121,7 @@ in
     grim
     slurp
     mako                        # notification daemon (omarchy style)
+    libnotify
     xdg-desktop-portal-hyprland
     xdg-desktop-portal-gtk
 
