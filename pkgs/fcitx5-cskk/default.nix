@@ -13,14 +13,14 @@
 , wrapQtAppsHook
 }:
 
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   pname = "fcitx5-cskk";
-  version = "1.2.0";
+  version = "unstable-2024-12-15";
 
   src = fetchFromGitHub {
     owner = "fcitx";
     repo = "fcitx5-cskk";
-    rev = "v${version}";
+    rev = "7ea513375d5412b37ab0251476f792d2467547e5";
     hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
   };
 
