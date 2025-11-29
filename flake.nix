@@ -7,10 +7,10 @@
     };
   };
 
-  outputs = { self, nixpkgs, zen-browser }: {
+  outputs = { self, nixpkgs, ... }@inputs: {
     nixosConfigurations.vm = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      specialArgs = { inherit zen-browser; };
+      specialArgs = { inherit inputs; };
       modules = [
         ./hosts/vm/configuration.nix
       ];

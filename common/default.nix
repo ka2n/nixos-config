@@ -1,5 +1,5 @@
 # Common configuration shared across all hosts
-{ config, pkgs, zen-browser, ... }:
+{ config, pkgs, inputs, ... }:
 
 let
   cica = pkgs.stdenvNoCC.mkDerivation rec {
@@ -123,7 +123,7 @@ in
     dunst
   ]) ++ [
     # External flake packages
-    zen-browser.packages.${pkgs.system}.default
+    inputs.zen-browser.packages.${pkgs.system}.default
   ];
 
   programs.fish.enable = true;
