@@ -6,7 +6,6 @@
 , pkg-config
 , gettext
 , fcitx5
-, libsForQt5
 , libcskk
 }:
 
@@ -26,20 +25,18 @@ stdenv.mkDerivation {
     extra-cmake-modules
     pkg-config
     gettext
-    libsForQt5.wrapQtAppsHook
   ];
 
   buildInputs = [
     fcitx5
-    libsForQt5.fcitx5-qt
-    libsForQt5.qtbase
-    libsForQt5.qtdeclarative
     libcskk
   ];
 
   cmakeFlags = [
-    "-DCMAKE_INSTALL_PREFIX=${placeholder "out"}"
+    (lib.cmakeBool "ENABLE_QT" false)
   ];
+
+  dontWrapQtApps = true;
 
   meta = with lib; {
     description = "Fcitx5 wrapper for libcskk";

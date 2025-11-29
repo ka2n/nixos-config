@@ -15,12 +15,10 @@ rustPlatform.buildRustPackage rec {
     owner = "naokiri";
     repo = "cskk";
     rev = "v${version}";
-    hash = "sha256-ooAfyoHpFoMiF0ZpvasW72Xk5BZ/t3qEGxRX8keWFuA=";
+    hash = "sha256-ApSDhQvV/PwtzGEtdtEepiw018F2mhWAKg+Y3wytEGs=";
   };
 
-  sourceRoot = "source/cskk";
-
-  cargoHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+  cargoHash = "sha256-M5oKBNc1+Tj1+8Nij46ca2SV8xgDPdRZqa6UJnIYt+g=";
 
   nativeBuildInputs = [
     cargo-c
