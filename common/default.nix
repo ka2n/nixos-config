@@ -3,7 +3,14 @@
 
 {
   # Nix settings
+  nix.gc.automatic = true;
+  nix.gc.dates = "weekly";
+  nix.gc.options = "--delete-older-than 7d";
+  nix.settings.auto-optimise-store = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.trusted-users = ["root" "@wheel"];
+  nix.settings.accept-flake-config = true;
+  nixpkgs.config.allowUnfree = true;
 
   # Bootloader
   boot.loader.systemd-boot.enable = true;
@@ -21,6 +28,11 @@
   i18n.extraLocaleSettings = {
     LC_CTYPE = "ja_JP.UTF-8";
   };
+  i18n.inputMethod.enable = true;
+  i18n.inputMethod.type = "fcitx5";
+  i18n.inputMethod.fcitx5.addons = with pkgs; [
+    fcitx5-gtk
+  ];
 
   # Keyboard
   services.xserver.xkb = {
@@ -35,13 +47,9 @@
     extraGroups = [ "networkmanager" "wheel" ];
   };
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
-
   # Common packages
   environment.systemPackages = with pkgs; [
     # Editors
-    vim
     neovim
 
     # CLI tools
@@ -50,6 +58,9 @@
     wget
     curl
     chezmoi
+    mise
+    tree
+    tig
 
     # Wayland / Hyprland
     wl-clipboard
@@ -66,6 +77,10 @@
   ];
 
   programs.fish.enable = true;
+  programs.neovim.enable = true;
+  programs.neovim.defaultEditor = true;
+  programs.neovim.viAlias = true;
+  programs.neovim.vimAlias = true;
 
   # Hyprland
   programs.hyprland.enable = true;
@@ -76,4 +91,8 @@
   # Services
   services.openssh.enable = true;
   services.tailscale.enable = true;
+
+  fonts.fonts = with pkgs; [
+    noto-fonts
+  ];
 }
