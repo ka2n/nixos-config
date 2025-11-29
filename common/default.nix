@@ -7,7 +7,7 @@ let
     version = "5.0.3";
     src = pkgs.fetchzip {
       url = "https://github.com/miiton/Cica/releases/download/v${version}/Cica_v${version}.zip";
-      hash = "sha256-XAi1XMTW3lKgz8MLcxT4VKfBvhkljUXPYAzrA3mqPLY=";
+      hash = "sha256-BtDnfWCfD9NE8tcWSmk8ciiInsspNPTPmAdGzpg62SM=";
       stripRoot = false;
     };
     installPhase = ''
