@@ -76,6 +76,8 @@ in
     mise
     tree
     tig
+    ldns          # drill
+    dig
 
     # Browsers
     google-chrome
