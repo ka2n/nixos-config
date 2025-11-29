@@ -46,8 +46,10 @@ in
   };
   i18n.inputMethod.enable = true;
   i18n.inputMethod.type = "fcitx5";
+  i18n.inputMethod.fcitx5.waylandFrontend = true;
   i18n.inputMethod.fcitx5.addons = with pkgs; [
     fcitx5-gtk
+    fcitx5-cskk
   ];
 
   # Keyboard
@@ -78,6 +80,7 @@ in
     tig
     ldns          # drill
     dig
+    ripgrep
 
     # Development
     go
@@ -106,6 +109,7 @@ in
     # System utilities
     blueman
     pavucontrol
+    dex                         # XDG autostart runner
 
     # Music
     spotify
@@ -129,6 +133,9 @@ in
     # Theming (omarchy style)
     gnome-themes-extra          # Adwaita GTK theme
     yaru-theme                  # Yaru icon theme
+
+    # SKK dictionary
+    skkDictionaries.l
   ]) ++ [
     # External flake packages
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
@@ -163,6 +170,7 @@ in
 
   # Display manager
   services.displayManager.ly.enable = true;
+  services.xserver.desktopManager.runXdgAutostartIfNone = true;
 
   # Services
   services.openssh.enable = true;
