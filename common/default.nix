@@ -79,6 +79,9 @@ in
     ldns          # drill
     dig
 
+    # Development
+    go
+
     # Browsers
     google-chrome
     firefox
