@@ -18,7 +18,7 @@ stdenv.mkDerivation {
     owner = "fcitx";
     repo = "fcitx5-cskk";
     rev = "7ea513375d5412b37ab0251476f792d2467547e5";
-    hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    hash = "sha256-ooAfyoHpFoMiF0ZpvasW72Xk5BZ/t3qEGxRX8keWFuA=";
   };
 
   nativeBuildInputs = [
