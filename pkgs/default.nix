@@ -5,4 +5,7 @@ final: prev: {
     inherit (final.qt6) qtbase wrapQtAppsHook;
     inherit (final.kdePackages) fcitx5-qt;
   };
+  inputactions-hyprland = final.callPackage ./inputactions-hyprland {
+    inherit (final) hyprlandPlugins;
+  };
 }

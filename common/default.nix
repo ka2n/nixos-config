@@ -104,6 +104,7 @@ in
     # Keyboard/Input
     xremap
     warpd
+    inputactions-hyprland       # Mouse/touchpad gestures (easystroke alternative)
 
     # Development
     go
