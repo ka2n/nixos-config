@@ -81,6 +81,29 @@ in
     ldns          # drill
     dig
     ripgrep
+    jq
+    fzf
+    fd
+    bat
+    lsd
+    colordiff
+    peco
+    ghq
+    just
+    yazi
+    pulsemixer
+
+    # Terminal
+    alacritty
+    tmux
+
+    # Shell enhancements
+    starship
+    atuin
+
+    # Keyboard/Input
+    xremap
+    warpd
 
     # Development
     go
