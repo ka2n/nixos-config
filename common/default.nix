@@ -134,6 +134,11 @@ in
     pavucontrol
     dex                         # XDG autostart runner
 
+    # GUI Settings tools
+    networkmanagerapplet        # nm-applet + nm-connection-editor
+    nwg-displays                # Display/monitor configuration
+    nwg-look                    # GTK theme settings (lxappearance alternative)
+
     # Music
     spotify
 
@@ -198,6 +203,11 @@ in
   # Services
   services.openssh.enable = true;
   services.tailscale.enable = true;
+
+  # Bluetooth
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
+  services.blueman.enable = true;
 
   # Audio (PipeWire)
   services.pipewire = {
