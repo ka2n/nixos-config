@@ -145,6 +145,7 @@ in
 
     # Wayland / Hyprland
     wl-clipboard
+    cliphist                    # Clipboard history (use with rofi)
     wlogout
     waybar
     rofi
@@ -154,6 +155,7 @@ in
     swaybg
     grim
     slurp
+    swappy                      # Screenshot annotation tool
     mako                        # notification daemon (omarchy style)
     libnotify
     xdg-desktop-portal-hyprland
