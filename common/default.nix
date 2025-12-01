@@ -94,6 +94,7 @@ in
     pulsemixer
 
     # Terminal
+    kitty
     alacritty
     tmux
 
