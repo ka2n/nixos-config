@@ -14,5 +14,7 @@
     foot  # CPU rendering, works in VM
   ];
 
+  services.intune.enable = true;
+
   system.stateVersion = "25.11";
 }
