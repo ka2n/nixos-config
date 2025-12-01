@@ -104,6 +104,7 @@ in
     # Keyboard/Input
     xremap
     warpd
+    inputactions-hyprland       # Mouse/touchpad gestures (easystroke alternative)
 
     # Development
     go
@@ -134,11 +135,17 @@ in
     pavucontrol
     dex                         # XDG autostart runner
 
+    # GUI Settings tools
+    networkmanagerapplet        # nm-applet + nm-connection-editor
+    nwg-displays                # Display/monitor configuration
+    nwg-look                    # GTK theme settings (lxappearance alternative)
+
     # Music
     spotify
 
     # Wayland / Hyprland
     wl-clipboard
+    cliphist                    # Clipboard history (use with rofi)
     wlogout
     waybar
     rofi
@@ -148,6 +155,7 @@ in
     swaybg
     grim
     slurp
+    swappy                      # Screenshot annotation tool
     mako                        # notification daemon (omarchy style)
     libnotify
     xdg-desktop-portal-hyprland
@@ -198,6 +206,11 @@ in
   # Services
   services.openssh.enable = true;
   services.tailscale.enable = true;
+
+  # Bluetooth
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
+  services.blueman.enable = true;
 
   # Audio (PipeWire)
   services.pipewire = {
