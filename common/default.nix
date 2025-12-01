@@ -164,8 +164,6 @@ in
     wlogout
     waybar
     rofi
-    hyprlock
-    hypridle
     hyprpaper
     swaybg
     grim
