@@ -92,6 +92,7 @@ in
     just
     yazi
     pulsemixer
+    libsecret
 
     # Terminal
     kitty
@@ -142,6 +143,7 @@ in
     # Browsers
     google-chrome
     firefox
+    microsoft-edge
 
     # Communication
     slack
@@ -189,8 +191,6 @@ in
     swappy                      # Screenshot annotation tool
     mako                        # notification daemon (omarchy style)
     libnotify
-    xdg-desktop-portal-hyprland
-    xdg-desktop-portal-gtk
 
     # Theming (omarchy style)
     gnome-themes-extra          # Adwaita GTK theme
@@ -218,6 +218,8 @@ in
   programs.hyprlock.enable = true;
   services.hypridle.enable = true;
 
+  programs.seahorse.enable = true;
+
   # 1Password
   programs._1password.enable = true;
   programs._1password-gui = {
@@ -239,6 +241,11 @@ in
   # Display manager
   services.displayManager.ly.enable = true;
   services.xserver.desktopManager.runXdgAutostartIfNone = true;
+  xdg.portal.enable = true;
+  xdg.portal.extraPortals = [
+    pkgs.xdg-desktop-portal-hyprland
+    pkgs.xdg-desktop-portal-gtk
+  ];
 
   # Services
   services.openssh.enable = true;
