@@ -108,7 +108,18 @@ in
 
     # Development
     go
+    python3
+    nodejs
     claude-code
+    codex
+    gemini-cli-bin
+
+    # Build tools
+    gcc
+    gnumake
+    cmake
+    pkg-config
+    binutils
 
     # Browsers
     google-chrome
