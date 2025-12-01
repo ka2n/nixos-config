@@ -52,6 +52,17 @@ in
     fcitx5-cskk
   ];
 
+  systemd.user.targets.hyprland-session = {
+      unitConfig = {
+          Description = "Hyprland compositor session";
+          Documentation = ["man:systemd.special(7)"];
+          BindsTo = ["graphical-session.target"];
+          Wants = ["graphical-session-pre.target"];
+          After = ["graphical-session-pre.target"];
+      };
+  };
+
+
   # Keyboard
   services.xserver.xkb = {
     layout = "us";
