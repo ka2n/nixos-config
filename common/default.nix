@@ -198,6 +198,8 @@ in
 
   # Hyprland
   programs.hyprland.enable = true;
+  programs.hyprlock.enable = true;
+  services.hypridle.enable = true;
 
   # 1Password
   programs._1password.enable = true;
