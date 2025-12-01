@@ -121,6 +121,23 @@ in
     cmake
     pkg-config
     binutils
+    zlib
+    readline
+    libyaml
+    libffi
+    ncurses
+    gdbm
+    openssl
+    rustc
+    cargo
+    groff
+    autoconf
+    automake
+    bison
+    libtool
+    jemalloc
+    unzip
+    p7zip
 
     # Browsers
     google-chrome
@@ -185,8 +202,9 @@ in
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
+  documentation.man.generateCaches = false;
+
   programs.nix-ld.enable = true;
-  programs.man.generateCaches = false;
   programs.fish.enable = true;
   programs.git.enable = true;
   programs.neovim.enable = true;
