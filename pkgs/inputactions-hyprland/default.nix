@@ -18,7 +18,7 @@ hyprlandPlugins.mkHyprlandPlugin rec {
     owner = "taj-ny";
     repo = "InputActions";
     rev = "v${version}";
-    hash = "sha256-1z1y72yGKxK816M9J41+4VvKey6jwZq2Lqe5VXlwjkw=";
+    hash = "sha256-YZsmEYIM403VCo+iJKRRXoRQS53lJlid/ZeIbxrmoUY=";
   };
 
   dontWrapQtApps = true;
