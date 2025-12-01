@@ -171,6 +171,7 @@ in
     nwg-displays                # Display/monitor configuration
     nwg-look                    # GTK theme settings (lxappearance alternative)
     cameractrls                 # Webcam settings (Camset)
+    cameractrls-gtk3
 
     # Music
     spotify
