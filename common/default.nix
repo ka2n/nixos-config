@@ -170,7 +170,6 @@ in
 
     # SKK
     skkDictionaries.l
-    yaskkserv2                  # SKK server
   ]) ++ [
     # External flake packages
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
