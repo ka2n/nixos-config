@@ -134,11 +134,14 @@ in
     blueman
     pavucontrol
     dex                         # XDG autostart runner
+    tailscale-systray           # Tailscale system tray icon
+    darkman                     # Dark/light mode daemon
 
     # GUI Settings tools
     networkmanagerapplet        # nm-applet + nm-connection-editor
     nwg-displays                # Display/monitor configuration
     nwg-look                    # GTK theme settings (lxappearance alternative)
+    cameractrls                 # Webcam settings (Camset)
 
     # Music
     spotify
@@ -165,8 +168,9 @@ in
     gnome-themes-extra          # Adwaita GTK theme
     yaru-theme                  # Yaru icon theme
 
-    # SKK dictionary
+    # SKK
     skkDictionaries.l
+    yaskkserv2                  # SKK server
   ]) ++ [
     # External flake packages
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
@@ -198,6 +202,9 @@ in
     '';
     mode = "0755";
   };
+
+  # NoiseTorch - microphone noise suppression
+  programs.noisetorch.enable = true;
 
   # Display manager
   services.displayManager.ly.enable = true;
