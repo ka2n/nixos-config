@@ -1,20 +1,21 @@
-# VM-specific configuration
+# Laptop-specific configuration
 { config, pkgs, lib, ... }:
 
 {
   imports = [
     ./hardware-configuration.nix
     ../../common
+    ../../modules/microsoft-intune
   ];
 
   networking.hostName = "wk2511058";
 
-  # VM-specific packages (CPU rendering terminals for VirtualBox)
   environment.systemPackages = with pkgs; [
-    foot  # CPU rendering, works in VM
+    foot
   ];
 
-  services.intune.enable = true;
+  # Disable /etc/lsb-release
+  environment.etc."lsb-release".enable = false;
 
   system.stateVersion = "25.11";
 }
