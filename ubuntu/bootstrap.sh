@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-# Ubuntu 25 System Setup Bootstrap Script
+# Ubuntu 24.04 LTS System Setup Bootstrap Script
 # This script installs Ansible and runs the main setup playbook
 
 echo "======================================"
-echo "Ubuntu 25 System Setup - Bootstrap"
+echo "Ubuntu 24.04 LTS System Setup - Bootstrap"
 echo "======================================"
 echo ""
 
@@ -45,7 +45,8 @@ sudo apt install -y curl git wget build-essential
 # Install Ansible if not already installed
 if ! command -v ansible &> /dev/null; then
     echo "Installing Ansible..."
-    # Use system package (PPA doesn't support Ubuntu 25.04+ yet)
+    sudo apt install -y software-properties-common
+    sudo add-apt-repository --yes --update ppa:ansible/ansible
     sudo apt install -y ansible
     echo "Ansible installed successfully."
 else
@@ -85,10 +86,6 @@ fi
 echo ""
 echo "Running ansible-playbook setup.yml..."
 echo ""
-
-# Ubuntu 25 uses sudo-rs which has compatibility issues with Ansible's become_ask_pass
-# Use sudo.ws wrapper for proper password prompt handling
-export ANSIBLE_BECOME_EXE=sudo.ws
 
 ansible-playbook setup.yml
 

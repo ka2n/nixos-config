@@ -6,7 +6,6 @@
     msg: |
       Installing Microsoft Intune for Ubuntu...
       This requires Ubuntu 22.04 or 24.04 LTS.
-      Ubuntu 25 may use Ubuntu 24.04 packages.
 
 - name: Install prerequisites
   apt:

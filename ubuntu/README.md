@@ -1,6 +1,6 @@
-# Ubuntu 25 System Configuration with Ansible
+# Ubuntu 24.04 LTS System Configuration with Ansible
 
-Ansible-based system configuration for Ubuntu 25 that mirrors the NixOS setup from `../nixos/`. This setup provides a complete desktop environment with Hyprland, development tools, and optional Microsoft enterprise integration (Intune + Defender ATP).
+Ansible-based system configuration for Ubuntu 24.04 LTS that mirrors the NixOS setup from `../nixos/`. This setup provides a complete desktop environment with Hyprland, development tools, and optional Microsoft enterprise integration (Intune + Defender ATP).
 
 ## Overview
 
@@ -17,7 +17,7 @@ This Ansible configuration automates the setup of:
 
 ## Prerequisites
 
-1. **Fresh Ubuntu 25 Installation**
+1. **Fresh Ubuntu 24.04 LTS Installation**
    - Minimal GNOME desktop installation via USB stick
    - User account created during installation
 
@@ -31,7 +31,7 @@ This Ansible configuration automates the setup of:
 
 ### 1. Initial Setup
 
-After installing Ubuntu 25 with minimal GNOME:
+After installing Ubuntu 24.04 LTS with minimal GNOME:
 
 ```bash
 # Clone this repository (or copy the ubuntu/ directory to your system)
@@ -340,7 +340,7 @@ ansible-playbook enterprise.yml --ask-become-pass \
 - Production channel (configurable)
 
 **Requirements:**
-- Ubuntu 22.04, 24.04, or 25 (uses 24.04 packages if needed)
+- Ubuntu 22.04 or 24.04 LTS
 - Internet connectivity to packages.microsoft.com
 - Onboarding package for mdatp
 - System reboot required after installation
@@ -381,23 +381,6 @@ mdatp_channel: "prod"  # Options: prod, insiders-slow, insiders-fast
 ```
 
 ## Troubleshooting
-
-### Ubuntu 25 (sudo-rs) Compatibility
-
-Ubuntu 25 uses **sudo-rs** (Rust-based sudo replacement) instead of traditional sudo. Ansible's `become_ask_pass` has compatibility issues with sudo-rs.
-
-**Workaround**: Set `ANSIBLE_BECOME_EXE` to use the original sudo wrapper:
-
-```bash
-export ANSIBLE_BECOME_EXE=sudo.ws
-ansible-playbook setup.yml
-```
-
-Or add to your shell config (`~/.bashrc`):
-
-```bash
-export ANSIBLE_BECOME_EXE=sudo.ws
-```
 
 ### Hyprland Installation Issues
 

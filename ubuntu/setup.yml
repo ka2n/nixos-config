@@ -1,8 +1,8 @@
 ---
-# Main playbook for Ubuntu 25 system setup
+# Main playbook for Ubuntu 24.04 LTS system setup
 # This playbook configures the desktop environment and development tools
 
-- name: Ubuntu 25 Desktop and Development Setup
+- name: Ubuntu 24.04 LTS Desktop and Development Setup
   hosts: localhost
   connection: local
   become: no
@@ -11,7 +11,7 @@
     - name: Display setup information
       debug:
         msg: |
-          Starting Ubuntu 25 system setup...
+          Starting Ubuntu 24.04 LTS system setup...
           This will install and configure:
           - Base system packages and locale settings
           - Hyprland desktop environment

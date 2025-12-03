@@ -20,7 +20,7 @@
           2. Microsoft Defender for Endpoint (mdatp)
 
           Requirements:
-          - Ubuntu 22.04, 24.04, or 25 LTS
+          - Ubuntu 22.04 or 24.04 LTS
           - Internet connectivity to packages.microsoft.com
           - For mdatp: WindowsDefenderATPOnboardingPackage.zip
 
