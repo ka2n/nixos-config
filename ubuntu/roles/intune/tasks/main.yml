@@ -1,0 +1,104 @@
+---
+# Microsoft Intune installation
+
+- name: Display Intune installation information
+  debug:
+    msg: |
+      Installing Microsoft Intune for Ubuntu...
+      This requires Ubuntu 22.04 or 24.04 LTS.
+      Ubuntu 25 may use Ubuntu 24.04 packages.
+
+- name: Install prerequisites
+  apt:
+    name:
+      - curl
+      - gpg
+    state: present
+  become: yes
+
+- name: Add Microsoft GPG signing key
+  block:
+    - name: Download Microsoft GPG key
+      get_url:
+        url: "{{ microsoft_gpg_key_url }}"
+        dest: /tmp/microsoft.asc
+      become: no
+
+    - name: Convert and install GPG key
+      shell: |
+        gpg --dearmor < /tmp/microsoft.asc > /tmp/microsoft.gpg
+        sudo install -o root -g root -m 644 /tmp/microsoft.gpg /usr/share/keyrings/microsoft-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/microsoft-archive-keyring.gpg
+
+- name: Determine Ubuntu version for repository
+  set_fact:
+    ubuntu_version_for_repo: "{{ ansible_distribution_version if ansible_distribution_version in ['22.04', '24.04'] else '24.04' }}"
+
+- name: Add Microsoft repository
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/ubuntu/{{ ubuntu_version_for_repo }}/prod {{ ansible_distribution_release }} main"
+    state: present
+    filename: microsoft-prod
+  become: yes
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: Install Microsoft Intune portal
+  apt:
+    name: intune-portal
+    state: present
+  become: yes
+  register: intune_install
+
+- name: Display post-installation message
+  debug:
+    msg: |
+      ========================================
+      Microsoft Intune Installation Complete
+      ========================================
+
+      IMPORTANT: A system reboot is required.
+
+      After reboot:
+      1. Launch the Intune Portal application
+      2. Sign in with your organization credentials
+      3. Complete the enrollment process
+      4. Your device will be managed by your organization
+
+      To uninstall (if needed):
+      - Uninstall only: sudo apt remove intune-portal
+      - Purge (includes data): sudo apt purge intune-portal
+
+      ========================================
+  when: intune_install is succeeded
+
+- name: Create reset-intune.sh script
+  copy:
+    dest: /usr/local/bin/reset-intune.sh
+    content: |
+      #!/bin/bash
+      # Reset Microsoft Intune enrollment
+      # This script clears Intune cache and resets configuration
+
+      echo "Resetting Microsoft Intune..."
+
+      # Stop Intune services
+      sudo systemctl stop intune-portal 2>/dev/null || true
+
+      # Clear Intune cache and data
+      sudo rm -rf /var/lib/intune-portal
+      sudo rm -rf /etc/opt/microsoft/intune
+
+      # Clear user-specific Intune data
+      rm -rf ~/.config/intune-portal
+      rm -rf ~/.local/share/intune-portal
+      rm -rf ~/.cache/intune-portal
+
+      echo "Intune has been reset."
+      echo "You can now re-enroll by launching the Intune Portal application."
+    mode: '0755'
+  become: yes
