@@ -1,0 +1,250 @@
+---
+# Desktop applications installation
+
+# Browsers
+- name: Install Firefox
+  apt:
+    name: firefox
+    state: present
+  become: yes
+
+- name: Install Google Chrome
+  block:
+    - name: Add Google Chrome apt key
+      apt_key:
+        url: https://dl.google.com/linux/linux_signing_key.pub
+        state: present
+      become: yes
+
+    - name: Add Google Chrome repository
+      apt_repository:
+        repo: "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
+        state: present
+        filename: google-chrome
+      become: yes
+
+    - name: Install Google Chrome
+      apt:
+        name: google-chrome-stable
+        state: present
+        update_cache: yes
+      become: yes
+
+- name: Install Microsoft Edge
+  block:
+    - name: Add Microsoft Edge apt key
+      apt_key:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+      become: yes
+
+    - name: Add Microsoft Edge repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main"
+        state: present
+        filename: microsoft-edge
+      become: yes
+
+    - name: Install Microsoft Edge
+      apt:
+        name: microsoft-edge-stable
+        state: present
+        update_cache: yes
+      become: yes
+
+# Communication
+- name: Install Slack
+  snap:
+    name: slack
+    classic: yes
+  become: yes
+
+# Note-taking
+- name: Install Obsidian
+  block:
+    - name: Download Obsidian AppImage
+      get_url:
+        url: https://github.com/obsidianmd/obsidian-releases/releases/latest/download/Obsidian-{{ ansible_architecture }}.AppImage
+        dest: /opt/Obsidian.AppImage
+        mode: '0755'
+      become: yes
+
+    - name: Create Obsidian desktop entry
+      copy:
+        dest: /usr/share/applications/obsidian.desktop
+        content: |
+          [Desktop Entry]
+          Name=Obsidian
+          Exec=/opt/Obsidian.AppImage
+          Terminal=false
+          Type=Application
+          Icon=obsidian
+          Categories=Office;
+        mode: '0644'
+      become: yes
+
+# Office
+- name: Install LibreOffice
+  apt:
+    name:
+      - libreoffice
+      - libreoffice-gtk3
+    state: present
+  become: yes
+
+# File manager
+- name: Install Thunar file manager
+  apt:
+    name:
+      - thunar
+      - thunar-archive-plugin
+      - thunar-media-tags-plugin
+      - thunar-volman
+    state: present
+  become: yes
+
+# Media
+- name: Install VLC media player
+  apt:
+    name: vlc
+    state: present
+  become: yes
+
+- name: Install feh image viewer
+  apt:
+    name: feh
+    state: present
+  become: yes
+
+- name: Install Spotify
+  snap:
+    name: spotify
+    state: present
+  become: yes
+
+# System utilities
+- name: Install Bluetooth manager
+  apt:
+    name:
+      - blueman
+      - bluez
+      - bluez-tools
+    state: present
+  become: yes
+
+- name: Install PulseAudio/PipeWire controls
+  apt:
+    name:
+      - pavucontrol
+      - pulsemixer
+    state: present
+  become: yes
+
+- name: Install Tailscale
+  block:
+    - name: Add Tailscale apt key
+      get_url:
+        url: "{{ tailscale_apt_key_url }}"
+        dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
+      become: yes
+
+    - name: Add Tailscale repository
+      apt_repository:
+        repo: "{{ tailscale_apt_repo }}"
+        state: present
+        filename: tailscale
+      become: yes
+
+    - name: Install Tailscale
+      apt:
+        name: tailscale
+        state: present
+        update_cache: yes
+      become: yes
+
+    - name: Enable Tailscale service
+      systemd:
+        name: tailscaled
+        enabled: yes
+        state: started
+      become: yes
+
+# GUI Settings tools
+- name: Install cameractrls (webcam settings)
+  block:
+    - name: Check if cameractrls is available
+      apt:
+        name:
+          - cameractrls
+          - cameractrls-gtk3
+        state: present
+      become: yes
+      ignore_errors: yes
+
+# Keyboard and input tools
+- name: Install xremap
+  block:
+    - name: Download xremap binary
+      get_url:
+        url: https://github.com/k0kubun/xremap/releases/latest/download/xremap-linux-x86_64-gnome.zip
+        dest: /tmp/xremap.zip
+      become: no
+
+    - name: Extract xremap
+      unarchive:
+        src: /tmp/xremap.zip
+        dest: /usr/local/bin/
+        remote_src: yes
+        mode: '0755'
+      become: yes
+      args:
+        creates: /usr/local/bin/xremap
+
+- name: Install warpd (keyboard-driven mouse control)
+  block:
+    - name: Install warpd build dependencies
+      apt:
+        name:
+          - libx11-dev
+          - libxi-dev
+          - libxinerama-dev
+          - libxft-dev
+          - libxtst-dev
+          - libxfixes-dev
+        state: present
+      become: yes
+
+    - name: Clone warpd repository
+      git:
+        repo: https://github.com/rvaiya/warpd.git
+        dest: /tmp/warpd-build
+        depth: 1
+      become: no
+
+    - name: Build and install warpd
+      shell: |
+        cd /tmp/warpd-build
+        make
+        sudo make install
+      args:
+        creates: /usr/local/bin/warpd
+
+# Additional utilities
+- name: Install additional CLI tools
+  apt:
+    name:
+      - just      # task runner
+      - yazi      # terminal file manager (if available)
+      - peco      # interactive filtering
+    state: present
+  become: yes
+  ignore_errors: yes
+
+- name: Install darkman (dark/light mode daemon)
+  block:
+    - name: Check if darkman is available
+      apt:
+        name: darkman
+        state: present
+      become: yes
+      ignore_errors: yes
