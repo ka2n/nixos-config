@@ -1,0 +1,351 @@
+---
+# Hyprland desktop environment installation
+
+- name: Install Wayland and graphics dependencies
+  apt:
+    name:
+      - wayland-protocols
+      - libwayland-dev
+      - libwayland-client0
+      - libwayland-server0
+      - libdrm-dev
+      - libgbm-dev
+      - libegl1-mesa-dev
+      - libgles2-mesa-dev
+      - libinput-dev
+      - libxkbcommon-dev
+      - libpixman-1-dev
+      - libseat-dev
+      - libxcb-composite0-dev
+      - libxcb-dri3-dev
+      - libxcb-present-dev
+      - libxcb-render-util0-dev
+      - libxcb-ewmh-dev
+      - libxcb-icccm4-dev
+      - hwdata
+      - xwayland
+    state: present
+  become: yes
+
+- name: Try to add Hyprland PPA
+  block:
+    - name: Add Hyprland PPA
+      apt_repository:
+        repo: "{{ hyprland_ppa }}"
+        state: present
+      become: yes
+      register: hyprland_ppa_result
+      ignore_errors: yes
+
+    - name: Update apt cache after adding PPA
+      apt:
+        update_cache: yes
+      become: yes
+      when: hyprland_ppa_result is succeeded
+
+    - name: Install Hyprland from PPA
+      apt:
+        name:
+          - hyprland
+        state: present
+      become: yes
+      when: hyprland_ppa_result is succeeded
+      register: hyprland_install
+
+- name: Build Hyprland from source if PPA failed
+  block:
+    - name: Install Hyprland build dependencies
+      apt:
+        name:
+          - meson
+          - ninja-build
+          - gcc-13
+          - g++-13
+          - libc++-dev
+          - libc++abi-dev
+          - libstdc++-13-dev
+          - libhyprlang-dev
+          - libhyprutils-dev
+          - libtomlplusplus-dev
+          - libzip-dev
+          - libmagic-dev
+          - git
+          - cmake
+          - gettext
+        state: present
+      become: yes
+
+    - name: Clone Hyprland repository
+      git:
+        repo: https://github.com/hyprwm/Hyprland.git
+        dest: /tmp/hyprland-build
+        version: main
+        depth: 1
+      become: no
+
+    - name: Build and install Hyprland
+      shell: |
+        cd /tmp/hyprland-build
+        make all
+        sudo make install
+      args:
+        creates: /usr/local/bin/Hyprland
+
+  when: hyprland_install is not defined or hyprland_install is failed
+
+- name: Install Hyprland ecosystem packages
+  apt:
+    name:
+      # Hyprland tools (these may need to be built from source if not in repos)
+      - foot  # Wayland terminal (lightweight alternative)
+      # Wayland clipboard
+      - wl-clipboard
+      # System utilities
+      - dex  # XDG autostart
+      - polkit-kde-agent-1  # PolicyKit authentication agent
+      # XDG Desktop Portal
+      - xdg-desktop-portal
+      - xdg-desktop-portal-gtk
+    state: present
+  become: yes
+
+- name: Install xdg-desktop-portal-hyprland (if available in repos)
+  apt:
+    name: xdg-desktop-portal-hyprland
+    state: present
+  become: yes
+  ignore_errors: yes
+
+- name: Install Wayland tools and utilities
+  apt:
+    name:
+      # Screenshot tools
+      - grim
+      - slurp
+      - swappy
+      # Notification daemon - mako
+      - libnotify-bin
+      # Background/wallpaper
+      - swaybg
+    state: present
+  become: yes
+
+- name: Install mako notification daemon (may need manual install)
+  apt:
+    name: mako-notifier
+    state: present
+  become: yes
+  ignore_errors: yes
+
+- name: Install additional Hyprland tools from source/snap
+  block:
+    # waybar
+    - name: Install waybar dependencies
+      apt:
+        name:
+          - libgtkmm-3.0-dev
+          - libdbusmenu-gtk3-dev
+          - libgirepository1.0-dev
+          - libpulse-dev
+          - libnl-3-dev
+          - libnl-genl-3-dev
+          - libspdlog-dev
+          - libgtk-layer-shell-dev
+          - libplayerctl-dev
+          - libmpdclient-dev
+        state: present
+      become: yes
+      ignore_errors: yes
+
+    - name: Check if waybar is available in repos
+      apt:
+        name: waybar
+        state: present
+      become: yes
+      ignore_errors: yes
+      register: waybar_install
+
+    # rofi-wayland
+    - name: Check if rofi-wayland is available
+      apt:
+        name: rofi
+        state: present
+      become: yes
+      ignore_errors: yes
+
+    # cliphist - clipboard manager
+    - name: Install cliphist via go install (if available)
+      shell: |
+        go install go.senan.xyz/cliphist@latest
+      args:
+        creates: "{{ ansible_env.HOME }}/go/bin/cliphist"
+      become: no
+      ignore_errors: yes
+
+    # hyprpaper - wallpaper utility
+    - name: Clone and build hyprpaper
+      block:
+        - name: Clone hyprpaper
+          git:
+            repo: https://github.com/hyprwm/hyprpaper.git
+            dest: /tmp/hyprpaper-build
+            depth: 1
+          become: no
+
+        - name: Build hyprpaper
+          shell: |
+            cd /tmp/hyprpaper-build
+            cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build
+            cmake --build ./build --config Release --target hyprpaper
+            sudo cmake --install build
+          args:
+            creates: /usr/local/bin/hyprpaper
+      ignore_errors: yes
+
+    # hyprlock - screen locker
+    - name: Clone and build hyprlock
+      block:
+        - name: Clone hyprlock
+          git:
+            repo: https://github.com/hyprwm/hyprlock.git
+            dest: /tmp/hyprlock-build
+            depth: 1
+          become: no
+
+        - name: Build hyprlock
+          shell: |
+            cd /tmp/hyprlock-build
+            cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build
+            cmake --build ./build --config Release --target hyprlock
+            sudo cmake --install build
+          args:
+            creates: /usr/local/bin/hyprlock
+      ignore_errors: yes
+
+    # hypridle - idle daemon
+    - name: Clone and build hypridle
+      block:
+        - name: Clone hypridle
+          git:
+            repo: https://github.com/hyprwm/hypridle.git
+            dest: /tmp/hypridle-build
+            depth: 1
+          become: no
+
+        - name: Build hypridle
+          shell: |
+            cd /tmp/hypridle-build
+            cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build
+            cmake --build ./build --config Release --target hypridle
+            sudo cmake --install build
+          args:
+            creates: /usr/local/bin/hypridle
+      ignore_errors: yes
+
+    # wlogout - logout menu
+    - name: Install wlogout (if available)
+      apt:
+        name: wlogout
+        state: present
+      become: yes
+      ignore_errors: yes
+
+- name: Install display manager (ly)
+  block:
+    - name: Check if ly is available in repos
+      apt:
+        name: ly
+        state: present
+      become: yes
+      ignore_errors: yes
+      register: ly_install
+
+    - name: Build ly from source if not available
+      block:
+        - name: Install ly build dependencies
+          apt:
+            name:
+              - libpam0g-dev
+              - libxcb-xkb-dev
+            state: present
+          become: yes
+
+        - name: Clone ly repository
+          git:
+            repo: https://github.com/fairyglade/ly.git
+            dest: /tmp/ly-build
+            depth: 1
+          become: no
+
+        - name: Build and install ly
+          shell: |
+            cd /tmp/ly-build
+            make
+            sudo make install
+            sudo systemctl enable ly.service
+          args:
+            creates: /usr/local/bin/ly
+      when: ly_install is failed
+
+- name: Install nwg-shell tools
+  block:
+    - name: Install nwg-displays (display configuration)
+      apt:
+        name: nwg-displays
+        state: present
+      become: yes
+      ignore_errors: yes
+
+    - name: Install nwg-look (GTK theme settings)
+      apt:
+        name: nwg-look
+        state: present
+      become: yes
+      ignore_errors: yes
+
+- name: Install GUI theming
+  apt:
+    name:
+      - gnome-themes-extra  # Adwaita theme
+      - yaru-theme-icon     # Yaru icons
+      - yaru-theme-gtk      # Yaru GTK theme
+      - papirus-icon-theme  # Additional icon theme
+    state: present
+  become: yes
+
+- name: Create systemd user target for Hyprland session
+  template:
+    src: hyprland-session.target.j2
+    dest: "{{ ansible_env.HOME }}/.config/systemd/user/hyprland-session.target"
+    mode: '0644'
+  become: no
+
+- name: Enable systemd user targets
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+    scope: user
+  loop:
+    - hyprland-session.target
+  become: no
+  ignore_errors: yes
+
+- name: Create XDG portal configuration directory
+  file:
+    path: "{{ ansible_env.HOME }}/.config/xdg-desktop-portal"
+    state: directory
+    mode: '0755'
+  become: no
+
+- name: Configure XDG Desktop Portal for Hyprland
+  copy:
+    dest: "{{ ansible_env.HOME }}/.config/xdg-desktop-portal/hyprland-portals.conf"
+    content: |
+      [preferred]
+      default=hyprland;gtk
+      org.freedesktop.impl.portal.Screenshot=hyprland
+      org.freedesktop.impl.portal.ScreenCast=hyprland
+      org.freedesktop.impl.portal.Inhibit=hyprland
+      org.freedesktop.impl.portal.FileChooser=gtk
+    mode: '0644'
+  become: no
