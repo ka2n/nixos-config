@@ -29,12 +29,11 @@
   copy:
     dest: /etc/pam.d/ly
     content: |
-      # PAM configuration for ly display manager
-      auth       include      system-login
+      auth       include      common-auth
       auth       optional     pam_gnome_keyring.so
-      account    include      system-login
-      password   include      system-login
-      session    include      system-login
+      account    include      common-account
+      password   include      common-password
+      session    include      common-session
       session    optional     pam_gnome_keyring.so auto_start
     mode: '0644'
   become: yes
