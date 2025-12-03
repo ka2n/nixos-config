@@ -11,18 +11,32 @@
     state: present
   become: yes
 
-- name: Enable GNOME Keyring in PAM
+- name: Enable GNOME Keyring in PAM for login
   lineinfile:
     path: /etc/pam.d/login
     line: "auth       optional     pam_gnome_keyring.so"
     insertafter: "^auth"
   become: yes
 
-- name: Enable GNOME Keyring session in PAM
+- name: Enable GNOME Keyring session in PAM for login
   lineinfile:
     path: /etc/pam.d/login
     line: "session    optional     pam_gnome_keyring.so auto_start"
     insertafter: "^session"
+  become: yes
+
+- name: Create PAM configuration for ly display manager
+  copy:
+    dest: /etc/pam.d/ly
+    content: |
+      # PAM configuration for ly display manager
+      auth       include      system-login
+      auth       optional     pam_gnome_keyring.so
+      account    include      system-login
+      password   include      system-login
+      session    include      system-login
+      session    optional     pam_gnome_keyring.so auto_start
+    mode: '0644'
   become: yes
 
 - name: Create GNOME Keyring autostart entry

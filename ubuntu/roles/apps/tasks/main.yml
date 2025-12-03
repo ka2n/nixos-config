@@ -205,12 +205,16 @@
     - name: Install warpd build dependencies
       apt:
         name:
+          - build-essential
           - libx11-dev
           - libxi-dev
           - libxinerama-dev
           - libxft-dev
           - libxtst-dev
           - libxfixes-dev
+          - libcairo2-dev
+          - libxkbcommon-dev
+          - libwayland-dev
         state: present
       become: yes
 
@@ -221,13 +225,14 @@
         depth: 1
       become: no
 
-    - name: Build and install warpd
+    - name: Build and install warpd (X11 + Wayland)
       shell: |
         cd /tmp/warpd-build
         make
         sudo make install
       args:
         creates: /usr/local/bin/warpd
+      become: no
 
 # Additional utilities
 - name: Install additional CLI tools

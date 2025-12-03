@@ -28,18 +28,20 @@
     - name: Install libcskk build dependencies
       apt:
         name:
+          - build-essential
           - cargo
           - rustc
-          - libglib2.0-dev
-          - libgee-0.8-dev
-          - libjson-glib-dev
-          - gobject-introspection
-          - libgirepository1.0-dev
-          - valac
-          - meson
-          - ninja-build
+          - libxkbcommon-dev
         state: present
       become: yes
+
+    - name: Install Rust build tools (cbindgen and cargo-c)
+      shell: |
+        cargo install --force cbindgen
+        cargo install --force cargo-c
+      args:
+        creates: "{{ ansible_env.HOME }}/.cargo/bin/cbindgen"
+      become: no
 
     - name: Clone libcskk repository
       git:
@@ -51,12 +53,13 @@
     - name: Build and install libcskk
       shell: |
         cd /tmp/libcskk-build
-        meson setup build
-        meson compile -C build
-        sudo meson install -C build
+        cargo cbuild --release
+        sudo cargo cinstall --release --prefix="/usr"
       args:
-        creates: /usr/local/lib/libcskk.so
+        creates: /usr/lib/libcskk.so
       become: no
+      environment:
+        PATH: "{{ ansible_env.HOME }}/.cargo/bin:{{ ansible_env.PATH }}"
 
 # Build fcitx5-cskk from source
 - name: Build fcitx5-cskk from source
@@ -64,15 +67,15 @@
     - name: Install fcitx5-cskk build dependencies
       apt:
         name:
-          - libfcitx5core-dev
-          - libfcitx5config-dev
-          - libfcitx5utils-dev
-          - fcitx5-modules-dev
-          - qtbase5-dev
+          - build-essential
+          - cmake
           - extra-cmake-modules
           - gettext
-          - cmake
-          - pkg-config
+          - libfcitx5core-dev
+          - fcitx5-modules-dev
+          - qtbase5-dev
+          - qtdeclarative5-dev
+          - libfcitx5-qt-dev
         state: present
       become: yes
 
@@ -86,11 +89,14 @@
     - name: Build and install fcitx5-cskk
       shell: |
         cd /tmp/fcitx5-cskk-build
-        cmake -B build -DCMAKE_INSTALL_PREFIX=/usr
-        cmake --build build
-        sudo cmake --install build
+        rm -rf ./build
+        mkdir build
+        cd build
+        cmake ..
+        make -j$(nproc)
+        sudo make install
       args:
-        creates: /usr/lib/fcitx5/cskk.so
+        creates: /usr/local/lib/fcitx5/cskk.so
       become: no
 
 - name: Download SKK dictionaries
