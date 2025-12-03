@@ -1,0 +1,284 @@
+---
+# Development tools and environment
+
+# Programming languages
+- name: Install Go
+  apt:
+    name: golang-go
+    state: present
+  become: yes
+
+- name: Install Python
+  apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-venv
+      - python3-dev
+    state: present
+  become: yes
+
+- name: Install Node.js and npm
+  apt:
+    name:
+      - nodejs
+      - npm
+    state: present
+  become: yes
+
+- name: Install Rust
+  block:
+    - name: Download and install rustup
+      shell: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      args:
+        creates: "{{ ansible_env.HOME }}/.cargo/bin/rustup"
+      become: no
+
+    - name: Add Rust to PATH
+      lineinfile:
+        path: "{{ ansible_env.HOME }}/.bashrc"
+        line: 'source $HOME/.cargo/env'
+        create: yes
+      become: no
+
+# Version managers
+- name: Install mise (version manager)
+  block:
+    - name: Download and install mise
+      shell: |
+        curl https://mise.run | sh
+      args:
+        creates: "{{ ansible_env.HOME }}/.local/bin/mise"
+      become: no
+
+    - name: Add mise to shell
+      lineinfile:
+        path: "{{ ansible_env.HOME }}/.bashrc"
+        line: 'eval "$({{ ansible_env.HOME }}/.local/bin/mise activate bash)"'
+        create: yes
+      become: no
+
+# Dotfiles manager
+- name: Install chezmoi
+  block:
+    - name: Download and install chezmoi
+      shell: |
+        sh -c "$(curl -fsLS get.chezmoi.io)" -- -b {{ ansible_env.HOME }}/.local/bin
+      args:
+        creates: "{{ ansible_env.HOME }}/.local/bin/chezmoi"
+      become: no
+
+# Editors
+- name: Install and configure Neovim
+  apt:
+    name: neovim
+    state: present
+  become: yes
+
+- name: Create vi/vim aliases for neovim
+  block:
+    - name: Update alternatives for vi
+      alternatives:
+        name: vi
+        path: /usr/bin/nvim
+      become: yes
+      ignore_errors: yes
+
+    - name: Update alternatives for vim
+      alternatives:
+        name: vim
+        path: /usr/bin/nvim
+      become: yes
+      ignore_errors: yes
+
+- name: Install Fish shell
+  apt:
+    name: fish
+    state: present
+  become: yes
+
+- name: Install shell enhancements
+  block:
+    # Starship prompt
+    - name: Download and install starship
+      shell: |
+        curl -sS https://starship.rs/install.sh | sh -s -- -y
+      args:
+        creates: /usr/local/bin/starship
+      become: yes
+
+    # Atuin - shell history
+    - name: Download and install atuin
+      shell: |
+        curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+      args:
+        creates: "{{ ansible_env.HOME }}/.cargo/bin/atuin"
+      become: no
+
+# AI development tools
+- name: Install claude-code
+  snap:
+    name: claude-code
+    classic: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Install codex
+  block:
+    - name: Download codex binary
+      get_url:
+        url: https://github.com/anthropics/codex/releases/latest/download/codex-linux-amd64
+        dest: /usr/local/bin/codex
+        mode: '0755'
+      become: yes
+      ignore_errors: yes
+
+- name: Install gemini-cli
+  block:
+    - name: Install gemini-cli via npm
+      npm:
+        name: gemini-cli
+        global: yes
+        state: present
+      become: yes
+      ignore_errors: yes
+
+# Docker
+- name: Install Docker
+  block:
+    - name: Install Docker prerequisites
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+      become: yes
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        keyring: /usr/share/keyrings/docker-archive-keyring.gpg
+        state: present
+      become: yes
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+      become: yes
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+      become: yes
+
+    - name: Add user to docker group
+      user:
+        name: "{{ primary_user }}"
+        groups: docker
+        append: yes
+      become: yes
+
+    - name: Enable and start Docker service
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+      become: yes
+
+# Git configuration
+- name: Ensure git is installed
+  apt:
+    name: git
+    state: present
+  become: yes
+
+- name: Install tig (text-mode interface for git)
+  apt:
+    name: tig
+    state: present
+  become: yes
+
+# NoiseTorch - microphone noise suppression
+- name: Install NoiseTorch
+  block:
+    - name: Download NoiseTorch
+      get_url:
+        url: https://github.com/noisetorch/NoiseTorch/releases/latest/download/NoiseTorch_x64.tgz
+        dest: /tmp/noisetorch.tgz
+      become: no
+
+    - name: Extract NoiseTorch
+      unarchive:
+        src: /tmp/noisetorch.tgz
+        dest: /tmp/
+        remote_src: yes
+      become: no
+
+    - name: Install NoiseTorch
+      copy:
+        src: /tmp/noisetorch
+        dest: /usr/local/bin/noisetorch
+        mode: '0755'
+        remote_src: yes
+      become: yes
+      ignore_errors: yes
+
+# Additional CLI utilities (installed via cargo/go if available)
+- name: Install just task runner via cargo
+  shell: |
+    cargo install just
+  args:
+    creates: "{{ ansible_env.HOME }}/.cargo/bin/just"
+  become: no
+  ignore_errors: yes
+
+- name: Install ghq repository manager via go
+  shell: |
+    go install github.com/x-motemen/ghq@latest
+  args:
+    creates: "{{ ansible_env.HOME }}/go/bin/ghq"
+  become: no
+  environment:
+    GOPATH: "{{ ansible_env.HOME }}/go"
+  ignore_errors: yes
+
+- name: Install yazi file manager via cargo
+  shell: |
+    cargo install --locked yazi-fm yazi-cli
+  args:
+    creates: "{{ ansible_env.HOME }}/.cargo/bin/yazi"
+  become: no
+  ignore_errors: yes
+
+- name: Add cargo bin to PATH
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: 'export PATH="$HOME/.cargo/bin:$PATH"'
+    create: yes
+  become: no
+
+- name: Add go bin to PATH
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: 'export PATH="$HOME/go/bin:$PATH"'
+    create: yes
+  become: no
+
+- name: Add local bin to PATH
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: 'export PATH="$HOME/.local/bin:$PATH"'
+    create: yes
+  become: no
