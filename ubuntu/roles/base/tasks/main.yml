@@ -1,0 +1,184 @@
+---
+# Base system configuration tasks
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  become: yes
+
+- name: Upgrade all packages
+  apt:
+    upgrade: dist
+  become: yes
+
+- name: Enable universe and multiverse repositories
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+  loop:
+    - "deb http://archive.ubuntu.com/ubuntu {{ ansible_distribution_release }} universe"
+    - "deb http://archive.ubuntu.com/ubuntu {{ ansible_distribution_release }} multiverse"
+  become: yes
+
+- name: Install core system packages
+  apt:
+    name:
+      # Build tools
+      - build-essential
+      - gcc
+      - g++
+      - make
+      - cmake
+      - pkg-config
+      - autoconf
+      - automake
+      - libtool
+      - bison
+      - binutils
+      # Libraries
+      - zlib1g-dev
+      - libreadline-dev
+      - libyaml-dev
+      - libffi-dev
+      - libncurses5-dev
+      - libgdbm-dev
+      - libssl-dev
+      - groff
+      - libjemalloc-dev
+      # Archive tools
+      - unzip
+      - p7zip-full
+      # CLI tools
+      - wget
+      - curl
+      - tree
+      - ripgrep
+      - jq
+      - fzf
+      - fd-find
+      - bat
+      - lsd
+      - colordiff
+      - peco
+      - ldnsutils  # provides drill command
+      - dnsutils   # provides dig command
+      - libsecret-tools
+      - libsecret-1-0
+      - libsecret-1-dev
+      # Terminal
+      - tmux
+      - kitty
+      - alacritty
+      # Networking
+      - network-manager
+      - network-manager-gnome
+      - openssh-server
+      # System utilities
+      - software-properties-common
+      - ca-certificates
+      - gnupg
+      - lsb-release
+      - apt-transport-https
+    state: present
+  become: yes
+
+- name: Install GitHub CLI
+  block:
+    - name: Add GitHub CLI apt key
+      apt_key:
+        url: https://cli.github.com/packages/githubcli-archive-keyring.gpg
+        keyring: /usr/share/keyrings/githubcli-archive-keyring.gpg
+        state: present
+      become: yes
+
+    - name: Add GitHub CLI repository
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
+        state: present
+      become: yes
+
+    - name: Install gh
+      apt:
+        name: gh
+        state: present
+      become: yes
+
+- name: Install modern CLI tools from GitHub releases or other sources
+  block:
+    - name: Install just (task runner)
+      shell: |
+        cargo install just || echo "Note: cargo not available yet, just will be installed later"
+      args:
+        creates: /usr/local/bin/just
+      ignore_errors: yes
+
+    - name: Install ghq (repository manager)
+      shell: |
+        go install github.com/x-motemen/ghq@latest || echo "Note: go not available yet, ghq will be installed later"
+      args:
+        creates: "{{ ansible_env.HOME }}/go/bin/ghq"
+      ignore_errors: yes
+
+- name: Set timezone
+  timezone:
+    name: "{{ timezone }}"
+  become: yes
+
+- name: Generate locale
+  locale_gen:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - "{{ locale }}"
+    - "{{ locale_ctype }}"
+  become: yes
+
+- name: Set default locale
+  lineinfile:
+    path: /etc/default/locale
+    regexp: '^LANG='
+    line: 'LANG={{ locale }}'
+  become: yes
+
+- name: Set LC_CTYPE
+  lineinfile:
+    path: /etc/default/locale
+    regexp: '^LC_CTYPE='
+    line: 'LC_CTYPE={{ locale_ctype }}'
+  become: yes
+
+- name: Set hostname
+  hostname:
+    name: "{{ hostname }}"
+  become: yes
+
+- name: Update /etc/hosts with hostname
+  lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1'
+    line: '127.0.1.1 {{ hostname }}'
+  become: yes
+
+- name: Ensure primary user exists
+  user:
+    name: "{{ primary_user }}"
+    state: present
+    groups: "{{ primary_user_groups }}"
+    append: yes
+    shell: /bin/bash
+  become: yes
+
+- name: Enable and start NetworkManager
+  systemd:
+    name: NetworkManager
+    enabled: yes
+    state: started
+  become: yes
+
+- name: Enable and start SSH
+  systemd:
+    name: ssh
+    enabled: yes
+    state: started
+  become: yes
