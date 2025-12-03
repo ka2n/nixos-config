@@ -10,15 +10,16 @@
 
 - name: Install Google Chrome
   block:
-    - name: Add Google Chrome apt key
-      apt_key:
-        url: https://dl.google.com/linux/linux_signing_key.pub
-        state: present
+    - name: Download Google Chrome GPG key
+      shell: |
+        curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
+      args:
+        creates: /usr/share/keyrings/google-chrome.gpg
       become: yes
 
     - name: Add Google Chrome repository
       apt_repository:
-        repo: "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main"
         state: present
         filename: google-chrome
       become: yes
@@ -32,15 +33,16 @@
 
 - name: Install Microsoft Edge
   block:
-    - name: Add Microsoft Edge apt key
-      apt_key:
-        url: https://packages.microsoft.com/keys/microsoft.asc
-        state: present
+    - name: Download Microsoft GPG key
+      shell: |
+        curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft.gpg
+      args:
+        creates: /usr/share/keyrings/microsoft.gpg
       become: yes
 
     - name: Add Microsoft Edge repository
       apt_repository:
-        repo: "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main"
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/edge stable main"
         state: present
         filename: microsoft-edge
       become: yes
@@ -61,10 +63,12 @@
 
 # Note-taking
 - name: Install Obsidian
+  vars:
+    obsidian_version: "1.10.6"
   block:
     - name: Download Obsidian AppImage
       get_url:
-        url: https://github.com/obsidianmd/obsidian-releases/releases/latest/download/Obsidian-{{ ansible_architecture }}.AppImage
+        url: "https://github.com/obsidianmd/obsidian-releases/releases/download/v{{ obsidian_version }}/Obsidian-{{ obsidian_version }}.AppImage"
         dest: /opt/Obsidian.AppImage
         mode: '0755'
       become: yes
@@ -170,16 +174,11 @@
       become: yes
 
 # GUI Settings tools
-- name: Install cameractrls (webcam settings)
-  block:
-    - name: Check if cameractrls is available
-      apt:
-        name:
-          - cameractrls
-          - cameractrls-gtk3
-        state: present
-      become: yes
-      ignore_errors: yes
+- name: Install cameractrls (webcam settings) via snap
+  snap:
+    name: cameractrls
+  become: yes
+  ignore_errors: yes
 
 # Keyboard and input tools
 - name: Install xremap
@@ -200,56 +199,12 @@
       args:
         creates: /usr/local/bin/xremap
 
-- name: Install warpd (keyboard-driven mouse control)
-  block:
-    - name: Install warpd build dependencies
-      apt:
-        name:
-          - build-essential
-          - libx11-dev
-          - libxi-dev
-          - libxinerama-dev
-          - libxft-dev
-          - libxtst-dev
-          - libxfixes-dev
-          - libcairo2-dev
-          - libxkbcommon-dev
-          - libwayland-dev
-        state: present
-      become: yes
-
-    - name: Clone warpd repository
-      git:
-        repo: https://github.com/rvaiya/warpd.git
-        dest: /tmp/warpd-build
-        depth: 1
-      become: no
-
-    - name: Build and install warpd (X11 + Wayland)
-      shell: |
-        cd /tmp/warpd-build
-        make
-        sudo make install
-      args:
-        creates: /usr/local/bin/warpd
-      become: no
-
 # Additional utilities
 - name: Install additional CLI tools
   apt:
     name:
       - just      # task runner
-      - yazi      # terminal file manager (if available)
       - peco      # interactive filtering
     state: present
   become: yes
   ignore_errors: yes
-
-- name: Install darkman (dark/light mode daemon)
-  block:
-    - name: Check if darkman is available
-      apt:
-        name: darkman
-        state: present
-      become: yes
-      ignore_errors: yes

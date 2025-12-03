@@ -1,46 +1,6 @@
 ---
 # Development tools and environment
-
-# Programming languages
-- name: Install Go
-  apt:
-    name: golang-go
-    state: present
-  become: yes
-
-- name: Install Python
-  apt:
-    name:
-      - python3
-      - python3-pip
-      - python3-venv
-      - python3-dev
-    state: present
-  become: yes
-
-- name: Install Node.js and npm
-  apt:
-    name:
-      - nodejs
-      - npm
-    state: present
-  become: yes
-
-- name: Install Rust
-  block:
-    - name: Download and install rustup
-      shell: |
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-      args:
-        creates: "{{ ansible_env.HOME }}/.cargo/bin/rustup"
-      become: no
-
-    - name: Add Rust to PATH
-      lineinfile:
-        path: "{{ ansible_env.HOME }}/.bashrc"
-        line: 'source $HOME/.cargo/env'
-        create: yes
-      become: no
+# Note: Language runtimes (Go, Python, Node.js, Rust, Zig) are installed in base role
 
 # Version managers
 - name: Install mise (version manager)
@@ -60,14 +20,12 @@
       become: no
 
 # Dotfiles manager
-- name: Install chezmoi
-  block:
-    - name: Download and install chezmoi
-      shell: |
-        sh -c "$(curl -fsLS get.chezmoi.io)" -- -b {{ ansible_env.HOME }}/.local/bin
-      args:
-        creates: "{{ ansible_env.HOME }}/.local/bin/chezmoi"
-      become: no
+- name: Install chezmoi via official script
+  shell: |
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/chezmoi"
+  become: no
 
 # Editors
 - name: Install and configure Neovim
@@ -116,34 +74,6 @@
         creates: "{{ ansible_env.HOME }}/.cargo/bin/atuin"
       become: no
 
-# AI development tools
-- name: Install claude-code
-  snap:
-    name: claude-code
-    classic: yes
-  become: yes
-  ignore_errors: yes
-
-- name: Install codex
-  block:
-    - name: Download codex binary
-      get_url:
-        url: https://github.com/anthropics/codex/releases/latest/download/codex-linux-amd64
-        dest: /usr/local/bin/codex
-        mode: '0755'
-      become: yes
-      ignore_errors: yes
-
-- name: Install gemini-cli
-  block:
-    - name: Install gemini-cli via npm
-      npm:
-        name: gemini-cli
-        global: yes
-        state: present
-      become: yes
-      ignore_errors: yes
-
 # Docker
 - name: Install Docker
   block:
@@ -157,16 +87,16 @@
         state: present
       become: yes
 
-    - name: Add Docker GPG key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        keyring: /usr/share/keyrings/docker-archive-keyring.gpg
-        state: present
+    - name: Download Docker GPG key
+      shell: |
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/docker-archive-keyring.gpg
       become: yes
 
     - name: Add Docker repository
       apt_repository:
-        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu noble stable"
         state: present
         filename: docker
       become: yes
@@ -212,33 +142,28 @@
 
 # NoiseTorch - microphone noise suppression
 - name: Install NoiseTorch
+  vars:
+    noisetorch_version: "0.12.2"
   block:
     - name: Download NoiseTorch
       get_url:
-        url: https://github.com/noisetorch/NoiseTorch/releases/latest/download/NoiseTorch_x64.tgz
+        url: "https://github.com/noisetorch/NoiseTorch/releases/download/v{{ noisetorch_version }}/NoiseTorch_x64_v{{ noisetorch_version }}.tgz"
         dest: /tmp/noisetorch.tgz
       become: no
 
-    - name: Extract NoiseTorch
+    - name: Extract NoiseTorch to user local directory
       unarchive:
         src: /tmp/noisetorch.tgz
-        dest: /tmp/
+        dest: "{{ ansible_env.HOME }}"
         remote_src: yes
       become: no
-
-    - name: Install NoiseTorch
-      copy:
-        src: /tmp/noisetorch
-        dest: /usr/local/bin/noisetorch
-        mode: '0755'
-        remote_src: yes
-      become: yes
-      ignore_errors: yes
+      args:
+        creates: "{{ ansible_env.HOME }}/.local/bin/noisetorch"
 
 # Additional CLI utilities (installed via cargo/go if available)
 - name: Install just task runner via cargo
   shell: |
-    cargo install just
+    . $HOME/.cargo/env && cargo install just
   args:
     creates: "{{ ansible_env.HOME }}/.cargo/bin/just"
   become: no
@@ -246,7 +171,7 @@
 
 - name: Install ghq repository manager via go
   shell: |
-    go install github.com/x-motemen/ghq@latest
+    export PATH="$HOME/go/bin:$PATH" && go install github.com/x-motemen/ghq@latest
   args:
     creates: "{{ ansible_env.HOME }}/go/bin/ghq"
   become: no
@@ -254,27 +179,63 @@
     GOPATH: "{{ ansible_env.HOME }}/go"
   ignore_errors: yes
 
-- name: Install yazi file manager via cargo
-  shell: |
-    cargo install --locked yazi-fm yazi-cli
-  args:
-    creates: "{{ ansible_env.HOME }}/.cargo/bin/yazi"
-  become: no
-  ignore_errors: yes
+# Yazi file manager - install from official binary release
+- name: Install yazi dependencies
+  apt:
+    name:
+      - ffmpeg
+      - p7zip-full
+      - jq
+      - poppler-utils
+      - fd-find
+      - ripgrep
+      - fzf
+      - zoxide
+      - imagemagick
+    state: present
+  become: yes
 
-- name: Add cargo bin to PATH
-  lineinfile:
-    path: "{{ ansible_env.HOME }}/.bashrc"
-    line: 'export PATH="$HOME/.cargo/bin:$PATH"'
-    create: yes
-  become: no
+- name: Install yazi file manager
+  vars:
+    yazi_version: "25.5.31"
+  block:
+    - name: Download yazi binary
+      get_url:
+        url: "https://github.com/sxyazi/yazi/releases/download/v{{ yazi_version }}/yazi-x86_64-unknown-linux-gnu.zip"
+        dest: /tmp/yazi.zip
+      become: no
 
-- name: Add go bin to PATH
-  lineinfile:
-    path: "{{ ansible_env.HOME }}/.bashrc"
-    line: 'export PATH="$HOME/go/bin:$PATH"'
-    create: yes
-  become: no
+    - name: Create yazi extraction directory
+      file:
+        path: /tmp/yazi-extract
+        state: directory
+        mode: '0755'
+      become: no
+
+    - name: Extract yazi
+      unarchive:
+        src: /tmp/yazi.zip
+        dest: /tmp/yazi-extract
+        remote_src: yes
+      become: no
+
+    - name: Install yazi binary
+      copy:
+        src: /tmp/yazi-extract/yazi-x86_64-unknown-linux-gnu/yazi
+        dest: /usr/local/bin/yazi
+        mode: '0755'
+        remote_src: yes
+      become: yes
+
+    - name: Install ya binary (yazi helper)
+      copy:
+        src: /tmp/yazi-extract/yazi-x86_64-unknown-linux-gnu/ya
+        dest: /usr/local/bin/ya
+        mode: '0755'
+        remote_src: yes
+      become: yes
+
+# Note: PATH additions for cargo, go, and local bin are in base role
 
 - name: Add local bin to PATH
   lineinfile:

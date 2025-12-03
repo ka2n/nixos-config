@@ -85,11 +85,11 @@
 
 - name: Install GitHub CLI
   block:
-    - name: Add GitHub CLI apt key
-      apt_key:
+    - name: Download GitHub CLI GPG key
+      get_url:
         url: https://cli.github.com/packages/githubcli-archive-keyring.gpg
-        keyring: /usr/share/keyrings/githubcli-archive-keyring.gpg
-        state: present
+        dest: /usr/share/keyrings/githubcli-archive-keyring.gpg
+        mode: '0644'
       become: yes
 
     - name: Add GitHub CLI repository
@@ -102,23 +102,8 @@
       apt:
         name: gh
         state: present
+        update_cache: yes
       become: yes
-
-- name: Install modern CLI tools from GitHub releases or other sources
-  block:
-    - name: Install just (task runner)
-      shell: |
-        cargo install just || echo "Note: cargo not available yet, just will be installed later"
-      args:
-        creates: /usr/local/bin/just
-      ignore_errors: yes
-
-    - name: Install ghq (repository manager)
-      shell: |
-        go install github.com/x-motemen/ghq@latest || echo "Note: go not available yet, ghq will be installed later"
-      args:
-        creates: "{{ ansible_env.HOME }}/go/bin/ghq"
-      ignore_errors: yes
 
 - name: Set timezone
   timezone:
@@ -182,3 +167,112 @@
     enabled: yes
     state: started
   become: yes
+
+# Programming language runtimes (needed for building tools in other roles)
+- name: Install Go
+  apt:
+    name: golang-go
+    state: present
+  become: yes
+
+- name: Setup Go environment
+  block:
+    - name: Create Go directories
+      file:
+        path: "{{ ansible_env.HOME }}/go/bin"
+        state: directory
+        mode: '0755'
+      become: no
+
+    - name: Add Go bin to PATH
+      lineinfile:
+        path: "{{ ansible_env.HOME }}/.bashrc"
+        line: 'export PATH="$HOME/go/bin:$PATH"'
+        create: yes
+      become: no
+
+- name: Install Python
+  apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-venv
+      - python3-dev
+    state: present
+  become: yes
+
+- name: Install Node.js and npm
+  apt:
+    name:
+      - nodejs
+      - npm
+    state: present
+  become: yes
+
+- name: Install Rust
+  block:
+    - name: Download and install rustup
+      shell: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      args:
+        creates: "{{ ansible_env.HOME }}/.cargo/bin/rustup"
+      become: no
+
+    - name: Add Rust to PATH in bashrc
+      lineinfile:
+        path: "{{ ansible_env.HOME }}/.bashrc"
+        line: 'source $HOME/.cargo/env'
+        create: yes
+      become: no
+
+    - name: Add cargo bin to PATH
+      lineinfile:
+        path: "{{ ansible_env.HOME }}/.bashrc"
+        line: 'export PATH="$HOME/.cargo/bin:$PATH"'
+        create: yes
+      become: no
+
+- name: Install Zig compiler (0.15.2)
+  vars:
+    zig_version: "0.15.2"
+  block:
+    - name: Check for Zig compiler
+      shell: zig version 2>/dev/null || echo "not installed"
+      register: zig_check
+      changed_when: false
+
+    - name: Download Zig
+      get_url:
+        url: "https://ziglang.org/download/{{ zig_version }}/zig-x86_64-linux-{{ zig_version }}.tar.xz"
+        dest: /tmp/zig.tar.xz
+      become: no
+      when: zig_version not in zig_check.stdout
+
+    - name: Remove old Zig installation
+      file:
+        path: /opt/zig
+        state: absent
+      become: yes
+      when: zig_version not in zig_check.stdout
+
+    - name: Extract Zig
+      unarchive:
+        src: /tmp/zig.tar.xz
+        dest: /opt/
+        remote_src: yes
+      become: yes
+      when: zig_version not in zig_check.stdout
+
+    - name: Rename Zig directory
+      command: mv /opt/zig-x86_64-linux-{{ zig_version }} /opt/zig
+      become: yes
+      when: zig_version not in zig_check.stdout
+      args:
+        creates: /opt/zig
+
+    - name: Create Zig symlink
+      file:
+        src: /opt/zig/zig
+        dest: /usr/local/bin/zig
+        state: link
+      become: yes

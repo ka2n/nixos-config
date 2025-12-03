@@ -55,20 +55,14 @@
 # 1Password
 - name: Install 1Password
   block:
-    - name: Add 1Password apt key
-      get_url:
-        url: "{{ onepassword_apt_key_url }}"
-        dest: /usr/share/keyrings/1password-archive-keyring.gpg
+    - name: Add 1Password apt key (dearmored)
+      shell: |
+        curl -fsSL "{{ onepassword_apt_key_url }}" | gpg --dearmor -o /usr/share/keyrings/1password-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/1password-archive-keyring.gpg
       become: yes
 
     - name: Add 1Password repository
-      apt_repository:
-        repo: "{{ onepassword_apt_repo }}"
-        state: present
-        filename: 1password
-      become: yes
-
-    - name: Add 1Password repository with signed-by
       apt_repository:
         repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main"
         state: present

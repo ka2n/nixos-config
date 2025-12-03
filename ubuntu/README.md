@@ -382,6 +382,23 @@ mdatp_channel: "prod"  # Options: prod, insiders-slow, insiders-fast
 
 ## Troubleshooting
 
+### Ubuntu 25 (sudo-rs) Compatibility
+
+Ubuntu 25 uses **sudo-rs** (Rust-based sudo replacement) instead of traditional sudo. Ansible's `become_ask_pass` has compatibility issues with sudo-rs.
+
+**Workaround**: Set `ANSIBLE_BECOME_EXE` to use the original sudo wrapper:
+
+```bash
+export ANSIBLE_BECOME_EXE=sudo.ws
+ansible-playbook setup.yml
+```
+
+Or add to your shell config (`~/.bashrc`):
+
+```bash
+export ANSIBLE_BECOME_EXE=sudo.ws
+```
+
 ### Hyprland Installation Issues
 
 If Hyprland PPA fails:

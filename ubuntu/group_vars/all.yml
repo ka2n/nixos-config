@@ -4,8 +4,7 @@
 # User configuration
 primary_user: k2
 primary_user_groups:
-  - networkmanager
-  - docker
+  - netdev
 
 # Locale and timezone
 timezone: Asia/Tokyo
@@ -69,6 +68,7 @@ onepassword_apt_repo: "deb [arch=amd64] https://downloads.1password.com/linux/de
 microsoft_gpg_key_url: "https://packages.microsoft.com/keys/microsoft.asc"
 microsoft_apt_repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/ubuntu/{{ ansible_distribution_version }}/prod {{ ansible_distribution_release }} main"
 
-# Tailscale
-tailscale_apt_key_url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ansible_distribution_release }}.noarmor.gpg"
-tailscale_apt_repo: "deb https://pkgs.tailscale.com/stable/ubuntu {{ ansible_distribution_release }} main"
+# Tailscale (use noble for unsupported releases)
+tailscale_ubuntu_release: "{{ 'noble' if ansible_distribution_release == 'questing' else ansible_distribution_release }}"
+tailscale_apt_key_url: "https://pkgs.tailscale.com/stable/ubuntu/{{ tailscale_ubuntu_release }}.noarmor.gpg"
+tailscale_apt_repo: "deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/ubuntu {{ tailscale_ubuntu_release }} main"

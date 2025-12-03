@@ -38,11 +38,14 @@ fi
 echo "Updating package list..."
 sudo apt update
 
+# Install basic tools required for setup
+echo "Installing basic tools..."
+sudo apt install -y curl git wget build-essential
+
 # Install Ansible if not already installed
 if ! command -v ansible &> /dev/null; then
     echo "Installing Ansible..."
-    sudo apt install -y software-properties-common
-    sudo add-apt-repository --yes --update ppa:ansible/ansible
+    # Use system package (PPA doesn't support Ubuntu 25.04+ yet)
     sudo apt install -y ansible
     echo "Ansible installed successfully."
 else
@@ -82,16 +85,53 @@ fi
 echo ""
 echo "Running ansible-playbook setup.yml..."
 echo ""
-ansible-playbook setup.yml --ask-become-pass
+
+# Ubuntu 25 uses sudo-rs which has compatibility issues with Ansible's become_ask_pass
+# Use sudo.ws wrapper for proper password prompt handling
+export ANSIBLE_BECOME_EXE=sudo.ws
+
+ansible-playbook setup.yml
+
+# Add ~/.local/bin to PATH in .bashrc (at the top, before interactive check)
+# This ensures PATH is available in both login shells and terminal emulators
+if ! grep -q 'PATH=.*\.local/bin' ~/.bashrc; then
+    echo "Adding ~/.local/bin to PATH in ~/.bashrc..."
+    # Create temp file with PATH export at the top
+    {
+        echo '# Added by bootstrap.sh - ~/.local/bin for user-installed binaries'
+        echo 'export PATH="$HOME/.local/bin:$PATH"'
+        echo ''
+        cat ~/.bashrc
+    } > ~/.bashrc.tmp
+    mv ~/.bashrc.tmp ~/.bashrc
+    echo "Added ~/.local/bin to PATH in ~/.bashrc"
+else
+    echo "~/.local/bin already in PATH"
+fi
+
+# Apply PATH change for current session
+export PATH="$HOME/.local/bin:$PATH"
+
+# Install Claude Code
+echo ""
+echo "Installing Claude Code..."
+curl -fsSL https://claude.ai/install.sh | bash
 
 echo ""
 echo "======================================"
 echo "Main Setup Complete!"
 echo "======================================"
 echo ""
+echo "Installed:"
+echo "  - Basic tools (curl, git, wget, build-essential)"
+echo "  - Ansible and all playbook packages"
+echo "  - Claude Code (run 'claude' to start)"
+echo "  - ~/.local/bin added to PATH"
+echo ""
 echo "Next steps:"
 echo ""
 echo "1. REBOOT your system (recommended)"
+echo "   Or run: source ~/.bashrc"
 echo ""
 echo "2. Optional: Install Microsoft Intune and Defender ATP"
 echo "   Download WindowsDefenderATPOnboardingPackage.zip from Microsoft"

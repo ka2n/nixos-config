@@ -1,67 +1,66 @@
 ---
-# Hyprland desktop environment installation
+# Hyprland desktop environment installation using cppiber PPA
+
+- name: Download cppiber Hyprland PPA signing key
+  shell: |
+    curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA54D23B62FF3FCC76EFF71E8FDBAAA1CF0CCF48E" | gpg --dearmor -o /usr/share/keyrings/cppiber-hyprland.gpg
+  args:
+    creates: /usr/share/keyrings/cppiber-hyprland.gpg
+  become: yes
+
+- name: Add cppiber Hyprland PPA repository
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/cppiber-hyprland.gpg] https://ppa.launchpadcontent.net/cppiber/hyprland/ubuntu {{ ansible_distribution_release }} main"
+    state: present
+    filename: cppiber-hyprland
+  become: yes
+
+- name: Update apt cache after adding PPA
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: Remove conflicting Ubuntu hyprland packages
+  apt:
+    name:
+      - hyprland-dev
+      - libhyprutils0
+      - libhyprlang2
+      - libhyprcursor0
+      - libudis86-0
+    state: absent
+    purge: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Install Hyprland and ecosystem from PPA
+  apt:
+    name:
+      - hyprland
+      - hyprpaper
+      - hyprlock
+      - hypridle
+      - xdg-desktop-portal-hyprland
+    state: present
+  become: yes
 
 - name: Install Wayland and graphics dependencies
   apt:
     name:
-      # Build tools
-      - build-essential
-      - cmake
-      - pkg-config
-      - git
-      - ninja-build
-      - meson
-      - gettext
       # Wayland
       - wayland-protocols
       - libwayland-dev
-      - libwayland-client0
-      - libwayland-server0
       # Graphics
       - libdrm-dev
       - libgbm-dev
       - libegl1-mesa-dev
       - libgles2-mesa-dev
       - libgl1-mesa-dev
-      - libglvnd-dev
       # Input and display
       - libinput-dev
       - libxkbcommon-dev
-      - libpixman-1-dev
       - libseat-dev
       - seatd
-      - hwdata
-      - libdisplay-info-dev
-      - libliftoff-dev
-      # XCB libraries
-      - libxcb1-dev
-      - libxcb-composite0-dev
-      - libxcb-dri3-dev
-      - libxcb-present-dev
-      - libxcb-render-util0-dev
-      - libxcb-xfixes0-dev
-      - libxcb-xinput-dev
-      - libxcb-ewmh-dev
-      - libxcb-icccm4-dev
-      - libxcb-xkb-dev
-      - libxcursor-dev
-      # Rendering
-      - libcairo2-dev
-      - libpango1.0-dev
-      # System libraries
-      - libudev-dev
-      - libuuid1
-      - uuid-dev
-      - pciutils
-      - binutils
-      # Image libraries (for hyprpaper)
-      - libfile-dev
-      - libjpeg-turbo8-dev
-      - libwebp-dev
-      - libjxl-dev
-      # PAM and auth (for hyprlock/ly)
-      - libpam0g-dev
-      - libsystemd-dev
       # X11 support
       - xwayland
       - xauth
@@ -70,169 +69,17 @@
     state: present
   become: yes
 
-- name: Try to add Hyprland PPA
-  block:
-    - name: Add Hyprland PPA
-      apt_repository:
-        repo: "{{ hyprland_ppa }}"
-        state: present
-      become: yes
-      register: hyprland_ppa_result
-      ignore_errors: yes
-
-    - name: Update apt cache after adding PPA
-      apt:
-        update_cache: yes
-      become: yes
-      when: hyprland_ppa_result is succeeded
-
-    - name: Install Hyprland from PPA
-      apt:
-        name:
-          - hyprland
-        state: present
-      become: yes
-      when: hyprland_ppa_result is succeeded
-      register: hyprland_install
-
-- name: Build Hyprland from source if PPA failed
-  block:
-    - name: Display Hyprland source build message
-      debug:
-        msg: |
-          Building Hyprland from source requires building several dependencies first.
-          This process may take 20-30 minutes.
-          Dependencies to build: hyprwayland-scanner, hyprutils, hyprlang, hyprgraphics,
-          hyprcursor, hyprland-protocols, aquamarine
-
-    # Build Hyprland libraries in order
-    - name: Build hyprwayland-scanner
-      shell: |
-        cd /tmp
-        git clone --depth 1 https://github.com/hyprwm/hyprwayland-scanner.git
-        cd hyprwayland-scanner
-        cmake -DCMAKE_INSTALL_PREFIX=/usr -B build
-        cmake --build build -j$(nproc)
-        sudo cmake --install build
-      args:
-        creates: /usr/bin/hyprwayland-scanner
-      become: no
-
-    - name: Build hyprutils
-      shell: |
-        cd /tmp
-        git clone --depth 1 https://github.com/hyprwm/hyprutils.git
-        cd hyprutils
-        cmake -DCMAKE_INSTALL_PREFIX=/usr -B build
-        cmake --build build -j$(nproc)
-        sudo cmake --install build
-      args:
-        creates: /usr/lib/libhyprutils.so
-      become: no
-
-    - name: Build hyprlang
-      shell: |
-        cd /tmp
-        git clone --depth 1 https://github.com/hyprwm/hyprlang.git
-        cd hyprlang
-        cmake -DCMAKE_INSTALL_PREFIX=/usr -B build
-        cmake --build build -j$(nproc)
-        sudo cmake --install build
-      args:
-        creates: /usr/lib/libhyprlang.so
-      become: no
-
-    - name: Build hyprgraphics
-      shell: |
-        cd /tmp
-        git clone --depth 1 https://github.com/hyprwm/hyprgraphics.git
-        cd hyprgraphics
-        cmake -DCMAKE_INSTALL_PREFIX=/usr -B build
-        cmake --build build -j$(nproc)
-        sudo cmake --install build
-      args:
-        creates: /usr/lib/libhyprgraphics.so
-      become: no
-
-    - name: Build hyprcursor
-      shell: |
-        cd /tmp
-        git clone --depth 1 https://github.com/hyprwm/hyprcursor.git
-        cd hyprcursor
-        cmake -DCMAKE_INSTALL_PREFIX=/usr -B build
-        cmake --build build -j$(nproc)
-        sudo cmake --install build
-      args:
-        creates: /usr/lib/libhyprcursor.so
-      become: no
-
-    - name: Build hyprland-protocols
-      shell: |
-        cd /tmp
-        git clone --depth 1 https://github.com/hyprwm/hyprland-protocols.git
-        cd hyprland-protocols
-        meson setup build --prefix=/usr
-        ninja -C build
-        sudo ninja -C build install
-      args:
-        creates: /usr/share/hyprland-protocols
-      become: no
-
-    - name: Build aquamarine
-      shell: |
-        cd /tmp
-        git clone --depth 1 https://github.com/hyprwm/aquamarine.git
-        cd aquamarine
-        cmake -DCMAKE_INSTALL_PREFIX=/usr -B build
-        cmake --build build -j$(nproc)
-        sudo cmake --install build
-      args:
-        creates: /usr/lib/libaquamarine.so
-      become: no
-
-    # Now build Hyprland itself
-    - name: Clone Hyprland repository
-      git:
-        repo: https://github.com/hyprwm/Hyprland.git
-        dest: /tmp/hyprland
-        version: main
-        depth: 1
-        recursive: yes
-      become: no
-
-    - name: Build and install Hyprland
-      shell: |
-        cd /tmp/hyprland
-        make release
-        sudo make install
-      args:
-        creates: /usr/local/bin/Hyprland
-      become: no
-
-  when: hyprland_install is not defined or hyprland_install is failed
-
 - name: Install Hyprland ecosystem packages
   apt:
     name:
-      # Hyprland tools (these may need to be built from source if not in repos)
-      - foot  # Wayland terminal (lightweight alternative)
-      # Wayland clipboard
+      - foot  # Wayland terminal
       - wl-clipboard
-      # System utilities
       - dex  # XDG autostart
       - polkit-kde-agent-1  # PolicyKit authentication agent
-      # XDG Desktop Portal
       - xdg-desktop-portal
       - xdg-desktop-portal-gtk
     state: present
   become: yes
-
-- name: Install xdg-desktop-portal-hyprland (if available in repos)
-  apt:
-    name: xdg-desktop-portal-hyprland
-    state: present
-  become: yes
-  ignore_errors: yes
 
 - name: Install Wayland tools and utilities
   apt:
@@ -241,23 +88,22 @@
       - grim
       - slurp
       - swappy
-      # Notification daemon - mako
+      # Notification
       - libnotify-bin
       # Background/wallpaper
       - swaybg
     state: present
   become: yes
 
-- name: Install mako notification daemon (may need manual install)
+- name: Install mako notification daemon
   apt:
     name: mako-notifier
     state: present
   become: yes
   ignore_errors: yes
 
-- name: Install additional Hyprland tools from source/snap
+- name: Install additional Hyprland tools
   block:
-    # waybar
     - name: Install waybar dependencies
       apt:
         name:
@@ -275,187 +121,112 @@
       become: yes
       ignore_errors: yes
 
-    - name: Check if waybar is available in repos
+    - name: Install waybar
       apt:
         name: waybar
         state: present
       become: yes
       ignore_errors: yes
-      register: waybar_install
 
-    # rofi-wayland
-    - name: Check if rofi-wayland is available
+    - name: Install rofi
       apt:
         name: rofi
         state: present
       become: yes
       ignore_errors: yes
 
-    # cliphist - clipboard manager
-    - name: Install cliphist via go install (if available)
+    - name: Install cliphist via go install
       shell: |
-        go install go.senan.xyz/cliphist@latest
+        export GOPATH="$HOME/go" && export PATH="$PATH:$GOPATH/bin" && go install go.senan.xyz/cliphist@latest
       args:
         creates: "{{ ansible_env.HOME }}/go/bin/cliphist"
       become: no
       ignore_errors: yes
 
-    # hyprpaper - wallpaper utility
-    - name: Clone and build hyprpaper
-      block:
-        - name: Clone hyprpaper
-          git:
-            repo: https://github.com/hyprwm/hyprpaper.git
-            dest: /tmp/hyprpaper-build
-            depth: 1
-          become: no
-
-        - name: Build hyprpaper
-          shell: |
-            cd /tmp/hyprpaper-build
-            cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build
-            cmake --build ./build --config Release --target hyprpaper -j$(nproc)
-            sudo cmake --install build
-          args:
-            creates: /usr/bin/hyprpaper
-          become: no
-      ignore_errors: yes
-
-    # hyprlock - screen locker
-    - name: Clone and build hyprlock
-      block:
-        - name: Clone hyprlock
-          git:
-            repo: https://github.com/hyprwm/hyprlock.git
-            dest: /tmp/hyprlock-build
-            depth: 1
-          become: no
-
-        - name: Build hyprlock
-          shell: |
-            cd /tmp/hyprlock-build
-            cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build
-            cmake --build ./build --config Release --target hyprlock -j$(nproc)
-            sudo cmake --install build
-          args:
-            creates: /usr/local/bin/hyprlock
-          become: no
-      ignore_errors: yes
-
-    # hypridle - idle daemon
-    - name: Clone and build hypridle
-      block:
-        - name: Clone hypridle
-          git:
-            repo: https://github.com/hyprwm/hypridle.git
-            dest: /tmp/hypridle-build
-            depth: 1
-          become: no
-
-        - name: Build hypridle
-          shell: |
-            cd /tmp/hypridle-build
-            cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build
-            cmake --build ./build --config Release --target all -j$(nproc)
-            sudo cmake --install build
-          args:
-            creates: /usr/bin/hypridle
-          become: no
-      ignore_errors: yes
-
-    # wlogout - logout menu
-    - name: Install wlogout (if available)
+    - name: Install wlogout
       apt:
         name: wlogout
         state: present
       become: yes
       ignore_errors: yes
 
-- name: Install display manager (ly)
+- name: Install display manager (ly) from source
+  vars:
+    ly_version: "v1.2.0"
   block:
-    - name: Check if ly is available in repos
+    - name: Install ly build dependencies
       apt:
-        name: ly
+        name:
+          - libpam0g-dev
+          - libxcb-xkb-dev
+          - xauth
+          - xserver-xorg
         state: present
       become: yes
-      ignore_errors: yes
-      register: ly_install
 
-    - name: Enable ly service if installed from repos
+    - name: Remove old ly build directory
+      file:
+        path: /tmp/ly-build
+        state: absent
+      become: yes
+
+    - name: Clone ly repository
+      git:
+        repo: https://github.com/fairyglade/ly.git
+        dest: /tmp/ly-build
+        version: "{{ ly_version }}"
+        depth: 1
+      become: no
+
+    - name: Build and install ly with systemd support
+      shell: |
+        cd /tmp/ly-build
+        zig build
+        zig build installexe -Dinit_system=systemd --prefix / -Ddest_directory=/
+      args:
+        creates: /usr/lib/systemd/system/ly.service
+      become: yes
+
+    - name: Reload systemd daemon
       systemd:
-        name: ly
+        daemon_reload: yes
+      become: yes
+
+    - name: Disable existing display manager (gdm3)
+      systemd:
+        name: gdm3.service
+        enabled: no
+      become: yes
+      ignore_errors: yes
+
+    - name: Remove display-manager.service symlink if exists
+      file:
+        path: /etc/systemd/system/display-manager.service
+        state: absent
+      become: yes
+
+    - name: Disable getty on tty2 (required for ly)
+      systemd:
+        name: getty@tty2.service
+        enabled: no
+      become: yes
+
+    - name: Enable ly service
+      systemd:
+        name: ly.service
         enabled: yes
       become: yes
-      when: ly_install is succeeded
-
-    - name: Build ly from source if not available
-      block:
-        - name: Install ly build dependencies (including Zig)
-          apt:
-            name:
-              - libpam0g-dev
-              - libxcb-xkb-dev
-            state: present
-          become: yes
-
-        - name: Check for Zig compiler
-          shell: which zig
-          register: zig_check
-          ignore_errors: yes
-          changed_when: false
-
-        - name: Install Zig (required for ly)
-          block:
-            - name: Download Zig
-              get_url:
-                url: https://ziglang.org/download/0.13.0/zig-linux-x86_64-0.13.0.tar.xz
-                dest: /tmp/zig.tar.xz
-              become: no
-
-            - name: Extract Zig
-              unarchive:
-                src: /tmp/zig.tar.xz
-                dest: /opt/
-                remote_src: yes
-              become: yes
-
-            - name: Create Zig symlink
-              file:
-                src: /opt/zig-linux-x86_64-0.13.0/zig
-                dest: /usr/local/bin/zig
-                state: link
-              become: yes
-          when: zig_check.rc != 0
-
-        - name: Clone ly repository
-          git:
-            repo: https://github.com/fairyglade/ly.git
-            dest: /tmp/ly-build
-            depth: 1
-          become: no
-
-        - name: Build and install ly
-          shell: |
-            cd /tmp/ly-build
-            zig build
-            sudo zig build installexe -Dinit_system=systemd
-            sudo systemctl enable ly@tty2.service
-            sudo systemctl disable getty@tty2.service
-          args:
-            creates: /usr/local/bin/ly
-          become: no
-      when: ly_install is failed
 
 - name: Install nwg-shell tools
   block:
-    - name: Install nwg-displays (display configuration)
+    - name: Install nwg-displays
       apt:
         name: nwg-displays
         state: present
       become: yes
       ignore_errors: yes
 
-    - name: Install nwg-look (GTK theme settings)
+    - name: Install nwg-look
       apt:
         name: nwg-look
         state: present
@@ -465,12 +236,19 @@
 - name: Install GUI theming
   apt:
     name:
-      - gnome-themes-extra  # Adwaita theme
-      - yaru-theme-icon     # Yaru icons
-      - yaru-theme-gtk      # Yaru GTK theme
-      - papirus-icon-theme  # Additional icon theme
+      - gnome-themes-extra
+      - yaru-theme-icon
+      - yaru-theme-gtk
+      - papirus-icon-theme
     state: present
   become: yes
+
+- name: Ensure systemd user directory exists
+  file:
+    path: "{{ ansible_env.HOME }}/.config/systemd/user"
+    state: directory
+    mode: '0755'
+  become: no
 
 - name: Create systemd user target for Hyprland session
   template:
@@ -508,3 +286,48 @@
       org.freedesktop.impl.portal.FileChooser=gtk
     mode: '0644'
   become: no
+
+# InputActions - Mouse and touchpad gestures for Hyprland
+- name: Build and install InputActions Hyprland plugin
+  block:
+    - name: Install InputActions build dependencies
+      apt:
+        name:
+          - cmake
+          - extra-cmake-modules
+          - pkg-config
+          - libevdev-dev
+          - libyaml-cpp-dev
+          - qt6-base-dev
+          - libaquamarine-dev
+          # hyprland headers are included in PPA's hyprland package
+        state: present
+      become: yes
+
+    - name: Clone InputActions repository
+      git:
+        repo: https://github.com/taj-ny/InputActions.git
+        dest: /tmp/inputactions-build
+        depth: 1
+      become: no
+
+    - name: Build InputActions Hyprland plugin
+      shell: |
+        cd /tmp/inputactions-build
+        rm -rf build
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DINPUTACTIONS_BUILD_HYPRLAND=ON
+        make -j$(nproc)
+      args:
+        creates: /tmp/inputactions-build/build/src/hyprland/libinputactions-hyprland.so
+      become: no
+
+    - name: Install InputActions Hyprland plugin
+      shell: |
+        cd /tmp/inputactions-build/build
+        make install
+      args:
+        creates: /usr/lib/hyprland/plugins/libinputactions-hyprland.so
+      become: yes
+      ignore_errors: yes
