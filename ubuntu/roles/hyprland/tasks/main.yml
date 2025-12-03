@@ -435,8 +435,9 @@
           shell: |
             cd /tmp/ly-build
             zig build
-            sudo zig build installsystemd
-            sudo systemctl enable ly.service
+            sudo zig build installexe -Dinit_system=systemd
+            sudo systemctl enable ly@tty2.service
+            sudo systemctl disable getty@tty2.service
           args:
             creates: /usr/local/bin/ly
           become: no
