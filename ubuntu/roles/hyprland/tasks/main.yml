@@ -313,11 +313,12 @@
         - name: Build hyprpaper
           shell: |
             cd /tmp/hyprpaper-build
-            cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build
-            cmake --build ./build --config Release --target hyprpaper
+            cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build
+            cmake --build ./build --config Release --target hyprpaper -j$(nproc)
             sudo cmake --install build
           args:
-            creates: /usr/local/bin/hyprpaper
+            creates: /usr/bin/hyprpaper
+          become: no
       ignore_errors: yes
 
     # hyprlock - screen locker
@@ -334,10 +335,11 @@
           shell: |
             cd /tmp/hyprlock-build
             cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build
-            cmake --build ./build --config Release --target hyprlock
+            cmake --build ./build --config Release --target hyprlock -j$(nproc)
             sudo cmake --install build
           args:
             creates: /usr/local/bin/hyprlock
+          become: no
       ignore_errors: yes
 
     # hypridle - idle daemon
@@ -353,11 +355,12 @@
         - name: Build hypridle
           shell: |
             cd /tmp/hypridle-build
-            cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build
-            cmake --build ./build --config Release --target hypridle
+            cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build
+            cmake --build ./build --config Release --target all -j$(nproc)
             sudo cmake --install build
           args:
-            creates: /usr/local/bin/hypridle
+            creates: /usr/bin/hypridle
+          become: no
       ignore_errors: yes
 
     # wlogout - logout menu
