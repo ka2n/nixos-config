@@ -9,6 +9,10 @@
       url = "github:NitorCreations/nix-mdatp";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    himmelblau = {
+      url = "github:himmelblau-idm/himmelblau/stable-2.x";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, ... }@inputs:
@@ -25,12 +29,12 @@
       ];
     };
 
-    nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.laptop2 = nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = { inherit inputs; };
       modules = [
         { nixpkgs.overlays = [ overlay ]; }
-        ./hosts/laptop/configuration.nix
+        ./hosts/laptop2/configuration.nix
       ];
     };
   };

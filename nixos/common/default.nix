@@ -104,6 +104,7 @@ in
     yazi
     pulsemixer
     libsecret
+    gcr
 
     # Terminal
     kitty
@@ -231,7 +232,7 @@ in
 
   programs.seahorse.enable = true;
   services.gnome.gnome-keyring.enable = true;
-  security.pam.services.ly.enableGnomeKeyring = true;
+  security.pam.services.gdm.enableGnomeKeyring = true;
 
   # 1Password
   programs._1password.enable = true;
@@ -251,8 +252,9 @@ in
   # NoiseTorch - microphone noise suppression
   programs.noisetorch.enable = true;
 
-  # Display manager
-  services.displayManager.ly.enable = true;
+  # Display manager (GDM)
+  services.displayManager.gdm.enable = true;
+  services.displayManager.gdm.wayland = true;
   services.xserver.desktopManager.runXdgAutostartIfNone = true;
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [

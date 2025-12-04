@@ -1,0 +1,39 @@
+# Laptop-specific configuration
+{ config, pkgs, lib, inputs, ... }:
+
+let
+  himmelblauPkg = pkgs.callPackage ../../modules/himmelblau/package.nix {
+    himmelblauSrc = inputs.himmelblau;
+  };
+in
+{
+  imports = [
+    ./hardware-configuration.nix
+    ../../common
+    ../../modules/himmelblau
+    inputs.mdatp.nixosModules.mdatp
+  ];
+
+  networking.hostName = "wk0011";
+
+  environment.systemPackages = with pkgs; [
+    foot
+  ];
+
+  services.azure-entra = {
+    enable = true;
+    browserSso.chrome = true;
+  };
+
+  services.mdatp.enable = true;
+
+  # Firefox with Entra SSO native messaging host
+  programs.firefox = {
+    enable = true;
+    nativeMessagingHosts.packages = [
+      himmelblauPkg.firefoxNativeMessagingHost
+    ];
+  };
+
+  system.stateVersion = "25.11";
+}
