@@ -19,14 +19,6 @@
         create: yes
       become: no
 
-# Dotfiles manager
-- name: Install chezmoi via official script
-  shell: |
-    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
-  args:
-    creates: "{{ ansible_env.HOME }}/.local/bin/chezmoi"
-  become: no
-
 # Editors
 - name: Build and install Neovim from source
   vars:
@@ -70,6 +62,101 @@
     - name: Clean up Neovim build directory
       file:
         path: /tmp/neovim
+        state: absent
+      become: no
+
+# Alacritty - GPU-accelerated terminal emulator
+- name: Build and install Alacritty from latest release
+  block:
+    - name: Install Alacritty build dependencies
+      apt:
+        name:
+          - cmake
+          - g++
+          - pkg-config
+          - libfontconfig1-dev
+          - libxcb-xfixes0-dev
+          - libxkbcommon-dev
+          - python3
+          - libegl1-mesa-dev
+          - scdoc
+        state: present
+      become: yes
+
+    - name: Get latest Alacritty release tag
+      shell: |
+        curl -s https://api.github.com/repos/alacritty/alacritty/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/'
+      register: alacritty_latest_tag
+      changed_when: false
+      become: no
+
+    - name: Clone Alacritty repository at latest release
+      git:
+        repo: https://github.com/alacritty/alacritty.git
+        dest: /tmp/alacritty-build
+        version: "{{ alacritty_latest_tag.stdout }}"
+        depth: 1
+        force: yes
+      become: no
+
+    - name: Build Alacritty
+      shell: |
+        . $HOME/.cargo/env
+        cd /tmp/alacritty-build
+        cargo build --release
+      args:
+        creates: /tmp/alacritty-build/target/release/alacritty
+      become: no
+
+    - name: Install Alacritty terminfo
+      shell: |
+        cd /tmp/alacritty-build
+        tic -xe alacritty,alacritty-direct extra/alacritty.info
+      args:
+        creates: /usr/share/terminfo/a/alacritty
+      become: yes
+
+    - name: Install Alacritty binary
+      copy:
+        src: /tmp/alacritty-build/target/release/alacritty
+        dest: /usr/local/bin/alacritty
+        mode: '0755'
+        remote_src: yes
+      become: yes
+
+    - name: Install Alacritty icon
+      copy:
+        src: /tmp/alacritty-build/extra/logo/alacritty-term.svg
+        dest: /usr/share/pixmaps/Alacritty.svg
+        mode: '0644'
+        remote_src: yes
+      become: yes
+
+    - name: Install Alacritty desktop file
+      shell: |
+        cd /tmp/alacritty-build
+        desktop-file-install extra/linux/Alacritty.desktop
+        update-desktop-database
+      args:
+        creates: /usr/share/applications/Alacritty.desktop
+      become: yes
+
+    - name: Install Alacritty man page
+      shell: |
+        cd /tmp/alacritty-build
+        mkdir -p /usr/local/share/man/man1 /usr/local/share/man/man5
+        scdoc < extra/man/alacritty.1.scd | gzip -c > /usr/local/share/man/man1/alacritty.1.gz
+        scdoc < extra/man/alacritty-msg.1.scd | gzip -c > /usr/local/share/man/man1/alacritty-msg.1.gz
+        scdoc < extra/man/alacritty.5.scd | gzip -c > /usr/local/share/man/man5/alacritty.5.gz
+        scdoc < extra/man/alacritty-bindings.5.scd | gzip -c > /usr/local/share/man/man5/alacritty-bindings.5.gz
+      args:
+        creates: /usr/local/share/man/man1/alacritty.1.gz
+      become: yes
+      ignore_errors: yes
+
+    - name: Clean up Alacritty build directory
+      file:
+        path: /tmp/alacritty-build
         state: absent
       become: no
 
@@ -200,22 +287,23 @@
         creates: "{{ ansible_env.HOME }}/.local/bin/noisetorch"
 
 # Additional CLI utilities (installed via cargo/go if available)
-- name: Install just task runner via cargo
-  shell: |
-    . $HOME/.cargo/env && cargo install just
-  args:
-    creates: "{{ ansible_env.HOME }}/.cargo/bin/just"
-  become: no
-  ignore_errors: yes
-
-- name: Install ghq repository manager via go
+- name: Build ghq via go install
   shell: |
     export PATH="$HOME/go/bin:$PATH" && go install github.com/x-motemen/ghq@latest
   args:
     creates: "{{ ansible_env.HOME }}/go/bin/ghq"
-  become: no
   environment:
     GOPATH: "{{ ansible_env.HOME }}/go"
+  become: no
+  ignore_errors: yes
+
+- name: Install ghq binary to /usr/local/bin
+  copy:
+    src: "{{ ansible_env.HOME }}/go/bin/ghq"
+    dest: /usr/local/bin/ghq
+    mode: '0755'
+    remote_src: yes
+  become: yes
   ignore_errors: yes
 
 # Yazi file manager - install from official binary release
