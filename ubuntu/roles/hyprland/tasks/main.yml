@@ -141,12 +141,41 @@
         state: absent
       become: no
 
+- name: Remove sway-notification-center (conflicts with mako)
+  apt:
+    name: sway-notification-center
+    state: absent
+    purge: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Disable swaync systemd user service
+  systemd:
+    name: swaync.service
+    enabled: no
+    state: stopped
+    scope: user
+  become: no
+  ignore_errors: yes
+
 - name: Install mako notification daemon
   apt:
     name: mako-notifier
     state: present
   become: yes
-  ignore_errors: yes
+
+- name: Reload systemd user daemon
+  systemd:
+    daemon_reload: yes
+    scope: user
+  become: no
+
+- name: Enable mako systemd user service
+  systemd:
+    name: mako.service
+    enabled: yes
+    scope: user
+  become: no
 
 - name: Install additional Hyprland tools
   block:
@@ -226,12 +255,39 @@
       become: yes
       ignore_errors: yes
 
-    - name: Install cliphist via go install
-      shell: |
-        export GOPATH="$HOME/go" && export PATH="$PATH:$GOPATH/bin" && go install go.senan.xyz/cliphist@latest
-      args:
-        creates: "{{ ansible_env.HOME }}/go/bin/cliphist"
-      become: no
+    - name: Install clipse clipboard manager from source
+      block:
+        - name: Clone clipse repository
+          git:
+            repo: https://github.com/savedra1/clipse.git
+            dest: /tmp/clipse-build
+            depth: 1
+          become: no
+
+        - name: Build clipse
+          shell: |
+            cd /tmp/clipse-build
+            go build -o clipse
+          args:
+            creates: /tmp/clipse-build/clipse
+          environment:
+            GOPATH: "{{ ansible_env.HOME }}/go"
+            PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/go/bin"
+          become: no
+
+        - name: Install clipse binary
+          copy:
+            src: /tmp/clipse-build/clipse
+            dest: /usr/local/bin/clipse
+            mode: '0755'
+            remote_src: yes
+          become: yes
+
+        - name: Clean up clipse build directory
+          file:
+            path: /tmp/clipse-build
+            state: absent
+          become: no
       ignore_errors: yes
 
     - name: Install wlogout

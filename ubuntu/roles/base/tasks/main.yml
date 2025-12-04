@@ -91,6 +91,13 @@
     state: present
   become: yes
 
+- name: Create fd symlink for fd-find
+  file:
+    src: /usr/bin/fdfind
+    dest: /usr/bin/fd
+    state: link
+  become: yes
+
 - name: Install GitHub CLI
   block:
     - name: Download GitHub CLI GPG key
@@ -284,3 +291,9 @@
         dest: /usr/local/bin/zig
         state: link
       become: yes
+
+# GNOME Desktop Settings
+- name: Set GTK key theme to Emacs
+  command: gsettings set org.gnome.desktop.interface gtk-key-theme Emacs
+  become: no
+  changed_when: false

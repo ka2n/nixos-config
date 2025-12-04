@@ -1,5 +1,31 @@
 ---
-# Security tools: 1Password, gnome-keyring
+# Security tools: 1Password, gnome-keyring, AppArmor profiles
+
+# AppArmor profile for Zen Browser (tarball installation)
+# Required for user namespace sandbox on Ubuntu 24.04+
+# Note: Firefox snap already has AppArmor profile, only Zen needs this
+- name: Create AppArmor profile for Zen Browser
+  copy:
+    dest: /etc/apparmor.d/zen-local
+    content: |
+      abi <abi/4.0>,
+      include <tunables/global>
+      profile zen-local
+      /opt/zen/{zen,zen-bin,updater}
+      flags=(unconfined) {
+          userns,
+          include if exists <local/zen>
+      }
+    mode: '0644'
+  become: yes
+  register: zen_apparmor
+
+- name: Restart AppArmor service
+  systemd:
+    name: apparmor
+    state: restarted
+  become: yes
+  when: zen_apparmor.changed
 
 # GNOME Keyring
 - name: Install GNOME Keyring

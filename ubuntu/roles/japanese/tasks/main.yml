@@ -159,6 +159,12 @@
   become: no
   changed_when: false
 
+- name: Configure GTK IM module via gsettings
+  shell: |
+    gsettings set org.gnome.settings-daemon.plugins.xsettings overrides "{'Gtk/IMModule':<'fcitx'>}"
+  become: no
+  changed_when: false
+
 - name: Create fcitx5 autostart directory
   file:
     path: "{{ ansible_env.HOME }}/.config/autostart"
