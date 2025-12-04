@@ -28,25 +28,64 @@
   become: no
 
 # Editors
-- name: Install and configure Neovim
-  apt:
-    name: neovim
-    state: present
-  become: yes
+- name: Build and install Neovim from source
+  vars:
+    neovim_version: "0.11.5"
+  block:
+    - name: Install Neovim build dependencies
+      apt:
+        name:
+          - ninja-build
+          - gettext
+          - cmake
+          - curl
+          - build-essential
+          - git
+        state: present
+      become: yes
+
+    - name: Clone Neovim repository
+      git:
+        repo: https://github.com/neovim/neovim.git
+        dest: /tmp/neovim
+        version: "v{{ neovim_version }}"
+        depth: 1
+        force: yes
+      become: no
+
+    - name: Build Neovim
+      shell: |
+        cd /tmp/neovim
+        make CMAKE_BUILD_TYPE=RelWithDebInfo
+      args:
+        creates: /tmp/neovim/build/bin/nvim
+      become: no
+
+    - name: Install Neovim
+      shell: |
+        cd /tmp/neovim
+        make install
+      become: yes
+
+    - name: Clean up Neovim build directory
+      file:
+        path: /tmp/neovim
+        state: absent
+      become: no
 
 - name: Create vi/vim aliases for neovim
   block:
     - name: Update alternatives for vi
       alternatives:
         name: vi
-        path: /usr/bin/nvim
+        path: /usr/local/bin/nvim
       become: yes
       ignore_errors: yes
 
     - name: Update alternatives for vim
       alternatives:
         name: vim
-        path: /usr/bin/nvim
+        path: /usr/local/bin/nvim
       become: yes
       ignore_errors: yes
 

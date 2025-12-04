@@ -87,13 +87,59 @@
       # Screenshot tools
       - grim
       - slurp
-      - swappy
       # Notification
       - libnotify-bin
       # Background/wallpaper
       - swaybg
     state: present
   become: yes
+
+- name: Build and install swappy from source
+  block:
+    - name: Install swappy build dependencies
+      apt:
+        name:
+          - meson
+          - ninja-build
+          - libcairo2-dev
+          - libpango1.0-dev
+          - libgtk-3-dev
+          - libglib2.0-dev
+          - scdoc
+          - wl-clipboard
+          - fonts-font-awesome
+        state: present
+      become: yes
+
+    - name: Clone swappy repository
+      git:
+        repo: https://github.com/jtheoof/swappy.git
+        dest: /tmp/swappy-build
+        depth: 1
+      become: no
+
+    - name: Build swappy
+      shell: |
+        cd /tmp/swappy-build
+        meson setup build
+        ninja -C build
+      args:
+        creates: /tmp/swappy-build/build/swappy
+      become: no
+
+    - name: Install swappy
+      shell: |
+        cd /tmp/swappy-build
+        ninja -C build install
+      args:
+        creates: /usr/local/bin/swappy
+      become: yes
+
+    - name: Clean up swappy build directory
+      file:
+        path: /tmp/swappy-build
+        state: absent
+      become: no
 
 - name: Install mako notification daemon
   apt:
@@ -128,10 +174,55 @@
       become: yes
       ignore_errors: yes
 
-    - name: Install rofi
+    - name: Install rofi-wayland build dependencies
       apt:
-        name: rofi
+        name:
+          - bison
+          - flex
+          - libxcb-util-dev
+          - libxcb-ewmh-dev
+          - libxcb-icccm4-dev
+          - libxcb-xrm-dev
+          - libxcb-xkb-dev
+          - libxkbcommon-dev
+          - libxkbcommon-x11-dev
+          - libstartup-notification0-dev
+          - libpango1.0-dev
+          - libcairo2-dev
+          - libglib2.0-dev
+          - libgdk-pixbuf-2.0-dev
+          - librsvg2-dev
+          - libwayland-dev
+          - wayland-protocols
+          - check
+          - libxcb-cursor-dev
         state: present
+      become: yes
+      ignore_errors: yes
+
+    - name: Clone rofi repository
+      git:
+        repo: "https://github.com/davatorium/rofi.git"
+        dest: "{{ ansible_env.HOME }}/.local/src/rofi"
+        version: "2.0.0"
+        depth: 1
+        force: yes
+      become: no
+
+    - name: Build rofi
+      shell: |
+        cd {{ ansible_env.HOME }}/.local/src/rofi
+        meson setup build --prefix=/usr/local
+        ninja -C build
+      args:
+        creates: "{{ ansible_env.HOME }}/.local/src/rofi/build/rofi"
+      become: no
+
+    - name: Install rofi
+      shell: |
+        ninja -C {{ ansible_env.HOME }}/.local/src/rofi/build install
+      args:
+        creates: /usr/local/bin/rofi
       become: yes
       ignore_errors: yes
 
@@ -217,21 +308,141 @@
         enabled: yes
       become: yes
 
-- name: Install nwg-shell tools
+- name: Build and install nwg-displays from source
   block:
-    - name: Install nwg-displays
+    - name: Install nwg-displays dependencies
       apt:
-        name: nwg-displays
+        name:
+          - python3
+          - python3-pip
+          - python3-setuptools
+          - python3-wheel
+          - python3-build
+          - python3-installer
+          - python3-gi
+          - python3-i3ipc
+          - libgtk-layer-shell-dev
+          - libgtk-layer-shell0
+          - gir1.2-gtklayershell-0.1
         state: present
       become: yes
-      ignore_errors: yes
+
+    - name: Clone nwg-displays repository
+      git:
+        repo: https://github.com/nwg-piotr/nwg-displays.git
+        dest: /tmp/nwg-displays-build
+        depth: 1
+      become: no
+
+    - name: Build nwg-displays wheel
+      shell: |
+        cd /tmp/nwg-displays-build
+        /usr/bin/python3 -m build --wheel --no-isolation
+      args:
+        creates: /tmp/nwg-displays-build/dist
+      become: no
+
+    - name: Install nwg-displays
+      shell: |
+        cd /tmp/nwg-displays-build
+        /usr/bin/python3 -m installer dist/*.whl
+      args:
+        creates: /usr/local/bin/nwg-displays
+      become: yes
+
+    - name: Install nwg-displays desktop file and icon
+      shell: |
+        cd /tmp/nwg-displays-build
+        install -Dm 644 -t "/usr/share/applications" nwg-displays.desktop
+        install -Dm 644 -t "/usr/share/pixmaps" nwg-displays.svg
+      args:
+        creates: /usr/share/applications/nwg-displays.desktop
+      become: yes
+
+    - name: Clean up nwg-displays build directory
+      file:
+        path: /tmp/nwg-displays-build
+        state: absent
+      become: no
+
+- name: Build and install xcur2png from source
+  block:
+    - name: Install xcur2png build dependencies
+      apt:
+        name:
+          - libpng-dev
+          - libxcursor-dev
+          - autoconf
+          - automake
+        state: present
+      become: yes
+
+    - name: Clone xcur2png repository
+      git:
+        repo: https://github.com/eworm-de/xcur2png.git
+        dest: /tmp/xcur2png-build
+        depth: 1
+      become: no
+
+    - name: Build and install xcur2png
+      shell: |
+        cd /tmp/xcur2png-build
+        autoreconf -i
+        ./configure
+        make
+        make install
+      args:
+        creates: /usr/local/bin/xcur2png
+      become: yes
+
+    - name: Clean up xcur2png build directory
+      file:
+        path: /tmp/xcur2png-build
+        state: absent
+      become: yes
+
+- name: Build and install nwg-look from source
+  block:
+    - name: Install nwg-look build dependencies
+      apt:
+        name:
+          - golang-go
+          - libgtk-3-dev
+          - pkg-config
+        state: present
+      become: yes
+
+    - name: Clone nwg-look repository
+      git:
+        repo: https://github.com/nwg-piotr/nwg-look.git
+        dest: /tmp/nwg-look-build
+        depth: 1
+      become: no
+
+    - name: Build nwg-look
+      shell: |
+        cd /tmp/nwg-look-build
+        make build
+      args:
+        creates: /tmp/nwg-look-build/bin/nwg-look
+      environment:
+        GOPATH: "{{ ansible_env.HOME }}/go"
+        PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/go/bin"
+      become: no
 
     - name: Install nwg-look
-      apt:
-        name: nwg-look
-        state: present
+      shell: |
+        cd /tmp/nwg-look-build
+        make install
+      args:
+        creates: /usr/local/bin/nwg-look
       become: yes
-      ignore_errors: yes
+
+    - name: Clean up nwg-look build directory
+      file:
+        path: /tmp/nwg-look-build
+        state: absent
+      become: no
 
 - name: Install GUI theming
   apt:
@@ -288,46 +499,42 @@
   become: no
 
 # InputActions - Mouse and touchpad gestures for Hyprland
-- name: Build and install InputActions Hyprland plugin
-  block:
-    - name: Install InputActions build dependencies
-      apt:
-        name:
-          - cmake
-          - extra-cmake-modules
-          - pkg-config
-          - libevdev-dev
-          - libyaml-cpp-dev
-          - qt6-base-dev
-          - libaquamarine-dev
-          # hyprland headers are included in PPA's hyprland package
-        state: present
-      become: yes
-
-    - name: Clone InputActions repository
-      git:
-        repo: https://github.com/taj-ny/InputActions.git
-        dest: /tmp/inputactions-build
-        depth: 1
-      become: no
-
-    - name: Build InputActions Hyprland plugin
-      shell: |
-        cd /tmp/inputactions-build
-        rm -rf build
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DINPUTACTIONS_BUILD_HYPRLAND=ON
-        make -j$(nproc)
-      args:
-        creates: /tmp/inputactions-build/build/src/hyprland/libinputactions-hyprland.so
-      become: no
-
-    - name: Install InputActions Hyprland plugin
-      shell: |
-        cd /tmp/inputactions-build/build
-        make install
-      args:
-        creates: /usr/lib/hyprland/plugins/libinputactions-hyprland.so
-      become: yes
-      ignore_errors: yes
+# SKIPPED: InputActions requires Qt6 6.6.0+ but Ubuntu 24.04 only has Qt6 6.4.2
+# To enable when Qt6 6.6.0+ becomes available, uncomment and update:
+# - name: Build and install InputActions Hyprland plugin
+#   block:
+#     - name: Install InputActions build dependencies
+#       apt:
+#         name:
+#           - cmake
+#           - extra-cmake-modules
+#           - pkg-config
+#           - libevdev-dev
+#           - libyaml-cpp-dev
+#           - qt6-base-dev
+#           - libaquamarine-dev
+#         state: present
+#       become: yes
+#     - name: Clone InputActions repository
+#       git:
+#         repo: https://github.com/taj-ny/InputActions.git
+#         dest: /tmp/inputactions-build
+#         depth: 1
+#       become: no
+#     - name: Build InputActions Hyprland plugin
+#       shell: |
+#         cd /tmp/inputactions-build
+#         rm -rf build && mkdir build && cd build
+#         cmake .. -DCMAKE_BUILD_TYPE=Release -DINPUTACTIONS_BUILD_HYPRLAND=ON
+#         make -j$(nproc)
+#       args:
+#         creates: /tmp/inputactions-build/build/src/hyprland/libinputactions-hyprland.so
+#       become: no
+#     - name: Install InputActions Hyprland plugin
+#       shell: |
+#         cd /tmp/inputactions-build/build
+#         make install
+#       args:
+#         creates: /usr/lib/hyprland/plugins/libinputactions-hyprland.so
+#       become: yes
+#       ignore_errors: yes

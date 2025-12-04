@@ -8,6 +8,58 @@
     state: present
   become: yes
 
+- name: Install Zen Browser
+  block:
+    - name: Download Zen Browser
+      get_url:
+        url: "https://github.com/zen-browser/desktop/releases/download/{{ zen_browser_version }}/zen.linux-x86_64.tar.xz"
+        dest: /tmp/zen-browser.tar.xz
+      become: no
+
+    - name: Create Zen Browser directory
+      file:
+        path: /opt/zen
+        state: directory
+        mode: '0755'
+      become: yes
+
+    - name: Extract Zen Browser
+      unarchive:
+        src: /tmp/zen-browser.tar.xz
+        dest: /opt/zen
+        remote_src: yes
+        extra_opts: ['--strip-components=1']
+      become: yes
+
+    - name: Create Zen Browser symlink
+      file:
+        src: /opt/zen/zen
+        dest: /usr/local/bin/zen
+        state: link
+      become: yes
+
+    - name: Create Zen Browser desktop entry
+      copy:
+        dest: /usr/share/applications/zen-browser.desktop
+        content: |
+          [Desktop Entry]
+          Name=Zen Browser
+          Comment=Experience tranquil browsing
+          Exec=/opt/zen/zen %u
+          Terminal=false
+          Type=Application
+          Icon=/opt/zen/browser/chrome/icons/default/default128.png
+          Categories=Network;WebBrowser;
+          MimeType=text/html;text/xml;application/xhtml+xml;application/vnd.mozilla.xul+xml;text/mml;x-scheme-handler/http;x-scheme-handler/https;
+        mode: '0644'
+      become: yes
+
+    - name: Clean up Zen Browser archive
+      file:
+        path: /tmp/zen-browser.tar.xz
+        state: absent
+      become: no
+
 - name: Install Google Chrome
   block:
     - name: Download Google Chrome GPG key
@@ -56,10 +108,27 @@
 
 # Communication
 - name: Install Slack
-  snap:
-    name: slack
-    classic: yes
-  become: yes
+  block:
+    - name: Download Slack GPG key
+      shell: |
+        curl -fsSL https://packagecloud.io/slacktechnologies/slack/gpgkey | gpg --dearmor -o /usr/share/keyrings/slack-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/slack-archive-keyring.gpg
+      become: yes
+
+    - name: Add Slack repository
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/slack-archive-keyring.gpg] https://packagecloud.io/slacktechnologies/slack/debian/ jessie main"
+        state: present
+        filename: slack
+      become: yes
+
+    - name: Install Slack desktop
+      apt:
+        name: slack-desktop
+        state: present
+        update_cache: yes
+      become: yes
 
 # Note-taking
 - name: Install Obsidian

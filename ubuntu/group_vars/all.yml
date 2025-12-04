@@ -18,13 +18,16 @@ hostname: wk2511058
 hyprland_ppa: "ppa:hyprland-community/hyprland"  # Update with actual PPA if available
 hyprland_build_from_source: false  # Set to true if PPA not available
 
+# Zen Browser
+zen_browser_version: "1.12.4b"
+
 # Fonts
 cica_font_version: "5.0.3"
 cica_font_url: "https://github.com/miiton/Cica/releases/download/v{{ cica_font_version }}/Cica_v{{ cica_font_version }}.zip"
 
 # Japanese input
 fcitx5_cskk_repo: "https://github.com/fcitx/fcitx5-cskk.git"
-fcitx5_cskk_ref: "7ea513375d5412b37ab0251476f792d2467547e5"
+fcitx5_cskk_ref: "v1.2.0"  # Requires Fcitx5Core 5.0.6+ (Ubuntu 24.04 has 5.1.7), cskk >= 3.0
 libcskk_repo: "https://github.com/naokiri/cskk.git"
 
 # Hyprland plugins

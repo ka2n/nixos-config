@@ -7,6 +7,14 @@
     cache_valid_time: 3600
   become: yes
 
+- name: Remove unwanted packages
+  apt:
+    name:
+      - gnome-initial-setup
+    state: absent
+    purge: yes
+  become: yes
+
 - name: Upgrade all packages
   apt:
     upgrade: dist
