@@ -26,19 +26,31 @@
     - name: Convert and install GPG key
       shell: |
         gpg --dearmor < /tmp/microsoft.asc > /tmp/microsoft.gpg
-        install -o root -g root -m 644 /tmp/microsoft.gpg /usr/share/keyrings/microsoft-archive-keyring.gpg
+        install -o root -g root -m 644 /tmp/microsoft.gpg /usr/share/keyrings/microsoft-prod.gpg
       args:
-        creates: /usr/share/keyrings/microsoft-archive-keyring.gpg
+        creates: /usr/share/keyrings/microsoft-prod.gpg
       become: yes
+
+- name: Remove conflicting keyring file if exists
+  file:
+    path: /usr/share/keyrings/microsoft-archive-keyring.gpg
+    state: absent
+  become: yes
 
 - name: Determine Ubuntu version for repository
   set_fact:
     ubuntu_version_for_repo: "{{ ansible_distribution_version if ansible_distribution_version in ['22.04', '24.04'] else '24.04' }}"
     ubuntu_release_for_repo: "{{ ansible_distribution_release if ansible_distribution_version in ['22.04', '24.04'] else 'noble' }}"
 
+- name: Remove old Microsoft repository file
+  file:
+    path: /etc/apt/sources.list.d/microsoft-prod.list
+    state: absent
+  become: yes
+
 - name: Add Microsoft repository
   apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/ubuntu/{{ ubuntu_version_for_repo }}/prod {{ ubuntu_release_for_repo }} main"
+    repo: "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/ubuntu/{{ ubuntu_version_for_repo }}/prod {{ ubuntu_release_for_repo }} main"
     state: present
     filename: microsoft-prod
   become: yes

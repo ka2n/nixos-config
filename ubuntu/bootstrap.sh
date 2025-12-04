@@ -82,13 +82,6 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 0
 fi
 
-# Run the main playbook
-echo ""
-echo "Running ansible-playbook setup.yml..."
-echo ""
-
-ansible-playbook setup.yml
-
 # Add ~/.local/bin to PATH in .bashrc (at the top, before interactive check)
 # This ensures PATH is available in both login shells and terminal emulators
 if ! grep -q 'PATH=.*\.local/bin' ~/.bashrc; then
@@ -113,6 +106,13 @@ export PATH="$HOME/.local/bin:$PATH"
 echo ""
 echo "Installing Claude Code..."
 curl -fsSL https://claude.ai/install.sh | bash
+
+# Run the main playbook
+echo ""
+echo "Running ansible-playbook setup.yml..."
+echo ""
+
+ansible-playbook setup.yml
 
 echo ""
 echo "======================================"

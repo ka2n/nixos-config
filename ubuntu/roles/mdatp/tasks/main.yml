@@ -1,5 +1,6 @@
 ---
 # Microsoft Defender for Endpoint (mdatp) installation
+# Uses Python script onboarding method (MicrosoftDefenderATPOnboardingLinuxServer.py)
 
 - name: Display mdatp installation information
   debug:
@@ -37,6 +38,7 @@
     name:
       - curl
       - python3-apt
+      - python3
     state: present
   become: yes
 
@@ -62,29 +64,47 @@
   become: yes
   when: mdatp_onboarding is defined and mdatp_onboarding != ""
 
-- name: Find onboarding JSON file
+- name: Find onboarding Python script
   find:
     paths: /tmp/mde_install/
-    patterns: "*.json"
-  register: onboarding_json_files
+    patterns: "*.py"
+  register: onboarding_py_files
   become: yes
 
-- name: Set onboarding JSON path
+- name: Set onboarding Python script path
   set_fact:
-    onboarding_json_path: "{{ onboarding_json_files.files[0].path }}"
-  when: onboarding_json_files.matched > 0
+    onboarding_py_path: "{{ onboarding_py_files.files[0].path }}"
+  when: onboarding_py_files.matched > 0
 
-- name: Install and onboard mdatp
+- name: Fail if no onboarding script found
+  fail:
+    msg: |
+      No onboarding Python script found in the package.
+      Expected: MicrosoftDefenderATPOnboardingLinuxServer.py
+  when: onboarding_py_files.matched == 0
+
+- name: Install mdatp using installer script
   shell: |
-    /tmp/mde_installer.sh --install --channel {{ mdatp_channel }} --onboard {{ onboarding_json_path }}
+    /tmp/mde_installer.sh --install --channel {{ mdatp_channel }}
   become: yes
   register: mdatp_install_output
-  when: onboarding_json_path is defined
 
 - name: Display installation output
   debug:
     msg: "{{ mdatp_install_output.stdout_lines }}"
-  when: mdatp_install_output is defined
+  when: mdatp_install_output.stdout_lines is defined
+
+- name: Onboard using Python script
+  shell: |
+    python3 {{ onboarding_py_path }}
+  become: yes
+  register: mdatp_onboard_output
+  when: onboarding_py_path is defined
+
+- name: Display onboarding output
+  debug:
+    msg: "{{ mdatp_onboard_output.stdout_lines }}"
+  when: mdatp_onboard_output.stdout_lines is defined
 
 - name: Wait for mdatp to be ready
   shell: mdatp health --field healthy
@@ -95,6 +115,17 @@
   become: yes
   ignore_errors: yes
 
+- name: Check real-time protection status
+  shell: mdatp health --field real_time_protection_enabled
+  register: rtp_status
+  become: yes
+  ignore_errors: yes
+
+- name: Enable real-time protection if disabled
+  shell: mdatp config real-time-protection --value enabled
+  become: yes
+  when: rtp_status.stdout is defined and rtp_status.stdout == "false"
+
 - name: Check mdatp health
   shell: mdatp health
   register: mdatp_health_full
@@ -104,7 +135,7 @@
 - name: Display mdatp health
   debug:
     msg: "{{ mdatp_health_full.stdout_lines }}"
-  when: mdatp_health_full is defined
+  when: mdatp_health_full.stdout_lines is defined
 
 - name: Test mdatp connectivity
   shell: mdatp connectivity test
@@ -115,7 +146,7 @@
 - name: Display connectivity test results
   debug:
     msg: "{{ mdatp_connectivity.stdout_lines }}"
-  when: mdatp_connectivity is defined
+  when: mdatp_connectivity.stdout_lines is defined
 
 - name: Clean up temporary files
   file:
