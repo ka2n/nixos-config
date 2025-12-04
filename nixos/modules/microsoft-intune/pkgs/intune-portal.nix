@@ -23,22 +23,18 @@ stdenv.mkDerivation {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/bin $out/share $out/lib
+    mkdir -p $out/bin
 
-    # Copy share and lib from unwrapped
-    cp -a ${unwrapped}/share/* $out/share/
-    cp -a ${unwrapped}/lib/* $out/lib/
+    # Symlink share and lib from unwrapped (no modifications needed)
+    ln -s ${unwrapped}/share $out/share
+    ln -s ${unwrapped}/lib $out/lib
 
     # Create bwrap wrapper for intune-portal only
     ln -s ${intuneWrapper.makeWrapper "${unwrapped}/bin/intune-portal"} $out/bin/intune-portal
 
-    # Copy other binaries without wrapper
+    # Symlink other binaries without wrapper
     ln -s ${unwrapped}/bin/intune-agent $out/bin/intune-agent
     ln -s ${unwrapped}/bin/intune-daemon $out/bin/intune-daemon
-
-    # Update desktop file to use wrapped binary
-    substituteInPlace $out/share/applications/intune-portal.desktop \
-      --replace ${unwrapped}/bin/intune-portal $out/bin/intune-portal
 
     runHook postInstall
   '';
