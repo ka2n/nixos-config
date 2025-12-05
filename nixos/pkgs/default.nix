@@ -8,4 +8,5 @@ final: prev: {
   inputactions-hyprland = final.callPackage ./inputactions-hyprland {
     inherit (final) hyprlandPlugins;
   };
+  keeper-desktop = final.callPackage ./keeper-desktop { };
 }

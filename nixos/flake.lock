@@ -18,9 +18,50 @@
         "type": "github"
       }
     },
-    "mdatp": {
+    "flake-utils_2": {
+      "inputs": {
+        "systems": "systems_2"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "himmelblau": {
       "inputs": {
         "flake-utils": "flake-utils",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1764780216,
+        "narHash": "sha256-4zNV9qx40LU6WI1uZlp2fNrvTKDBnUSVbh7GnCaGsZE=",
+        "owner": "himmelblau-idm",
+        "repo": "himmelblau",
+        "rev": "198ef91d808997419ff1e3900f4da3478a67c85f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "himmelblau-idm",
+        "ref": "stable-2.x",
+        "repo": "himmelblau",
+        "type": "github"
+      }
+    },
+    "mdatp": {
+      "inputs": {
+        "flake-utils": "flake-utils_2",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -57,12 +98,49 @@
     },
     "root": {
       "inputs": {
+        "himmelblau": "himmelblau",
         "mdatp": "mdatp",
         "nixpkgs": "nixpkgs",
         "zen-browser": "zen-browser"
       }
     },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "himmelblau",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1759977258,
+        "narHash": "sha256-hOxEFSEBoqDmJb7BGX1CzT1gvUPK6r+Qs+n3IxBgfTs=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "1d0c6173f57d07db7957b50e799240d4f2d7520f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
     "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_2": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",

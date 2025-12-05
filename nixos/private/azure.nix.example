@@ -1,0 +1,4 @@
+# Copy to azure.nix and fill in your values
+{
+  domains = ["your-tenant.onmicrosoft.com"];
+}
