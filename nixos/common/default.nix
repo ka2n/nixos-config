@@ -190,6 +190,9 @@ in
     # Music
     spotify
 
+    # Password Manager
+    keeper-desktop
+
     # Wayland / Hyprland
     wl-clipboard
     clipse                      # Clipboard manager TUI
