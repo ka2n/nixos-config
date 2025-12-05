@@ -192,7 +192,7 @@ in
 
     # Wayland / Hyprland
     wl-clipboard
-    cliphist                    # Clipboard history (use with rofi)
+    clipse                      # Clipboard manager TUI
     wlogout
     waybar
     rofi
