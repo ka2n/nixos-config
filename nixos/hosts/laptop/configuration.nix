@@ -16,6 +16,8 @@ in
 
   networking.hostName = "wk2511058";
 
+  boot.kernelPackages = pkgs.linuxPackages_zen;
+
   environment.systemPackages = with pkgs; [
     foot
   ];
@@ -23,6 +25,7 @@ in
   services.azure-entra = {
     enable = true;
     browserSso.chrome = true;
+    pamServices = [ "passwd" "login" "systemd-user" ];
   };
 
   services.mdatp.enable = true;

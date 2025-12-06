@@ -1,5 +1,5 @@
 # Common configuration shared across all hosts
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 let
   cica = pkgs.stdenvNoCC.mkDerivation rec {
@@ -32,8 +32,8 @@ in
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Use latest kernel
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # Use latest kernel (can be overridden by host-specific config)
+  boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
 
   # Networking
   networking.networkmanager.enable = true;
