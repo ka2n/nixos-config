@@ -46,6 +46,13 @@ stdenv.mkDerivation {
     (lib.cmakeBool "USE_QT6" (majorVersion == "6"))
   ];
 
+  # Link libcskk's share directory (contains rules) into the output
+  # so that fcitx5-with-addons can find the rules via XDG_DATA_DIRS
+  postInstall = ''
+    mkdir -p $out/share
+    ln -s ${libcskk}/share/libcskk $out/share/libcskk
+  '';
+
   meta = with lib; {
     description = "Fcitx5 wrapper for libcskk";
     homepage = "https://github.com/fcitx/fcitx5-cskk";

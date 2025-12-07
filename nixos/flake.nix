@@ -4,7 +4,6 @@
 
     nixos-hardware = {
       url = "github:NixOS/nixos-hardware/master";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     zen-browser = {
       url = "github:youwen5/zen-browser-flake";
@@ -40,7 +39,7 @@
       modules = [
         { nixpkgs.overlays = [ overlay ]; }
         ./hosts/laptop/configuration.nix
-        nixos-hardware.nixosModules.lenovo-thinkpad-x1-13th-gen
+        #nixos-hardware.nixosModules.lenovo-thinkpad-x1-13th-gen
       ];
     };
 

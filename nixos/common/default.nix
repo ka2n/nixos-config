@@ -18,6 +18,9 @@ let
   };
 in
 {
+  imports = [
+    ../modules/zen-browser
+  ];
   # Nix settings
   nix.gc.automatic = true;
   nix.gc.dates = "weekly";
@@ -103,6 +106,7 @@ in
     just
     yazi
     pulsemixer
+    wiremix             # PipeWire TUI mixer
     libsecret
     gcr
 
@@ -127,6 +131,7 @@ in
     claude-code
     codex
     gemini-cli-bin
+    delta
 
     # Build tools
     gcc
@@ -179,10 +184,11 @@ in
     dex                         # XDG autostart runner
     tailscale-systray           # Tailscale system tray icon
     darkman                     # Dark/light mode daemon
+    sound-theme-freedesktop
+    pulseaudio
 
     # GUI Settings tools
     networkmanagerapplet        # nm-applet + nm-connection-editor
-    nwg-displays                # Display/monitor configuration
     nwg-look                    # GTK theme settings (lxappearance alternative)
     cameractrls                 # Webcam settings (Camset)
     cameractrls-gtk3
@@ -200,7 +206,7 @@ in
     waybar
     rofi
     hyprpaper
-    swaybg
+    rose-pine-hyprcursor
     grim
     slurp
     swappy                      # Screenshot annotation tool
@@ -213,10 +219,10 @@ in
 
     # SKK
     skkDictionaries.l
-  ]) ++ [
-    # External flake packages
-    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
-  ];
+  ]);
+
+  # Link SKK dictionaries to /run/current-system/sw/share/skk/
+  environment.pathsToLink = [ "/share/skk" ];
 
   documentation.man.generateCaches = false;
 
@@ -227,6 +233,9 @@ in
   programs.neovim.defaultEditor = true;
   programs.neovim.viAlias = true;
   programs.neovim.vimAlias = true;
+
+  # Zen Browser
+  programs.zen-browser.enable = true;
 
   # Hyprland
   programs.hyprland.enable = true;
@@ -264,6 +273,15 @@ in
     pkgs.xdg-desktop-portal-hyprland
     pkgs.xdg-desktop-portal-gtk
   ];
+  xdg.portal.config = {
+    common = {
+      default = ["hyprland" "gtk"];
+    };
+    hyprland = {
+      default = ["hyprland" "gtk"];
+      "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
+    };
+  };
 
   # Services
   services.openssh.enable = true;

@@ -13,6 +13,12 @@
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
+  powerManagement = {
+    enable = true;
+    cpuFreqGovernor = "schedutil";
+  };
+  services.power-profiles-daemon.enable = true;
+
   fileSystems."/" =
     { device = "/dev/mapper/luks-459af733-88f0-403d-a984-2861fbbb8e0e";
       fsType = "ext4";

@@ -102,8 +102,8 @@ in
     # DBus service for identity broker (required for browser SSO)
     services.dbus.packages = [ cfg.package ];
 
-    # Firefox native messaging host (placed in lib/mozilla via systemPackages)
-    environment.systemPackages = lib.mkIf cfg.browserSso.firefox [
+    # Firefox native messaging host
+    programs.firefox.nativeMessagingHosts.packages = lib.mkIf cfg.browserSso.firefox [
       cfg.package.firefoxNativeMessagingHost
     ];
 
