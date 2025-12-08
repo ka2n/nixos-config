@@ -17,6 +17,10 @@
       url = "github:himmelblau-idm/himmelblau/stable-2.x";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    inputactions = {
+      url = "github:taj-ny/InputActions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, nixos-hardware, ... }@inputs:
@@ -39,7 +43,7 @@
       modules = [
         { nixpkgs.overlays = [ overlay ]; }
         ./hosts/laptop/configuration.nix
-        #nixos-hardware.nixosModules.lenovo-thinkpad-x1-13th-gen
+        nixos-hardware.nixosModules.lenovo-thinkpad-x1-13th-gen
       ];
     };
 

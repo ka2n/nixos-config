@@ -89,7 +89,7 @@ in
     wget
     curl
     chezmoi
-    mise
+    mise-wrapped
     tree
     tig
     ldns          # drill
@@ -107,8 +107,10 @@ in
     yazi
     pulsemixer
     wiremix             # PipeWire TUI mixer
+    swaylock            # Fallback screen locker
     libsecret
     gcr
+    playerctl
 
     # Terminal
     kitty
@@ -122,7 +124,8 @@ in
     # Keyboard/Input
     xremap
     warpd
-    inputactions-hyprland       # Mouse/touchpad gestures (easystroke alternative)
+    inputs.inputactions.packages.x86_64-linux.inputactions-hyprland  # Mouse/touchpad gestures (easystroke alternative)
+    inputs.inputactions.packages.x86_64-linux.inputactions-ctl
 
     # Development
     go
@@ -154,6 +157,8 @@ in
     bison
     libtool
     jemalloc
+    patchelf
+    file
     unzip
     p7zip
 
@@ -170,6 +175,9 @@ in
 
     # Office
     libreoffice
+
+    # Design
+    figma-linux
 
     # File manager
     xfce.thunar
@@ -227,6 +235,16 @@ in
   documentation.man.generateCaches = false;
 
   programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    zlib
+    openssl
+    readline
+    libyaml
+    libffi
+    gmp
+    ncurses
+    stdenv.cc.cc.lib
+  ];
   programs.fish.enable = true;
   programs.git.enable = true;
   programs.neovim.enable = true;
@@ -241,6 +259,15 @@ in
   programs.hyprland.enable = true;
   programs.hyprlock.enable = true;
   services.hypridle.enable = true;
+
+  # Override hypridle to only start under hyprland-session.target (not gdm-greeter)
+  systemd.user.services.hypridle = {
+    wantedBy = lib.mkForce [ "hyprland-session.target" ];
+    after = lib.mkForce [ "hyprland-session.target" ];
+  };
+
+  # Swaylock (fallback screen locker)
+  security.pam.services.swaylock = {};
 
   programs.seahorse.enable = true;
   services.gnome.gnome-keyring.enable = true;
@@ -260,6 +287,53 @@ in
     '';
     mode = "0755";
   };
+
+  # InputActions Hyprland plugin symlink
+  environment.etc."hyprland/plugins/libinputactions_hyprland.so".source =
+    "${inputs.inputactions.packages.x86_64-linux.inputactions-hyprland}/lib/libinputactions_hyprland.so";
+
+  # mise system configuration
+  environment.sessionVariables.MISE_SYSTEM_CONFIG_FILE = "/etc/mise/config.toml";
+  environment.etc."mise/config.toml".text = ''
+    [tasks.nix-patch-elf]
+    description = "Patch all mise-installed ELF binaries for NixOS compatibility"
+    run = """
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    NIX_LD_LIB="/run/current-system/sw/share/nix-ld/lib"
+    INTERPRETER="/lib64/ld-linux-x86-64.so.2"
+    MISE_INSTALLS="''${MISE_DATA_DIR:-$HOME/.local/share/mise}/installs"
+
+    if [[ ! -d "$NIX_LD_LIB" ]]; then
+        echo "Error: nix-ld library path not found at $NIX_LD_LIB"
+        exit 1
+    fi
+
+    count=0
+    for f in $(find "$MISE_INSTALLS" -type f 2>/dev/null); do
+        type=$(file -b "$f" 2>/dev/null) || continue
+        if [[ "$type" == *"ELF"*"executable"* ]]; then
+            current_interp=$(patchelf --print-interpreter "$f" 2>/dev/null) || continue
+            if [[ "$current_interp" != "$INTERPRETER" ]]; then
+                patchelf --set-interpreter "$INTERPRETER" "$f" 2>/dev/null || true
+            fi
+            rpath=$(patchelf --print-rpath "$f" 2>/dev/null) || continue
+            if [[ -n "$rpath" && "$rpath" != *"$NIX_LD_LIB"* ]]; then
+                patchelf --set-rpath "$NIX_LD_LIB:$rpath" "$f" 2>/dev/null || true
+            fi
+            ((count++)) || true
+        elif [[ "$type" == *"ELF"*"shared object"* ]]; then
+            rpath=$(patchelf --print-rpath "$f" 2>/dev/null) || continue
+            if [[ -n "$rpath" && "$rpath" != *"$NIX_LD_LIB"* ]]; then
+                patchelf --set-rpath "$NIX_LD_LIB:$rpath" "$f" 2>/dev/null || true
+            fi
+            ((count++)) || true
+        fi
+    done
+    echo "Patched $count ELF files in $MISE_INSTALLS"
+    """
+  '';
 
   # NoiseTorch - microphone noise suppression
   programs.noisetorch.enable = true;

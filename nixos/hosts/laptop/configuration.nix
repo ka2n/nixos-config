@@ -20,12 +20,13 @@ in
 
   environment.systemPackages = with pkgs; [
     foot
+    brightnessctl
   ];
 
   services.azure-entra = {
     enable = true;
     browserSso.chrome = true;
-    pamServices = [ "passwd" "login" "systemd-user" "hyprlock" ];
+    pamServices = [ "passwd" "login" "systemd-user" "hyprlock" "swaylock" ];
   };
 
   services.mdatp.enable = true;
