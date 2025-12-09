@@ -82,7 +82,7 @@ in
         id_attr_map = name
         idmap_range = 5000000-5999999
         join_type = join
-        local_groups = users,networkmanager,wheel,docker
+        local_groups = users,networkmanager,wheel,docker,uinput
         selinux = false
         shell = /run/current-system/sw/bin/bash
         socket_path = /var/run/himmelblaud/socket

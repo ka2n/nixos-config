@@ -16,12 +16,20 @@ let
       runHook postInstall
     '';
   };
+
+  # Hyprland plugins directory
+  hypr-plugin-dir = pkgs.symlinkJoin {
+    name = "hyprland-plugins";
+    paths = [
+      inputs.inputactions.packages.x86_64-linux.inputactions-hyprland
+    ];
+  };
 in
 {
   imports = [
     ../modules/zen-browser
     ../modules/mise
-    ../modules/hypr-terminal-apps
+    ../modules/hypr-scripts
   ];
   # Nix settings
   nix.gc.automatic = true;
@@ -84,7 +92,7 @@ in
   users.users.k2 = {
     isNormalUser = true;
     description = "k2";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" "uinput" ];
   };
 
   # Common packages
@@ -218,7 +226,6 @@ in
     # Wayland / Hyprland
     wl-clipboard
     clipse                      # Clipboard manager TUI
-    wlogout
     waybar
     rofi
     hyprpaper
@@ -242,6 +249,9 @@ in
 
   # Add $HOME/.local/bin to PATH
   environment.sessionVariables.PATH = [ "$HOME/.local/bin" ];
+
+  # Hyprland plugins directory
+  environment.sessionVariables.HYPR_PLUGIN_DIR = "${hypr-plugin-dir}/lib";
 
   documentation.man.generateCaches = false;
 
@@ -270,6 +280,9 @@ in
   # Swaylock (fallback screen locker)
   security.pam.services.swaylock = {};
 
+  # Polkit
+  security.polkit.enable = true;
+
   programs.seahorse.enable = true;
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.gdm.enableGnomeKeyring = true;
@@ -289,15 +302,11 @@ in
     mode = "0755";
   };
 
-  # InputActions Hyprland plugin symlink
-  environment.etc."hyprland/plugins/libinputactions_hyprland.so".source =
-    "${inputs.inputactions.packages.x86_64-linux.inputactions-hyprland}/lib/libinputactions_hyprland.so";
-
   # mise - polyglot runtime manager
   programs.mise.enable = true;
 
-  # Terminal apps with alacritty wrapper (for Hyprland)
-  programs.hypr-terminal-apps.enable = true;
+  # Hyprland utility scripts (terminal wrappers, rofi scripts)
+  programs.hypr-scripts.enable = true;
 
   # NoiseTorch - microphone noise suppression
   programs.noisetorch.enable = true;
