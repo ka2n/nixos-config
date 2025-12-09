@@ -20,6 +20,8 @@ in
 {
   imports = [
     ../modules/zen-browser
+    ../modules/mise
+    ../modules/hypr-terminal-apps
   ];
   # Nix settings
   nix.gc.automatic = true;
@@ -72,6 +74,12 @@ in
     variant = "";
   };
 
+  # xremap - udev rules for /dev/uinput access
+  hardware.uinput.enable = true;
+  services.udev.extraRules = ''
+    KERNEL=="uinput", GROUP="users", MODE="0660"
+  '';
+
   # User
   users.users.k2 = {
     isNormalUser = true;
@@ -89,7 +97,6 @@ in
     wget
     curl
     chezmoi
-    mise-wrapped
     tree
     tig
     ldns          # drill
@@ -111,6 +118,7 @@ in
     libsecret
     gcr
     playerctl
+    bluetui
 
     # Terminal
     kitty
@@ -232,19 +240,12 @@ in
   # Link SKK dictionaries to /run/current-system/sw/share/skk/
   environment.pathsToLink = [ "/share/skk" ];
 
+  # Add $HOME/.local/bin to PATH
+  environment.sessionVariables.PATH = [ "$HOME/.local/bin" ];
+
   documentation.man.generateCaches = false;
 
-  programs.nix-ld.enable = true;
-  programs.nix-ld.libraries = with pkgs; [
-    zlib
-    openssl
-    readline
-    libyaml
-    libffi
-    gmp
-    ncurses
-    stdenv.cc.cc.lib
-  ];
+  # nix-ld is configured by programs.mise module
   programs.fish.enable = true;
   programs.git.enable = true;
   programs.neovim.enable = true;
@@ -292,48 +293,11 @@ in
   environment.etc."hyprland/plugins/libinputactions_hyprland.so".source =
     "${inputs.inputactions.packages.x86_64-linux.inputactions-hyprland}/lib/libinputactions_hyprland.so";
 
-  # mise system configuration
-  environment.sessionVariables.MISE_SYSTEM_CONFIG_FILE = "/etc/mise/config.toml";
-  environment.etc."mise/config.toml".text = ''
-    [tasks.nix-patch-elf]
-    description = "Patch all mise-installed ELF binaries for NixOS compatibility"
-    run = """
-    #!/usr/bin/env bash
-    set -euo pipefail
+  # mise - polyglot runtime manager
+  programs.mise.enable = true;
 
-    NIX_LD_LIB="/run/current-system/sw/share/nix-ld/lib"
-    INTERPRETER="/lib64/ld-linux-x86-64.so.2"
-    MISE_INSTALLS="''${MISE_DATA_DIR:-$HOME/.local/share/mise}/installs"
-
-    if [[ ! -d "$NIX_LD_LIB" ]]; then
-        echo "Error: nix-ld library path not found at $NIX_LD_LIB"
-        exit 1
-    fi
-
-    count=0
-    for f in $(find "$MISE_INSTALLS" -type f 2>/dev/null); do
-        type=$(file -b "$f" 2>/dev/null) || continue
-        if [[ "$type" == *"ELF"*"executable"* ]]; then
-            current_interp=$(patchelf --print-interpreter "$f" 2>/dev/null) || continue
-            if [[ "$current_interp" != "$INTERPRETER" ]]; then
-                patchelf --set-interpreter "$INTERPRETER" "$f" 2>/dev/null || true
-            fi
-            rpath=$(patchelf --print-rpath "$f" 2>/dev/null) || continue
-            if [[ -n "$rpath" && "$rpath" != *"$NIX_LD_LIB"* ]]; then
-                patchelf --set-rpath "$NIX_LD_LIB:$rpath" "$f" 2>/dev/null || true
-            fi
-            ((count++)) || true
-        elif [[ "$type" == *"ELF"*"shared object"* ]]; then
-            rpath=$(patchelf --print-rpath "$f" 2>/dev/null) || continue
-            if [[ -n "$rpath" && "$rpath" != *"$NIX_LD_LIB"* ]]; then
-                patchelf --set-rpath "$NIX_LD_LIB:$rpath" "$f" 2>/dev/null || true
-            fi
-            ((count++)) || true
-        fi
-    done
-    echo "Patched $count ELF files in $MISE_INSTALLS"
-    """
-  '';
+  # Terminal apps with alacritty wrapper (for Hyprland)
+  programs.hypr-terminal-apps.enable = true;
 
   # NoiseTorch - microphone noise suppression
   programs.noisetorch.enable = true;
