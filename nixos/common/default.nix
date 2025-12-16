@@ -50,6 +50,7 @@ in
 
   # Networking
   networking.networkmanager.enable = true;
+  networking.networkmanager.wifi.powersave = false;
 
   # Timezone and locale
   time.timeZone = "Asia/Tokyo";
@@ -99,6 +100,7 @@ in
   environment.systemPackages = (with pkgs; [
     # Editors
     neovim
+    code-cursor-fhs
 
     # CLI tools
     gh
@@ -165,8 +167,7 @@ in
     ncurses
     gdbm
     openssl
-    rustc
-    cargo
+    rustup
     groff
     autoconf
     automake
@@ -252,6 +253,9 @@ in
 
   # Hyprland plugins directory
   environment.sessionVariables.HYPR_PLUGIN_DIR = "${hypr-plugin-dir}/lib";
+
+  # GTK Emacs keybindings (Ctrl-W for word delete, etc.)
+  environment.sessionVariables.GTK_KEY_THEME = "Emacs";
 
   documentation.man.generateCaches = false;
 
