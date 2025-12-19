@@ -9,16 +9,16 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "libcskk";
-  version = "3.1.1";
+  version = "3.2.0";
 
   src = fetchFromGitHub {
     owner = "naokiri";
     repo = "cskk";
     rev = "v${version}";
-    hash = "sha256-ApSDhQvV/PwtzGEtdtEepiw018F2mhWAKg+Y3wytEGs=";
+    hash = "sha256-lhLNtSmD5XiG0U6TLWgN+YA/f7UJ/RyHoe5vq5OopuI=";
   };
 
-  cargoHash = "sha256-M5oKBNc1+Tj1+8Nij46ca2SV8xgDPdRZqa6UJnIYt+g=";
+  cargoHash = "sha256-XWPeqQ3dC73Hp+TTPdLJtvF0hQ+uI82xfY7DxAXO1gA=";
 
   nativeBuildInputs = [
     cargo-c
@@ -38,6 +38,10 @@ rustPlatform.buildRustPackage rec {
   installPhase = ''
     runHook preInstall
     cargo cinstall --release --prefix=$out
+
+    # Install assets (rules) to share/libcskk
+    mkdir -p $out/share/libcskk
+    cp -r assets/* $out/share/libcskk/
     runHook postInstall
   '';
 

@@ -236,10 +236,14 @@ in
     swappy                      # Screenshot annotation tool
     mako                        # notification daemon (omarchy style)
     libnotify
+    darkman
+    wlsunset
+    glib
 
     # Theming (omarchy style)
     gnome-themes-extra          # Adwaita GTK theme
     yaru-theme                  # Yaru icon theme
+    nordic
 
     # SKK
     skkDictionaries.l
