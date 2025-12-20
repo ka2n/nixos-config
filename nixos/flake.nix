@@ -5,6 +5,10 @@
     nixos-hardware = {
       url = "github:NixOS/nixos-hardware/master";
     };
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     zen-browser = {
       url = "github:youwen5/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -53,6 +57,16 @@
       modules = [
         { nixpkgs.overlays = [ overlay ]; }
         ./hosts/laptop2/configuration.nix
+      ];
+    };
+
+    nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
+      inherit system;
+      specialArgs = { inherit inputs; };
+      modules = [
+        { nixpkgs.overlays = [ overlay ]; }
+        inputs.disko.nixosModules.disko
+        ./hosts/desktop/configuration.nix
       ];
     };
   };
