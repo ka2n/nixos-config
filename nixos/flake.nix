@@ -2,9 +2,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
 
-    nixos-hardware = {
-      url = "github:NixOS/nixos-hardware/master";
-    };
+    nixos-hardware = { url = "github:NixOS/nixos-hardware/master"; };
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -25,49 +23,42 @@
       url = "github:taj-ny/InputActions";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, nixos-hardware, ... }@inputs:
-  let
-    system = "x86_64-linux";
-    overlay = import ./pkgs;
-  in {
-    nixosConfigurations.vm = nixpkgs.lib.nixosSystem {
-      inherit system;
-      specialArgs = { inherit inputs; };
-      modules = [
-        { nixpkgs.overlays = [ overlay ]; }
-        ./hosts/vm/configuration.nix
-      ];
-    };
+    let
+      system = "x86_64-linux";
+      overlay = import ./pkgs;
+    in {
+      nixosConfigurations.vm = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit inputs; };
+        modules =
+          [ { nixpkgs.overlays = [ overlay ]; } ./hosts/vm/configuration.nix ];
+      };
 
-    nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
-      inherit system;
-      specialArgs = { inherit inputs; };
-      modules = [
-        { nixpkgs.overlays = [ overlay ]; }
-        ./hosts/laptop/configuration.nix
-        nixos-hardware.nixosModules.lenovo-thinkpad-x1-13th-gen
-      ];
-    };
+      nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit inputs; };
+        modules = [
+          { nixpkgs.overlays = [ overlay ]; }
+          ./hosts/laptop/configuration.nix
+          nixos-hardware.nixosModules.lenovo-thinkpad-x1-13th-gen
+        ];
+      };
 
-    nixosConfigurations.laptop2 = nixpkgs.lib.nixosSystem {
-      inherit system;
-      specialArgs = { inherit inputs; };
-      modules = [
-        { nixpkgs.overlays = [ overlay ]; }
-        ./hosts/laptop2/configuration.nix
-      ];
+      nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit inputs; };
+        modules = [
+          { nixpkgs.overlays = [ overlay ]; }
+          inputs.disko.nixosModules.disko
+          ./hosts/desktop/configuration.nix
+        ];
+      };
     };
-
-    nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
-      inherit system;
-      specialArgs = { inherit inputs; };
-      modules = [
-        { nixpkgs.overlays = [ overlay ]; }
-        inputs.disko.nixosModules.disko
-        ./hosts/desktop/configuration.nix
-      ];
-    };
-  };
 }
