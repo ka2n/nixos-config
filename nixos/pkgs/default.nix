@@ -6,6 +6,7 @@ final: prev: {
     inherit (final.kdePackages) fcitx5-qt;
   };
   keeper-desktop = final.callPackage ./keeper-desktop { };
+  display-switch = final.callPackage ./display-switch { };
 
   # Cursor 2.2.20 - Update from nixpkgs 2.1.42
   # Patches:

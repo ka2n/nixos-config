@@ -6,6 +6,7 @@
     ./disko.nix
     ./hardware-configuration.nix
     ../../common
+    ../../modules/display-switch.nix
   ];
 
   networking.hostName = "junior";
@@ -18,6 +19,19 @@
     foot
     ntfs3g
   ];
+
+  # Enable display-switch service
+  services.display-switch = {
+    enable = true;
+    config = ''
+      ## USB device to watch for to trigger screen change
+      usb_device = "05e3:0626"
+
+      ## Specify which input to switch for _all_ DDC monitors.
+      on_usb_connect = "Hdmi1"
+      on_usb_disconnect = "Hdmi2"
+    '';
+  };
 
   fileSystems =
     let 
