@@ -24,12 +24,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, nixos-hardware, ... }@inputs:
+  outputs = { self, nixpkgs, nixos-hardware, home-manager, ... }@inputs:
     let
       system = "x86_64-linux";
       overlay = import ./pkgs;

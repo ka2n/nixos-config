@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "disko": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1766150702,
+        "narHash": "sha256-P0kM+5o+DKnB6raXgFEk3azw8Wqg5FL6wyl9jD+G5a4=",
+        "owner": "nix-community",
+        "repo": "disko",
+        "rev": "916506443ecd0d0b4a0f4cf9d40a3c22ce39b378",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "disko",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -56,6 +76,27 @@
         "owner": "himmelblau-idm",
         "ref": "stable-2.x",
         "repo": "himmelblau",
+        "type": "github"
+      }
+    },
+    "home-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1766292113,
+        "narHash": "sha256-sWTtmkQujRpjWYCnZc8LWdDiCzrRlSBPrGovkZpLkBI=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "fdec8815a86db36f42fc9c8cb2931cd8485f5aed",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "ref": "release-25.11",
+        "repo": "home-manager",
         "type": "github"
       }
     },
@@ -135,7 +176,9 @@
     },
     "root": {
       "inputs": {
+        "disko": "disko",
         "himmelblau": "himmelblau",
+        "home-manager": "home-manager",
         "inputactions": "inputactions",
         "mdatp": "mdatp",
         "nixos-hardware": "nixos-hardware",

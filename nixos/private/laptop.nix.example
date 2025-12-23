@@ -1,0 +1,7 @@
+# Copy to laptop.nix and fill in your values
+{
+  domains = ["your-tenant.onmicrosoft.com"];
+
+  # home-manager user settings
+  username = "user@example.com";
+}

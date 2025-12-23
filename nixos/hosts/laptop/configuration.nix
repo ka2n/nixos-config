@@ -5,8 +5,8 @@ let
   himmelblauPkg = pkgs.callPackage ../../modules/himmelblau/package.nix {
     himmelblauSrc = inputs.himmelblau;
   };
-in
-{
+  privateConfig = import ../../private/laptop.nix;
+in {
   imports = [
     ./hardware-configuration.nix
     ../../common
@@ -21,6 +21,18 @@ in
   environment.systemPackages = with pkgs; [
     foot
     brightnessctl
+    # Standalone Home Manager for himmelblau user (users.users not available)
+    (inputs.home-manager.lib.homeManagerConfiguration {
+      inherit pkgs;
+      modules = [
+        ../../home/common.nix
+        {
+          home.username = privateConfig.username;
+          home.homeDirectory = "/home/katsuma";
+          home.stateVersion = "25.11";
+        }
+      ];
+    }).activationPackage
   ];
 
   services.azure-entra = {
@@ -34,17 +46,13 @@ in
   # Firefox with native messaging hosts
   programs.firefox = {
     enable = true;
-    nativeMessagingHosts.packages = [
-      himmelblauPkg.firefoxNativeMessagingHost
-      pkgs.tridactyl-native
-    ];
+    nativeMessagingHosts.packages =
+      [ himmelblauPkg.firefoxNativeMessagingHost pkgs.tridactyl-native ];
   };
 
   # Zen Browser with native messaging hosts
-  programs.zen-browser.nativeMessagingHosts.packages = [
-    himmelblauPkg.firefoxNativeMessagingHost
-    pkgs.tridactyl-native
-  ];
+  programs.zen-browser.nativeMessagingHosts.packages =
+    [ himmelblauPkg.firefoxNativeMessagingHost pkgs.tridactyl-native ];
 
   system.stateVersion = "25.11";
 }

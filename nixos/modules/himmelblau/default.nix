@@ -2,12 +2,10 @@
 
 let
   cfg = config.services.azure-entra;
-  azureConfig = import ../../private/azure.nix;
-  himmelblauPkg = pkgs.callPackage ./package.nix {
-    himmelblauSrc = inputs.himmelblau;
-  };
-in
-{
+  privateConfig = import ../../private/laptop.nix;
+  himmelblauPkg =
+    pkgs.callPackage ./package.nix { himmelblauSrc = inputs.himmelblau; };
+in {
   options.services.azure-entra = {
     enable = lib.mkEnableOption "Azure Entra ID authentication via Himmelblau";
 
@@ -17,17 +15,18 @@ in
       description = "Himmelblau package to use";
     };
 
-
     debugFlag = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Whether to pass the debug (-d) flag to the himmelblaud binary";
+      description =
+        "Whether to pass the debug (-d) flag to the himmelblaud binary";
     };
 
     mfaSshWorkaroundFlag = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Whether to add mfa_poll_prompt option to PAM module for OpenSSH Bug 2876 workaround";
+      description =
+        "Whether to add mfa_poll_prompt option to PAM module for OpenSSH Bug 2876 workaround";
     };
 
     pamServices = lib.mkOption {
@@ -38,8 +37,10 @@ in
 
     browserSso = {
       chrome = lib.mkEnableOption "Chrome native messaging host for Entra SSO";
-      chromium = lib.mkEnableOption "Chromium native messaging host for Entra SSO";
-      firefox = lib.mkEnableOption "Firefox native messaging host for Entra SSO";
+      chromium =
+        lib.mkEnableOption "Chromium native messaging host for Entra SSO";
+      firefox =
+        lib.mkEnableOption "Firefox native messaging host for Entra SSO";
     };
   };
 
@@ -69,7 +70,7 @@ in
         connection_timeout = 30
         db_path = /var/cache/himmelblaud/himmelblau.cache.db
         debug = ${lib.boolToString cfg.debugFlag}
-        domains = ${builtins.head azureConfig.domains}
+        domains = ${builtins.head privateConfig.domains}
         enable_experimental_mfa = true
         enable_hello = true
         enable_sfa_fallback = false
@@ -103,20 +104,21 @@ in
     services.dbus.packages = [ cfg.package ];
 
     # Firefox native messaging host
-    programs.firefox.nativeMessagingHosts.packages = lib.mkIf cfg.browserSso.firefox [
-      cfg.package.firefoxNativeMessagingHost
-    ];
+    programs.firefox.nativeMessagingHosts.packages =
+      lib.mkIf cfg.browserSso.firefox
+      [ cfg.package.firefoxNativeMessagingHost ];
 
     # NSS modules
     system.nssModules = [ cfg.package ];
     system.nssDatabases.passwd = lib.mkOrder 1501 [ "himmelblau" ];
-    system.nssDatabases.group  = lib.mkOrder 1501 [ "himmelblau" ];
+    system.nssDatabases.group = lib.mkOrder 1501 [ "himmelblau" ];
     system.nssDatabases.shadow = lib.mkOrder 1501 [ "himmelblau" ];
 
     # PAM configuration
     security.pam.services = let
       genServiceCfg = service: {
-        rules = let super = config.security.pam.services.${service}.rules; in {
+        rules = let super = config.security.pam.services.${service}.rules;
+        in {
           account.himmelblau = {
             order = super.account.unix.order - 10;
             control = "sufficient";
@@ -128,7 +130,8 @@ in
             order = super.auth.unix.order - 10;
             control = "sufficient";
             modulePath = "${cfg.package}/lib/libpam_himmelblau.so";
-            settings.mfa_poll_prompt = cfg.mfaSshWorkaroundFlag && service == "sshd";
+            settings.mfa_poll_prompt = cfg.mfaSshWorkaroundFlag && service
+              == "sshd";
             settings.debug = cfg.debugFlag;
           };
           session.himmelblau = {
@@ -168,7 +171,8 @@ in
         wantedBy = [ "multi-user.target" "accounts-daemon.service" ];
         upholds = [ "himmelblaud-tasks.service" ];
         serviceConfig = commonServiceConfig // {
-          ExecStart = "${cfg.package}/bin/himmelblaud" + lib.optionalString cfg.debugFlag " -d";
+          ExecStart = "${cfg.package}/bin/himmelblaud"
+            + lib.optionalString cfg.debugFlag " -d";
           Restart = "on-failure";
           DynamicUser = true;
           # Add tss group for TPM access via tpm2-abrmd
@@ -197,11 +201,13 @@ in
           RestartSec = "1s";
           User = "root";
           ProtectSystem = "strict";
-          ReadWritePaths = "/home /var/run/himmelblaud /tmp /etc/krb5.conf.d /etc /var/lib /var/cache/nss-himmelblau /var/cache/himmelblau-policies";
+          ReadWritePaths =
+            "/home /var/run/himmelblaud /tmp /etc/krb5.conf.d /etc /var/lib /var/cache/nss-himmelblau /var/cache/himmelblau-policies";
           # Restrict to IPv4 only - himmelblaud_tasks fails on IPv6 connection errors
           # before falling back to IPv4, causing "federation provider not set" errors
           RestrictAddressFamilies = "AF_INET AF_UNIX";
-          CapabilityBoundingSet = "CAP_CHOWN CAP_FOWNER CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH";
+          CapabilityBoundingSet =
+            "CAP_CHOWN CAP_FOWNER CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH";
           PrivateDevices = true;
         };
       };
