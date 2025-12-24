@@ -43,30 +43,30 @@
       };
       overlay = import ./pkgs;
     in {
-      nixosConfigurations.vm = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.nixos-vm = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs pkgs-unstable; };
         modules =
-          [ { nixpkgs.overlays = [ overlay ]; } ./hosts/vm/configuration.nix ];
+          [ { nixpkgs.overlays = [ overlay ]; } ./hosts/nixos-vm/configuration.nix ];
       };
 
-      nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.wk2511058 = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs pkgs-unstable; };
         modules = [
           { nixpkgs.overlays = [ overlay ]; }
-          ./hosts/laptop/configuration.nix
+          ./hosts/wk2511058/configuration.nix
           nixos-hardware.nixosModules.lenovo-thinkpad-x1-13th-gen
         ];
       };
 
-      nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.junior = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs pkgs-unstable; };
         modules = [
           { nixpkgs.overlays = [ overlay ]; }
           inputs.disko.nixosModules.disko
-          ./hosts/desktop/configuration.nix
+          ./hosts/junior/configuration.nix
         ];
       };
     };
