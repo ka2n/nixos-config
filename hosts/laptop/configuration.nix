@@ -24,6 +24,7 @@ in {
     # Standalone Home Manager for himmelblau user (users.users not available)
     (inputs.home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
+      extraSpecialArgs = { inherit inputs; };
       modules = [
         ../../home/common.nix
         {
