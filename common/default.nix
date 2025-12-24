@@ -30,6 +30,7 @@ in
     ../modules/zen-browser
     ../modules/mise
     ../modules/hypr-scripts
+    ../modules/xremap.nix
   ];
   # Nix settings
   nix.gc.automatic = true;
@@ -83,11 +84,8 @@ in
     variant = "";
   };
 
-  # xremap - udev rules for /dev/uinput access
-  hardware.uinput.enable = true;
-  services.udev.extraRules = ''
-    KERNEL=="uinput", GROUP="users", MODE="0660"
-  '';
+  # xremap
+  programs.xremap.enable = true;
 
   # User
   users.users.k2 = {
@@ -140,7 +138,6 @@ in
     atuin
 
     # Keyboard/Input
-    xremap
     warpd
     inputs.inputactions.packages.x86_64-linux.inputactions-hyprland  # Mouse/touchpad gestures (easystroke alternative)
     inputs.inputactions.packages.x86_64-linux.inputactions-ctl
