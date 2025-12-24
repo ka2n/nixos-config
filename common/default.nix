@@ -1,5 +1,5 @@
 # Common configuration shared across all hosts
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, inputs, pkgs-unstable, ... }:
 
 let
   cica = pkgs.stdenvNoCC.mkDerivation rec {
@@ -149,7 +149,7 @@ in
     go
     python3
     nodejs
-    claude-code
+    pkgs-unstable.claude-code
     codex
     gemini-cli-bin
     delta

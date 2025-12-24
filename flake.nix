@@ -1,6 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs?ref=nixos-unstable";
 
     nixos-hardware = { url = "github:NixOS/nixos-hardware/master"; };
     disko = {
@@ -33,21 +34,25 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixos-hardware, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, ... }@inputs:
     let
       system = "x86_64-linux";
+      pkgs-unstable = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+      };
       overlay = import ./pkgs;
     in {
       nixosConfigurations.vm = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs pkgs-unstable; };
         modules =
           [ { nixpkgs.overlays = [ overlay ]; } ./hosts/vm/configuration.nix ];
       };
 
       nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs pkgs-unstable; };
         modules = [
           { nixpkgs.overlays = [ overlay ]; }
           ./hosts/laptop/configuration.nix
@@ -57,7 +62,7 @@
 
       nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs pkgs-unstable; };
         modules = [
           { nixpkgs.overlays = [ overlay ]; }
           inputs.disko.nixosModules.disko
