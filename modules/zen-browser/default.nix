@@ -2,9 +2,9 @@
 
 let
   cfg = config.programs.zen-browser;
-  zenUnwrapped = inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped;
-in
-{
+  zenUnwrapped =
+    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped;
+in {
   options.programs.zen-browser = {
     enable = lib.mkEnableOption "Zen Browser";
 
@@ -22,7 +22,6 @@ in
       (pkgs.wrapFirefox zenUnwrapped {
         pname = "zen-browser";
         nativeMessagingHosts = cfg.nativeMessagingHosts.packages;
-        # Enable system-wide native messaging hosts directory
         hasMozSystemDirPatch = true;
       })
     ];
