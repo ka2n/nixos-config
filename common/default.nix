@@ -31,6 +31,7 @@ in
     ../modules/mise
     ../modules/hypr-scripts
     ../modules/xremap.nix
+    ../modules/webcam-flicker.nix
   ];
   # Nix settings
   nix.gc.automatic = true;
@@ -86,11 +87,6 @@ in
 
   # xremap
   programs.xremap.enable = true;
-
-  # Webcam flicker prevention (50Hz for East Japan)
-  services.udev.extraRules = ''
-    ACTION=="add", SUBSYSTEM=="video4linux", DRIVERS=="uvcvideo", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl --set-ctrl=power_line_frequency=1"
-  '';
 
   # User
   users.users.k2 = {

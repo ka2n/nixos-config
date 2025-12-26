@@ -70,5 +70,13 @@
     "amdgpu.gpu_recovery=1"
   ];
 
+  # Webcam flicker prevention (50Hz for East Japan)
+  hardware.webcam.flickerPrevention = {
+    enable = true;
+    devices = {
+      "Logitech StreamCam" = 50;
+    };
+  };
+
   system.stateVersion = "25.11";
 }

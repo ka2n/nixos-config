@@ -26,7 +26,7 @@ in {
       inherit pkgs;
       extraSpecialArgs = { inherit inputs; };
       modules = [
-        ../../home/common.nix
+        ../../home
         {
           home.username = privateConfig.username;
           home.homeDirectory = "/home/katsuma";
@@ -54,6 +54,15 @@ in {
   # Zen Browser with native messaging hosts
   programs.zen-browser.nativeMessagingHosts.packages =
     [ himmelblauPkg.firefoxNativeMessagingHost pkgs.tridactyl-native ];
+
+  # Webcam flicker prevention (50Hz for East Japan)
+  hardware.webcam.flickerPrevention = {
+    enable = true;
+    devices = {
+      "Logitech StreamCam" = 50;
+      "Integrated Camera: Integrated C" = 50;
+    };
+  };
 
   system.stateVersion = "25.11";
 }
