@@ -12,6 +12,7 @@ in {
     ../../common
     ../../modules/himmelblau
     inputs.mdatp.nixosModules.mdatp
+    inputs.home-manager.nixosModules.home-manager
   ];
 
   networking.hostName = "wk2511058";
@@ -21,25 +22,34 @@ in {
   environment.systemPackages = with pkgs; [
     foot
     brightnessctl
-    # Standalone Home Manager for himmelblau user (users.users not available)
-    (inputs.home-manager.lib.homeManagerConfiguration {
-      inherit pkgs;
-      extraSpecialArgs = { inherit inputs; };
-      modules = [
-        ../../home
-        {
-          home.username = privateConfig.username;
-          home.homeDirectory = "/home/katsuma";
-          home.stateVersion = "25.11";
-        }
-      ];
-    }).activationPackage
   ];
+
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = false;
+    backupFileExtension = "backup";
+    extraSpecialArgs = { inherit inputs; };
+    users.katsuma = { ... }: {
+      imports = [ ../../home ];
+      home.username = "katsuma";
+      home.homeDirectory = "/home/katsuma";
+    };
+  };
+
+  # Local user for home-manager integration with himmelblau
+  users.users.katsuma = {
+    uid = 5096008;
+    group = "users";
+    home = "/home/katsuma";
+    isNormalUser = true;
+    createHome = false;
+  };
 
   services.azure-entra = {
     enable = true;
     browserSso.chrome = true;
     pamServices = [ "passwd" "login" "systemd-user" "hyprlock" "swaylock" ];
+    userMap.katsuma = privateConfig.username;
   };
 
   services.mdatp.enable = true;

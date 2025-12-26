@@ -42,6 +42,13 @@ in {
       firefox =
         lib.mkEnableOption "Firefox native messaging host for Entra SSO";
     };
+
+    userMap = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = { };
+      description = "Mapping of local usernames to UPNs for Local User Mapping feature";
+      example = { katsuma = "katsuma@example.onmicrosoft.com"; };
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -89,9 +96,14 @@ in {
         socket_path = /var/run/himmelblaud/socket
         task_socket_path = /var/run/himmelblaud/task_sock
         use_etc_skel = false
+      '' + lib.optionalString (cfg.userMap != { }) ''
+        user_map_file = /etc/himmelblau/user-map
       '';
       "krb5.conf.d/krb5_himmelblau.conf".source =
         "${inputs.himmelblau}/src/config/krb5_himmelblau.conf";
+    } // lib.optionalAttrs (cfg.userMap != { }) {
+      "himmelblau/user-map".text = lib.concatStringsSep "\n"
+        (lib.mapAttrsToList (local: upn: "${local}:${upn}") cfg.userMap);
     } // lib.optionalAttrs cfg.browserSso.chrome {
       "opt/chrome/native-messaging-hosts/linux_entra_sso.json".source =
         "${cfg.package.chromeNativeMessagingHost}/etc/opt/chrome/native-messaging-hosts/linux_entra_sso.json";

@@ -1,7 +1,15 @@
 { config, pkgs, inputs, ... }: {
   home.stateVersion = "25.11";
 
-  imports = [ inputs.nix-index-database.homeModules.nix-index ];
+  imports = [
+    inputs.nix-index-database.homeModules.nix-index
+  ];
+
+  home.packages = [ pkgs.delta ];
+
+  xdg.configFile."git/config".source = pkgs.replaceVars ./dotfiles/git/config {
+    op_ssh_sign = "${pkgs._1password-gui}/bin/op-ssh-sign";
+  };
 
   programs.direnv = {
     enable = true;

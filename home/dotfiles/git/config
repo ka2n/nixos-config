@@ -1,0 +1,99 @@
+[user]
+  name = Katsuma Ito
+  email = katsumai@gmail.com
+
+[gpg]
+  format = ssh
+
+[gpg "ssh"]
+  program = @op_ssh_sign@
+
+[commit]
+  gpgSign = false
+
+[tag]
+  gpgSign = false
+
+[alias]
+  co = checkout
+  sw = switch
+  st = status
+  sup = "!f() { git stash -u; git pull --rebase; git stash pop; }; f"
+  up = pull --rebase
+  psuh = push
+  puhs = push
+  comimt = commit
+  delete-merged = "!git branch --merged | grep -v -e '*' -e 'master' -e 'main' | xargs -I % git branch -d %"
+  branches = branch -a
+  tags = tag
+  rc = rebase --continue
+  graph = log --graph -10 --branches --remotes --tags --format=format:'%Cgreen%h %Creset• %<(75,trunc)%s (%cN, %cr) %Cred%d' --date-order
+  fixup = commit --amend --no-edit
+  r = "!git reflog -n 50 --pretty='format:%gs' | perl -anal -e '$seen{$1}++ or print $1 if /checkout:.*to (.+)/'"
+  rev = "!git rev-parse \"${1-HEAD}\""
+  fetch-pulls = fetch origin '+refs/pull/*:refs/remotes/pr/*'
+  fresh-new-branch = "!f() { git stash -u; git fetch; git switch -C \"$1\" origin/main --no-track; }; f"
+  back = "!prev=$(git rev-parse --abbrev-ref @{-1}); [ \"$prev\" = \"main\" ] && git switch @{-2} || git switch -"
+
+[pull]
+  ff = only
+  rebase = true
+
+[push]
+  default = simple
+  autoSetupRemote = true
+
+[fetch]
+  prune = true
+
+[init]
+  defaultBranch = main
+
+[rerere]
+  enabled = true
+
+[core]
+  autocrlf = input
+  quotepath = false
+  precomposeunicode = true
+  pager = delta
+
+[interactive]
+  diffFilter = delta --color-only
+
+[merge]
+  tool = vimdiff
+  ff = true
+  conflictstyle = diff3
+
+[diff]
+  tool = vimdiff
+  colorMoved = default
+
+[log]
+  follow = true
+
+[color]
+  ui = true
+
+[github]
+  user = ka2n
+
+[ghq]
+  root = ~/go/src
+  root = ~/src
+
+[credential]
+  helper = !gh auth git-credential
+
+[safe]
+  directory = /home/shared/nixos-config
+
+[delta]
+  features = side-by-side line-numbers decorations
+  whitespace-error-style = 22 reverse
+
+[delta "decorations"]
+  commit-decoration-style = bold yellow box ul
+  file-style = bold yellow ul
+  file-decoration-style = none
