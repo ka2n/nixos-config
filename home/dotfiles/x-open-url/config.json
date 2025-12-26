@@ -1,0 +1,33 @@
+{
+  "browser": "@zen_browser@",
+  "rules": [
+    {
+      "pattern": "^https://zoom.us/j/",
+      "mods": [
+        {
+          "action": "url_replace",
+          "data": [
+            "https://zoom.us/j/(\\d+)",
+            "zoommtg://zoom.us/join?confno=$1"
+          ]
+        }
+      ]
+    },
+    {
+      "pattern": "^https://zoom.us/s/",
+      "mods": [
+        {
+          "action": "url_replace",
+          "data": [
+            "https://zoom.us/s/(\\d+)",
+            "zoommtg://zoom.us/start?confno=$1"
+          ]
+        }
+      ]
+    },
+    {
+      "pattern": "^https://meet.google.com",
+      "cmd": "@google_chrome@"
+    }
+  ]
+}

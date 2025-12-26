@@ -1,0 +1,39 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = false
+format = """
+$directory\
+$git_branch\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$character"""
+right_format = """$all"""
+
+[directory]
+truncation_length = 7
+truncate_to_repo = true
+repo_root_style = "fg:252 bg:29"
+
+[docker_context]
+disabled = true
+
+[package]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[ruby]
+disabled = true
+
+[golang]
+disabled = true
+
+[gcloud]
+format = '[$symbol$active]($style) '
+style = 'bold blue'
+
+[terraform]
+disabled = true

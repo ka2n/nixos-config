@@ -68,6 +68,20 @@ in
     fcitx5-cskk
   ];
 
+  # fcitx5入力メソッド設定
+  i18n.inputMethod.fcitx5.settings = {
+    inputMethod = {
+      "Groups/0" = {
+        Name = "Default";
+        "Default Layout" = "us";
+        DefaultIM = "cskk";
+      };
+      "Groups/0/Items/0".Name = "cskk";
+      "Groups/0/Items/1".Name = "keyboard-us";
+      GroupOrder."0" = "Default";
+    };
+  };
+
   systemd.user.targets.hyprland-session = {
       unitConfig = {
           Description = "Hyprland compositor session";
@@ -102,6 +116,10 @@ in
     code-cursor-fhs
 
     # CLI tools
+    coreutils
+    gawk
+    file
+    bubblewrap      # Sandboxing tool
     gh
     wget
     curl
@@ -115,11 +133,8 @@ in
     fzf
     fd
     bat
-    lsd
     colordiff
     peco
-    ghq
-    just
     yazi
     pulsemixer
     wiremix             # PipeWire TUI mixer
@@ -129,10 +144,14 @@ in
     playerctl
     bluetui
 
+    # From aqua migration (system-level tools)
+    yq-go
+    cloudflared
+
     # Terminal
     kitty
-    alacritty
-    tmux
+    alacritty-graphics
+    (tmux.override { withSixel = true; })
 
     # Shell enhancements
     starship
@@ -173,7 +192,6 @@ in
     libtool
     jemalloc
     patchelf
-    file
     unzip
     p7zip
 

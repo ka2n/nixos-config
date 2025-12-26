@@ -1,0 +1,32 @@
+#
+# ~/.bashrc
+#
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+alias ls='ls --color=auto'
+PS1='[\u@\h \W]\$ '
+
+export EDITOR=vim
+
+command -v mise &>/dev/null && eval "$(mise activate bash)"
+command -v atuin &>/dev/null && eval "$(atuin init --disable-up-arrow bash)"
+
+[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
+
+# Unless under VSCode(VSCODE_INJECTION=1) call tmux setup
+if [ "$VSCODE_INJECTION" != "1" ]; then
+  if [[ -z "$TMUX" ]]; then
+      if [[ "$TMUX_AUTO_ATTACH" == "true" ]]; then
+          tmux attach-session || tmux new-session
+      else
+          tmux new-session
+      fi
+  
+      if [[ "$TMUX_AUTO_EXIT" == "true" ]]; then
+          exit
+      fi
+  fi
+fi
+
