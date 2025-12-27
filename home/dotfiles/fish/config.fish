@@ -1,8 +1,5 @@
 set fish_greeting
 
-# EDITOR
-set -gx EDITOR nvim
-
 set -g fish_escape_delay_ms 600
 
 function fish_title
@@ -33,8 +30,6 @@ end
 
 #set -gx VOLTA_HOME "$HOME/.volta"
 #set -gx PATH "$VOLTA_HOME/bin" $PATH
-
-set -gx PATH $HOME/go/bin $PATH 
 
 # Lolcommits
 set -gx LOLCOMMITS_FONT "/Library/Fonts/ヒラギノ角ゴ Std W8.otf"
@@ -264,14 +259,6 @@ end
 if type -q direnv
     direnv hook fish | .
 end
-
-# Bun
-set -Ux BUN_INSTALL "/home/k2/.bun"
-set -px --path PATH "/home/k2/.bun/bin"
-
-# Aqua
-set -px --path PATH "$HOME/.local/share/aquaproj-aqua/bin"
-set -gx AQUA_GLOBAL_CONFIG "$HOME/.config/aquaproj-aqua/aqua.yaml"
 
 if type -q starship
     starship init fish | source
