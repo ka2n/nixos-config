@@ -100,8 +100,22 @@ in
     google_chrome = lib.getExe pkgs.google-chrome;
   };
 
-  xdg.configFile."fish/config.fish".source = ./dotfiles/fish/config.fish;
-  xdg.configFile."fish/fish_plugins".source = ./dotfiles/fish/fish_plugins;
+  # Fish shell configuration and plugins (migrated from fisher)
+  # Let home-manager generate config.fish with plugin loaders,
+  # and add our custom config via conf.d
+  programs.fish = {
+    enable = true;
+    plugins = [
+      { name = "fish-bd"; src = pkgs.fishPlugins.fish-bd.src; }
+      { name = "bass"; src = pkgs.fishPlugins.bass.src; }
+      { name = "done"; src = pkgs.fishPlugins.done.src; }
+      { name = "fzf-fish"; src = pkgs.fishPlugins.fzf-fish.src; }
+      { name = "z"; src = pkgs.fishPlugins.z.src; }
+    ];
+  };
+
+  # Add custom config via conf.d (loaded after plugins)
+  xdg.configFile."fish/conf.d/zzz-custom.fish".source = ./dotfiles/fish/conf.d-custom.fish;
 
   # GTK 2.0 - use .gtkrc-2.0.mine for customization (nwg-look compatible)
   home.file.".gtkrc-2.0.mine".source = ./dotfiles/gtkrc-2.0.mine;

@@ -280,7 +280,7 @@ in
   documentation.man.generateCaches = false;
 
   # nix-ld is configured by programs.mise module
-  programs.fish.enable = true;
+  # Fish is configured in home-manager (for plugin support)
   programs.git.enable = true;
   programs.neovim.enable = true;
   programs.neovim.defaultEditor = true;
