@@ -1,0 +1,38 @@
+
+[cursor.style]
+blinking = "Always"
+shape = "Block"
+
+[bell]
+command = { program = "paplay", args = ["/run/current-system/sw/share/sounds/freedesktop/stereo/bell.oga"] }
+
+[env]
+TERM = "tmux-256color"
+GLFW_IM_MODULE = "ibus"
+
+[font]
+size = 12.0
+
+[font.normal]
+# 日本語にほんご
+#family = "Moralerspace Argon"
+family = "Cica"
+style = "Regular"
+
+[window]
+decorations = "none"
+dynamic_padding = true
+dynamic_title = true
+opacity = 0.98
+
+[window.padding]
+x = 3
+y = 3
+
+[scrolling]
+history = 10000
+multiplier = 3
+
+[general]
+live_config_reload = true
+import = ["./nord.toml"]

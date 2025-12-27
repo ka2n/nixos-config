@@ -1,0 +1,17 @@
+configuration {
+	modi: "combi,run,filebrowser,keys";
+	show-icons: true;
+	combi-modi: "window,drun,run";
+  timeout {
+      action: "kb-cancel";
+      delay:  0;
+  }
+  filebrowser {
+      directories-first: true;
+      sorting-method:    "name";
+  }
+  show {
+      icons: "-combi-modi";
+  }
+}
+@theme "catppuccin-macchiato"

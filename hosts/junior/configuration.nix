@@ -78,5 +78,8 @@
     };
   };
 
+  # Power button behavior
+  services.logind.settings.Login.HandlePowerKey = "suspend";
+
   system.stateVersion = "25.11";
 }

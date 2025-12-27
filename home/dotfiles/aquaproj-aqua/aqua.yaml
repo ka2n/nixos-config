@@ -1,0 +1,22 @@
+---
+# aqua - Declarative CLI Version Manager
+# https://aquaproj.github.io/
+# checksum:
+#   enabled: true
+#   require_checksum: true
+#   supported_envs:
+#   - all
+registries:
+- type: standard
+  ref: v4.419.0 # renovate: depName=aquaproj/aqua-registry
+#- name: monicle
+#  type: github_content
+#  repo_owner: monicle
+#  repo_name: aqua-registry
+#  ref: v0.1.10 # renovate: depName=monicle/aqua-registry
+#  path: registry.yaml
+packages:
+- import: ./packages.private.yaml
+# Note: The following packages are now managed by NixOS/home-manager
+# System-level (common/default.nix): ripgrep, fd, yq-go, cloudflared, gh
+# User-level (home-manager): ghq, git-who, kubectx, stern, snyk, just, jnv, lsd, curlie, vhs
