@@ -80,7 +80,7 @@ in {
         domains = ${builtins.head privateConfig.domains}
         enable_experimental_mfa = true
         enable_hello = true
-        enable_sfa_fallback = false
+        enable_sfa_fallback = true
         hello_pin_min_length = 6
         home_alias = CN
         home_attr = CN
