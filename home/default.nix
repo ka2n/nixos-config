@@ -1,9 +1,10 @@
-{ config, pkgs, inputs, lib, osConfig ? null, variant ? "desktop", ... }:
+{ config, pkgs, inputs, lib, osConfig ? null, variant ? "desktop", himmelblauPkg ? null, ... }:
 let
+  hasHimmelblau = himmelblauPkg != null;
   zenBrowser = pkgs.wrapFirefox
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped {
       pname = "zen-browser";
-      extraPolicies = {
+      extraPolicies = lib.optionalAttrs hasHimmelblau {
         ExtensionSettings = {
           "linux-entra-sso@example.com" = {
             install_url = "https://github.com/siemens/linux-entra-sso/releases/download/v1.7.1/linux_entra_sso-1.7.1.xpi";
@@ -351,6 +352,8 @@ in
 
   programs.firefox = {
     enable = true;
+    nativeMessagingHosts = [ pkgs.tridactyl-native ]
+      ++ lib.optional hasHimmelblau himmelblauPkg.firefoxNativeMessagingHost;
     package = zenBrowser;
     configPath = ".zen";
 

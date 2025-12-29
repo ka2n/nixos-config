@@ -19,16 +19,16 @@ in {
 
   #boot.kernelPackages = pkgs.linuxPackages_zen;
 
-  environment.systemPackages = with pkgs; [
-    foot
-    brightnessctl
-  ];
+  environment.systemPackages = with pkgs; [ foot brightnessctl ];
 
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = false;
     backupFileExtension = "backup";
-    extraSpecialArgs = { inherit inputs; variant = "laptop"; };
+    extraSpecialArgs = {
+      inherit inputs himmelblauPkg;
+      variant = "laptop";
+    };
     users.katsuma = { ... }: {
       imports = [ ../../home ];
       home.username = "katsuma";
@@ -37,12 +37,14 @@ in {
   };
 
   # Local user for home-manager integration with himmelblau
+  # UID is managed by himmelblau via user_map_file
   users.users.katsuma = {
-    uid = 5096008;
     group = "users";
     home = "/home/katsuma";
     isNormalUser = true;
-    createHome = false;
+    createHome = true;
+    uid = 1001;
+    extraGroups = [ "networkmanager" "wheel" "docker" "uinput" ];
   };
 
   services.azure-entra = {
@@ -53,17 +55,6 @@ in {
   };
 
   services.mdatp.enable = true;
-
-  # Firefox with native messaging hosts
-  programs.firefox = {
-    enable = true;
-    nativeMessagingHosts.packages =
-      [ himmelblauPkg.firefoxNativeMessagingHost pkgs.tridactyl-native ];
-  };
-
-  # Zen Browser with native messaging hosts
-  programs.zen-browser.nativeMessagingHosts.packages =
-    [ himmelblauPkg.firefoxNativeMessagingHost pkgs.tridactyl-native ];
 
   # Webcam flicker prevention (50Hz for East Japan)
   hardware.webcam.flickerPrevention = {
