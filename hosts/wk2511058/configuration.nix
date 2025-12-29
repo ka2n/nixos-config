@@ -28,7 +28,7 @@ in {
     useGlobalPkgs = true;
     useUserPackages = false;
     backupFileExtension = "backup";
-    extraSpecialArgs = { inherit inputs; };
+    extraSpecialArgs = { inherit inputs; variant = "laptop"; };
     users.katsuma = { ... }: {
       imports = [ ../../home ];
       home.username = "katsuma";

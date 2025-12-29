@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, lib, ... }:
+{ config, pkgs, inputs, lib, osConfig ? null, variant ? "desktop", ... }:
 let
   zenBrowser = pkgs.wrapFirefox
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped {
@@ -179,6 +179,11 @@ in
     source = ./dotfiles/hypr;
     recursive = true;
   };
+  # Override hypridle.conf based on variant
+  xdg.configFile."hypr/hypridle.conf".source =
+    if variant == "laptop"
+    then ./dotfiles/hypr/hypridle-laptop.conf
+    else ./dotfiles/hypr/hypridle-desktop.conf;
   xdg.configFile."alacritty" = {
     source = ./dotfiles/alacritty;
     recursive = true;

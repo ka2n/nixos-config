@@ -7,9 +7,18 @@
     ./hardware-configuration.nix
     ../../common
     ../../modules/display-switch.nix
+    inputs.home-manager.nixosModules.home-manager
   ];
 
   networking.hostName = "junior";
+
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    backupFileExtension = "backup";
+    extraSpecialArgs = { inherit inputs; variant = "desktop"; };
+    users.k2 = import ../../home/default.nix;
+  };
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
