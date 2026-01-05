@@ -1,4 +1,11 @@
+pkgs-unstable:
 final: prev: {
+  # Claude CLI wrapper with ENABLE_TOOL_SEARCH environment variable
+  claude-code-wrapped = final.writeShellScriptBin "claude" ''
+    export ENABLE_TOOL_SEARCH="true"
+    exec ${pkgs-unstable.claude-code}/bin/claude "$@"
+  '';
+
   libcskk = final.callPackage ./libcskk { };
   fcitx5-cskk = final.callPackage ./fcitx5-cskk {
     inherit (final) libcskk fcitx5;

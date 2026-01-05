@@ -42,7 +42,7 @@
         inherit system;
         config.allowUnfree = true;
       };
-      overlay = import ./pkgs;
+      overlay = import ./pkgs pkgs-unstable;
     in {
       nixosConfigurations.nixos-vm = nixpkgs.lib.nixosSystem {
         inherit system;

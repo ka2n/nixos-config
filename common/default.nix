@@ -166,7 +166,7 @@ in
     go
     python3
     nodejs
-    pkgs-unstable.claude-code
+    pkgs.claude-code-wrapped
     codex
     gemini-cli-bin
     delta
