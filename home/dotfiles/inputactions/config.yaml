@@ -30,6 +30,7 @@ mouse:
     # up left: previous tab
     - type: stroke
       strokes: ['ZFoAzWELLJ4RCVpdAAxkAA==']
+      mouse_buttons: [right]
       actions:
         - on: end
           input:
@@ -38,6 +39,7 @@ mouse:
     # up right: next tab
     - type: stroke
       strokes: ['AFUAzwAPKABBDk8FZBVkAA==']
+      mouse_buttons: [right]
       actions:
         - on: end
           input:
