@@ -1,0 +1,47 @@
+diff --git a/include/aquamarine/backend/DRM.hpp b/include/aquamarine/backend/DRM.hpp
+index cc39686..43d9d52 100644
+--- a/include/aquamarine/backend/DRM.hpp
++++ b/include/aquamarine/backend/DRM.hpp
+@@ -321,13 +321,14 @@ namespace Aquamarine {
+                 uint32_t content_type;        // not guaranteed to exist
+                 uint32_t max_bpc;             // not guaranteed to exist
+                 uint32_t Colorspace;          // not guaranteed to exist
++                uint32_t broadcast_rgb;       // not guaranteed to exist (Intel/AMD only)
+                 uint32_t hdr_output_metadata; // not guaranteed to exist
+ 
+                 // atomic-modesetting only
+ 
+                 uint32_t crtc_id;
+             } values;
+-            uint32_t props[13] = {0};
++            uint32_t props[14] = {0};
+         };
+         UDRMConnectorProps props;
+ 
+diff --git a/src/backend/drm/Props.cpp b/src/backend/drm/Props.cpp
+index 64c6ae3..92e73ac 100644
+--- a/src/backend/drm/Props.cpp
++++ b/src/backend/drm/Props.cpp
+@@ -20,6 +20,7 @@ struct prop_info {
+ 
+ static const struct prop_info connector_info[] = {
+ #define INDEX(name) (offsetof(SDRMConnector::UDRMConnectorProps, values.name) / sizeof(uint32_t))
++    {.name = "Broadcast RGB", .index = INDEX(broadcast_rgb)},
+     {.name = "CRTC_ID", .index = INDEX(crtc_id)},
+     {.name = "Colorspace", .index = INDEX(Colorspace)},
+     {.name = "DPMS", .index = INDEX(dpms)},
+diff --git a/src/backend/drm/impl/Atomic.cpp b/src/backend/drm/impl/Atomic.cpp
+index 2eb0f7b..e030fcf 100644
+--- a/src/backend/drm/impl/Atomic.cpp
++++ b/src/backend/drm/impl/Atomic.cpp
+@@ -166,6 +166,10 @@ void Aquamarine::CDRMAtomicRequest::addConnector(Hyprutils::Memory::CSharedPoint
+     if (enable && connector->props.values.content_type)
+         add(connector->id, connector->props.values.content_type, STATE.contentType);
+ 
++    // Force Broadcast RGB to Full (1) for proper color output on HDMI
++    if (enable && connector->props.values.broadcast_rgb)
++        add(connector->id, connector->props.values.broadcast_rgb, 1);
++
+     add(connector->crtc->id, connector->crtc->props.values.active, enable);
+ 
+     if (enable) {

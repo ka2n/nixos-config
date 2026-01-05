@@ -56,6 +56,11 @@ in {
 
   services.mdatp.enable = true;
 
+  # Force RGB Full Range on HDMI (DELL S2722QC)
+  hardware.display.dellS2722qcRgb.enable = true;
+  hardware.display.outputs."HDMI-A-1".edid = config.hardware.display.dellS2722qcRgb.edidFilename;
+  hardware.display.aquamarineBroadcastRgbFull.enable = true;
+
   # Webcam flicker prevention (50Hz for East Japan)
   hardware.webcam.flickerPrevention = {
     enable = true;

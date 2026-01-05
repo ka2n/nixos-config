@@ -16,7 +16,7 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "backup";
-    extraSpecialArgs = { inherit inputs; variant = "desktop"; };
+    extraSpecialArgs = { inherit inputs; variant = "desktop"; himmelblauPkg = null; };
     users.k2 = import ../../home/default.nix;
   };
 
@@ -78,6 +78,10 @@
     "amdgpu.ppfeaturemask=0xffffffff"
     "amdgpu.gpu_recovery=1"
   ];
+
+  # Force RGB output for HDMI (DELL S2722QC)
+  hardware.display.dellS2722qcRgb.enable = true;
+  hardware.display.outputs."HDMI-A-1".edid = config.hardware.display.dellS2722qcRgb.edidFilename;
 
   # Webcam flicker prevention (50Hz for East Japan)
   hardware.webcam.flickerPrevention = {
