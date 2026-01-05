@@ -33,6 +33,10 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, ... }@inputs:
@@ -47,8 +51,11 @@
       nixosConfigurations.nixos-vm = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs pkgs-unstable; };
-        modules =
-          [ { nixpkgs.overlays = [ overlay ]; } ./hosts/nixos-vm/configuration.nix ];
+        modules = [
+          { nixpkgs.overlays = [ overlay ]; }
+          inputs.sops-nix.nixosModules.sops
+          ./hosts/nixos-vm/configuration.nix
+        ];
       };
 
       nixosConfigurations.wk2511058 = nixpkgs.lib.nixosSystem {
@@ -56,6 +63,7 @@
         specialArgs = { inherit inputs pkgs-unstable; };
         modules = [
           { nixpkgs.overlays = [ overlay ]; }
+          inputs.sops-nix.nixosModules.sops
           ./hosts/wk2511058/configuration.nix
           nixos-hardware.nixosModules.lenovo-thinkpad-x1-13th-gen
         ];
@@ -66,6 +74,7 @@
         specialArgs = { inherit inputs pkgs-unstable; };
         modules = [
           { nixpkgs.overlays = [ overlay ]; }
+          inputs.sops-nix.nixosModules.sops
           inputs.disko.nixosModules.disko
           ./hosts/junior/configuration.nix
         ];

@@ -32,6 +32,7 @@ in
     ../modules/hypr-scripts
     ../modules/xremap.nix
     ../modules/webcam-flicker.nix
+    ../modules/local-ca
   ];
   # Nix settings
   nix.gc.automatic = true;
@@ -391,5 +392,12 @@ in
       monospace = [ "Cica" "Noto Sans Mono CJK JP" ];
       emoji = [ "Noto Color Emoji" ];
     };
+  };
+
+  # Local CA for HTTPS development (Caddy)
+  security.localCA = {
+    enable = true;
+    certificateFile = ../certs/local-ca.crt;
+    sopsSecretFile = ../secrets/local-ca.yaml;
   };
 }
