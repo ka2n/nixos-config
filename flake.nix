@@ -21,7 +21,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     inputactions = {
-      url = "github:taj-ny/InputActions";
+      # Pinned to Dec 2025 revision compatible with nixos-25.11's Hyprland
+      url = "github:taj-ny/InputActions/2eb2a2450ddc85befb770c60d5baf9ced7d1197d";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
