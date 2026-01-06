@@ -19,7 +19,7 @@ return {
 			workspaces = {
 				{
 					name = "notes",
-					path = "~/Documents/Notes/Notes",
+					path = "~/Documents/Vaults/Notes",
 					overrides = {
 						daily_notes = {},
 					},
