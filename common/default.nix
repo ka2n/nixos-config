@@ -271,6 +271,9 @@ in
   # Link SKK dictionaries to /run/current-system/sw/share/skk/
   environment.pathsToLink = [ "/share/skk" ];
 
+  # Provide /bin/bash, /usr/bin/env, etc. for compatibility with FHS scripts
+  services.envfs.enable = true;
+
   # Add $HOME/.local/bin to PATH
   environment.sessionVariables.PATH = [ "$HOME/.local/bin" ];
 
