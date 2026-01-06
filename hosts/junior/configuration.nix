@@ -55,8 +55,12 @@
       ];
     });
   
+  # AMD GPU Power Management - Memory Clock Locking
+  # Fix artifacts by locking memory clock (mclk) to highest level only
+  # GPU clock (sclk) remains dynamic for better power efficiency
+  # Root cause: Memory speed unable to keep up with screen refresh rates
   systemd.services.amdgpu-power = {
-    description = "AMD GPU Power Management";
+    description = "AMD GPU Power Management - Lock Memory Clock";
     wantedBy = ["multi-user.target"];
     after = ["display-manager.service"];
     serviceConfig = {
@@ -65,18 +69,34 @@
     };
     script = ''
       sleep 2
+      # Set to manual mode to allow individual clock control
       for gpu in /sys/class/drm/card*/device/power_dpm_force_performance_level; do
-        [ -w "$gpu" ] && echo "high" > "$gpu"
+        [ -w "$gpu" ] && echo "manual" > "$gpu"
       done
-      for gpu in /sys/class/drm/card*/device/power_dpm_state; do
-        [ -w "$gpu" ] && echo "performance" > "$gpu"
+      # Lock memory clock to highest level (level 2 for this GPU: 1750MHz)
+      # This prevents artifacts while keeping GPU clock dynamic
+      for mclk in /sys/class/drm/card*/device/pp_dpm_mclk; do
+        if [ -w "$mclk" ]; then
+          echo "2" > "$mclk"
+        fi
       done
     '';
   };
 
+  # AMD GPU Power Management for Polaris (RX 480/570/580)
+  # Known issue: GFXOFF feature causes artifacts and crashes on Polaris cards
+  # Solution: Disable GFXOFF (bit 15) while keeping other power-saving features
+  # Sources:
+  # - https://wiki.archlinux.org/title/AMDGPU
+  # - https://wiki.gentoo.org/wiki/AMDGPU
+  # - https://docs.kernel.org/gpu/amdgpu/thermal.html
+  # - https://github.com/mohemohe/linux-amdgpu-artifacts-fix
+  # - https://github.com/sibradzic/amdgpu-clocks
+  # - https://github.com/torvalds/linux/blob/master/drivers/gpu/drm/amd/include/amd_shared.h
   boot.kernelParams = [
-    "amdgpu.ppfeaturemask=0xffffffff"
+    "amdgpu.ppfeaturemask=0xffff7fff"  # Disable PP_GFXOFF_MASK (bit 15) only
     "amdgpu.gpu_recovery=1"
+    "amdgpu.runpm=0"  # Disable runtime PM - fixes BACO suspend/resume crashes on Polaris
   ];
 
   # Force RGB output for HDMI (DELL S2722QC)
