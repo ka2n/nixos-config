@@ -405,5 +405,6 @@ in
     enable = true;
     certificateFile = ../certs/local-ca.crt;
     sopsSecretFile = ../secrets/local-ca.yaml;
+    extraDomainsSecretFile = ../secrets/local-ca-extra-domains.enc;
   };
 }

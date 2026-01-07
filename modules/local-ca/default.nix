@@ -4,7 +4,6 @@ with lib;
 
 let
   cfg = config.security.localCA;
-  opensslBin = "${pkgs.openssl}/bin/openssl";
 in {
   options.security.localCA = {
     enable = mkEnableOption "local CA certificate for HTTPS development";
@@ -31,6 +30,12 @@ in {
       description = "Domains to include in the server certificate SAN";
     };
 
+    extraDomainsSecretFile = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = "Path to a sops-encrypted file containing additional domains (one per line, binary format)";
+    };
+
     serverCertValidityDays = mkOption {
       type = types.int;
       default = 825;
@@ -54,6 +59,12 @@ in {
       mode = "0600";
     };
 
+    sops.secrets.local-ca-extra-domains = mkIf (cfg.extraDomainsSecretFile != null) {
+      sopsFile = cfg.extraDomainsSecretFile;
+      format = "binary";
+      mode = "0600";
+    };
+
     # Trust local CA certificate system-wide
     security.pki.certificateFiles = [ cfg.certificateFile ];
 
@@ -64,17 +75,43 @@ in {
     system.activationScripts.localCACerts = {
       deps = [ "setupSecrets" ];
       text = let
-        sanEntries = concatMapStringsSep "," (d: "DNS:${d}") cfg.domains;
+        baseSanEntries = concatMapStringsSep "," (d: "DNS:${d}") cfg.domains;
+        extraDomainsPath = "/run/secrets/local-ca-extra-domains";
+        openssl = "${pkgs.openssl}/bin/openssl";
+        sed = "${pkgs.gnused}/bin/sed";
+        grep = "${pkgs.gnugrep}/bin/grep";
       in ''
         CERT_DIR=/etc/ssl/local-ca/certs
         mkdir -p $CERT_DIR
 
-        # Regenerate if cert doesn't exist or CA cert is newer
-        if [ ! -f $CERT_DIR/localhost.crt ] || [ /etc/ssl/local-ca/ca.crt -nt $CERT_DIR/localhost.crt ]; then
+        # Build SAN entries
+        SAN_ENTRIES="${baseSanEntries}"
+        ${optionalString (cfg.extraDomainsSecretFile != null) ''
+          if [ -f "${extraDomainsPath}" ]; then
+            EXTRA_DOMAINS=$(cat "${extraDomainsPath}" | ${grep} -v '^#' | ${grep} -v '^$' | ${sed} 's/^/DNS:/' | tr '\n' ',' | ${sed} 's/,$//')
+            if [ -n "$EXTRA_DOMAINS" ]; then
+              SAN_ENTRIES="$SAN_ENTRIES,$EXTRA_DOMAINS"
+            fi
+          fi
+        ''}
+
+        # Regenerate if cert doesn't exist or CA cert is newer or extra domains file is newer
+        NEED_REGEN=0
+        if [ ! -f $CERT_DIR/localhost.crt ]; then
+          NEED_REGEN=1
+        elif [ /etc/ssl/local-ca/ca.crt -nt $CERT_DIR/localhost.crt ]; then
+          NEED_REGEN=1
+        ${optionalString (cfg.extraDomainsSecretFile != null) ''
+        elif [ -f "${extraDomainsPath}" ] && [ "${extraDomainsPath}" -nt $CERT_DIR/localhost.crt ]; then
+          NEED_REGEN=1
+        ''}
+        fi
+
+        if [ "$NEED_REGEN" = "1" ]; then
           echo "Generating localhost server certificate..."
 
-          ${opensslBin} genrsa -out $CERT_DIR/localhost.key 2048
-          ${opensslBin} req -new \
+          ${openssl} genrsa -out $CERT_DIR/localhost.key 2048
+          ${openssl} req -new \
             -key $CERT_DIR/localhost.key \
             -out /tmp/localhost.csr \
             -subj "/O=${cfg.organization}/CN=localhost"
@@ -83,10 +120,10 @@ in {
 authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
 keyUsage=digitalSignature,keyEncipherment
-subjectAltName=${sanEntries}
+subjectAltName=$SAN_ENTRIES
 EOF
 
-          ${opensslBin} x509 -req \
+          ${openssl} x509 -req \
             -in /tmp/localhost.csr \
             -CA /etc/ssl/local-ca/ca.crt \
             -CAkey /etc/ssl/local-ca/ca.key \
