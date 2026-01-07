@@ -56,6 +56,9 @@ in
   # Networking
   networking.networkmanager.enable = true;
   networking.networkmanager.wifi.powersave = false;
+  # Workaround for iptables 1.8.11 bug breaking Docker bridge networks
+  # https://github.com/NixOS/nixpkgs/issues/417641
+  networking.firewall.trustedInterfaces = [ "br+" ];
 
   # Timezone and locale
   time.timeZone = "Asia/Tokyo";
