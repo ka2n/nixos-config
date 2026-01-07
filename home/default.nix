@@ -1,4 +1,5 @@
-{ config, pkgs, inputs, lib, osConfig ? null, variant ? "desktop", himmelblauPkg ? null, ... }:
+{ config, pkgs, inputs, lib, osConfig ? null, variant ? "desktop"
+, himmelblauPkg ? null, ... }:
 let
   hasHimmelblau = himmelblauPkg != null;
   zenBrowser = pkgs.wrapFirefox
@@ -7,26 +8,24 @@ let
       extraPolicies = lib.optionalAttrs hasHimmelblau {
         ExtensionSettings = {
           "linux-entra-sso@example.com" = {
-            install_url = "https://github.com/siemens/linux-entra-sso/releases/download/v1.7.1/linux_entra_sso-1.7.1.xpi";
+            install_url =
+              "https://github.com/siemens/linux-entra-sso/releases/download/v1.7.1/linux_entra_sso-1.7.1.xpi";
             installation_mode = "normal_installed";
           };
         };
       };
     };
-in
-{
+in {
   home.stateVersion = "25.11";
 
-  imports = [
-    inputs.nix-index-database.homeModules.nix-index
-  ];
+  imports = [ inputs.nix-index-database.homeModules.nix-index ];
 
   home.packages = [
     pkgs.delta
     pkgs.lf
     pkgs.ffmpegthumbnailer
     pkgs.chafa
-    pkgs.imagemagick  # for convert and identify
+    pkgs.imagemagick # for convert and identify
 
     # Phase 3: Additional packages
     pkgs.tailscale-systray
@@ -44,20 +43,28 @@ in
     pkgs.vhs
 
     # Local bin scripts
-    (pkgs.writeShellScriptBin "wlprop" (builtins.replaceStrings
-      ["@hyprctl@" "@jq@" "@slurp@" "@awk@"]
-      ["${lib.getExe' pkgs.hyprland "hyprctl"}" "${lib.getExe pkgs.jq}" "${lib.getExe pkgs.slurp}" "${lib.getExe' pkgs.gawk "awk"}"]
-      (builtins.readFile ./dotfiles/local/bin/wlprop.sh)))
+    (pkgs.writeShellScriptBin "wlprop"
+      (builtins.replaceStrings [ "@hyprctl@" "@jq@" "@slurp@" "@awk@" ] [
+        "${lib.getExe' pkgs.hyprland "hyprctl"}"
+        "${lib.getExe pkgs.jq}"
+        "${lib.getExe pkgs.slurp}"
+        "${lib.getExe' pkgs.gawk "awk"}"
+      ] (builtins.readFile ./dotfiles/local/bin/wlprop.sh)))
 
-    (pkgs.writeShellScriptBin "find-parent-package-dir" (builtins.replaceStrings
-      ["@git@"]
-      ["${lib.getExe pkgs.git}"]
-      (builtins.readFile ./dotfiles/local/bin/find-parent-package-dir.sh)))
+    (pkgs.writeShellScriptBin "find-parent-package-dir"
+      (builtins.replaceStrings [ "@git@" ] [ "${lib.getExe pkgs.git}" ]
+        (builtins.readFile ./dotfiles/local/bin/find-parent-package-dir.sh)))
 
     (pkgs.writeScriptBin "x-open-url" ''
       #!${lib.getExe' pkgs.nodejs "node"}
       ${builtins.readFile ./dotfiles/local/bin/x-open-url.js}
     '')
+
+    (pkgs.writeShellScriptBin "claude-notify-waiting"
+      (builtins.readFile ./dotfiles/local/bin/claude-notify-waiting.sh))
+
+    (pkgs.writeShellScriptBin "claude-notify-complete"
+      (builtins.readFile ./dotfiles/local/bin/claude-notify-complete.sh))
   ];
 
   home.sessionPath = [
@@ -82,12 +89,14 @@ in
   };
   xdg.configFile."git/ignore".source = ./dotfiles/git/ignore;
 
-  xdg.configFile."tmux/tmux.conf".source = pkgs.replaceVars ./dotfiles/tmux/tmux.conf {
-    fish_path = lib.getExe pkgs.fish;
-  };
+  xdg.configFile."tmux/tmux.conf".source =
+    pkgs.replaceVars ./dotfiles/tmux/tmux.conf {
+      fish_path = lib.getExe pkgs.fish;
+    };
 
   # Config files
-  xdg.configFile."inputactions/config.yaml".source = ./dotfiles/inputactions/config.yaml;
+  xdg.configFile."inputactions/config.yaml".source =
+    ./dotfiles/inputactions/config.yaml;
   xdg.configFile."clipse/config.json".source = ./dotfiles/clipse/config.json;
   xdg.configFile."darkman/config.yaml".source = ./dotfiles/darkman/config.yaml;
   xdg.configFile."bluetui/config.toml".source = ./dotfiles/bluetui/config.toml;
@@ -96,10 +105,11 @@ in
   xdg.configFile."gh/config.yml".source = ./dotfiles/gh/config.yml;
   xdg.configFile."mako/config".source = ./dotfiles/mako/config;
   xdg.configFile."wlogout/layout".source = ./dotfiles/wlogout/layout;
-  xdg.configFile."x-open-url/config.json".source = pkgs.replaceVars ./dotfiles/x-open-url/config.json {
-    zen_browser = lib.getExe zenBrowser;
-    google_chrome = lib.getExe pkgs.google-chrome;
-  };
+  xdg.configFile."x-open-url/config.json".source =
+    pkgs.replaceVars ./dotfiles/x-open-url/config.json {
+      zen_browser = lib.getExe zenBrowser;
+      google_chrome = lib.getExe pkgs.google-chrome;
+    };
 
   # Fish shell configuration and plugins (migrated from fisher)
   # Let home-manager generate config.fish with plugin loaders,
@@ -107,16 +117,32 @@ in
   programs.fish = {
     enable = true;
     plugins = [
-      { name = "fish-bd"; src = pkgs.fishPlugins.fish-bd.src; }
-      { name = "bass"; src = pkgs.fishPlugins.bass.src; }
-      { name = "done"; src = pkgs.fishPlugins.done.src; }
-      { name = "fzf-fish"; src = pkgs.fishPlugins.fzf-fish.src; }
-      { name = "z"; src = pkgs.fishPlugins.z.src; }
+      {
+        name = "fish-bd";
+        src = pkgs.fishPlugins.fish-bd.src;
+      }
+      {
+        name = "bass";
+        src = pkgs.fishPlugins.bass.src;
+      }
+      {
+        name = "done";
+        src = pkgs.fishPlugins.done.src;
+      }
+      {
+        name = "fzf-fish";
+        src = pkgs.fishPlugins.fzf-fish.src;
+      }
+      {
+        name = "z";
+        src = pkgs.fishPlugins.z.src;
+      }
     ];
   };
 
   # Add custom config via conf.d (loaded after plugins)
-  xdg.configFile."fish/conf.d/zzz-custom.fish".source = ./dotfiles/fish/conf.d-custom.fish;
+  xdg.configFile."fish/conf.d/zzz-custom.fish".source =
+    ./dotfiles/fish/conf.d-custom.fish;
 
   # GTK 2.0 - use .gtkrc-2.0.mine for customization (nwg-look compatible)
   home.file.".gtkrc-2.0.mine".source = ./dotfiles/gtkrc-2.0.mine;
@@ -125,19 +151,21 @@ in
   xdg.configFile."starship.toml".source = ./dotfiles/starship.toml;
 
   # Phase 2: Aqua package manager
-  xdg.configFile."aquaproj-aqua/aqua.yaml".source = ./dotfiles/aquaproj-aqua/aqua.yaml;
-  xdg.configFile."aquaproj-aqua/aqua-policy.yaml".source = ./dotfiles/aquaproj-aqua/aqua-policy.yaml;
+  xdg.configFile."aquaproj-aqua/aqua.yaml".source =
+    ./dotfiles/aquaproj-aqua/aqua.yaml;
+  xdg.configFile."aquaproj-aqua/aqua-policy.yaml".source =
+    ./dotfiles/aquaproj-aqua/aqua-policy.yaml;
 
   # Phase 3: fcitx5-cskk辞書設定
-  xdg.configFile."fcitx5/cskk/dictionary_list".text = let
-    inherit (pkgs) skkDictionaries;
-  in ''
-    type,file,mode,encoding,complete
-    file,$FCITX_CONFIG_DIR/cskk/user.dict,readwrite,utf-8,
-    file,${skkDictionaries.l}/share/skk/SKK-JISYO.L,readonly,euc-jp,
-    file,${skkDictionaries.emoji}/share/skk/SKK-JISYO.emoji,readonly,utf-8,
-    file,${skkDictionaries.zipcode}/share/skk/SKK-JISYO.zipcode,readonly,euc-jp,
-  '';
+  xdg.configFile."fcitx5/cskk/dictionary_list".text =
+    let inherit (pkgs) skkDictionaries;
+    in ''
+      type,file,mode,encoding,complete
+      file,$FCITX_CONFIG_DIR/cskk/user.dict,readwrite,utf-8,
+      file,${skkDictionaries.l}/share/skk/SKK-JISYO.L,readonly,euc-jp,
+      file,${skkDictionaries.emoji}/share/skk/SKK-JISYO.emoji,readonly,utf-8,
+      file,${skkDictionaries.zipcode}/share/skk/SKK-JISYO.zipcode,readonly,euc-jp,
+    '';
 
   # Multi-file configs
   xdg.configFile."rofi" = {
@@ -181,10 +209,10 @@ in
     recursive = true;
   };
   # Override hypridle.conf based on variant
-  xdg.configFile."hypr/hypridle.conf".source =
-    if variant == "laptop"
-    then ./dotfiles/hypr/hypridle-laptop.conf
-    else ./dotfiles/hypr/hypridle-desktop.conf;
+  xdg.configFile."hypr/hypridle.conf".source = if variant == "laptop" then
+    ./dotfiles/hypr/hypridle-laptop.conf
+  else
+    ./dotfiles/hypr/hypridle-desktop.conf;
   xdg.configFile."alacritty" = {
     source = ./dotfiles/alacritty;
     recursive = true;
@@ -223,7 +251,8 @@ in
   };
 
   # Desktop files
-  home.file.".local/share/applications/x-open-url.desktop".source = ./dotfiles/local/share/applications/x-open-url.desktop;
+  home.file.".local/share/applications/x-open-url.desktop".source =
+    ./dotfiles/local/share/applications/x-open-url.desktop;
 
   # Darkman hooks
   home.file.".local/share/dark-mode.d/notify.sh" = {
@@ -261,7 +290,8 @@ in
         matcher = "";
         hooks = [{
           type = "command";
-          command = "paplay /run/current-system/sw/share/sounds/freedesktop/stereo/bell.oga";
+          command =
+            "paplay /run/current-system/sw/share/sounds/freedesktop/stereo/bell.oga";
         }];
       }];
     };
@@ -274,7 +304,7 @@ in
   };
 
   # GTK 3.0/4.0 - Ensure Emacs keybindings persist with nwg-look
-  home.activation.gtkKeyTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.gtkKeyTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     # GTK 3.0
     mkdir -p ~/.config/gtk-3.0
     if [ -f ~/.config/gtk-3.0/settings.ini ]; then
@@ -312,9 +342,7 @@ in
       Restart = "on-failure";
       Type = "simple";
     };
-    Install = {
-      WantedBy = [ "graphical-session.target" ];
-    };
+    Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
   systemd.user.services.xremap = let
@@ -334,20 +362,15 @@ in
     };
     Service = {
       KillMode = "process";
-      ExecStart = lib.concatStringsSep " " ([
-        (lib.getExe pkgs.xremap)
-        "--watch=config,device"
-      ] ++ deviceArgs ++ [
-        (toString ./dotfiles/xremap/config.yml)
-      ]);
+      ExecStart = lib.concatStringsSep " "
+        ([ (lib.getExe pkgs.xremap) "--watch=config,device" ] ++ deviceArgs
+          ++ [ (toString ./dotfiles/xremap/config.yml) ]);
       Restart = "on-failure";
       RestartSec = "5s";
       StandardOutput = "null";
       StandardError = "journal";
     };
-    Install = {
-      WantedBy = [ "graphical-session.target" ];
-    };
+    Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
   programs.firefox = {
