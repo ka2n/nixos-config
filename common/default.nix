@@ -258,6 +258,7 @@ in
     darkman
     wlsunset
     glib
+    gtk3                  # gtk-launch
 
     # Theming (omarchy style)
     gnome-themes-extra          # Adwaita GTK theme

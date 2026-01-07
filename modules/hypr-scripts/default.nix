@@ -121,6 +121,84 @@ let
     main "$@"
   '';
 
+  # Focus-or-launch script (run-or-raise for Hyprland)
+  hyprFocusOrLaunch = pkgs.writeShellScriptBin "hypr-focus-or-launch" ''
+    set -euo pipefail
+
+    # Command paths (replaced by Nix)
+    hyprctl=${lib.getExe' pkgs.hyprland "hyprctl"}
+    jq=${lib.getExe pkgs.jq}
+
+    show_help() {
+      cat <<EOF
+Usage: hypr-focus-or-launch [-s special] <class-pattern> <launch-command>
+
+Focus an existing window matching the class pattern, or launch a new instance.
+
+Options:
+  -s special      Toggle the specified special workspace after focus/launch
+  -h, --help      Show this help message
+
+Arguments:
+  class-pattern   Regex pattern to match window class (e.g., "firefox", "Alacritty")
+  launch-command  Command to execute if no matching window is found
+
+Examples:
+  hypr-focus-or-launch firefox firefox
+  hypr-focus-or-launch "^Alacritty$" alacritty
+  hypr-focus-or-launch -s cal "^chrome-notion" "gtk-launch notion"
+EOF
+    }
+
+    # Show help if requested
+    if [[ "''${1:-}" == "-h" || "''${1:-}" == "--help" ]]; then
+      show_help
+      exit 0
+    fi
+
+    # Parse options
+    SPECIAL_WS=""
+    while getopts "s:h" opt; do
+      case $opt in
+        s) SPECIAL_WS="$OPTARG" ;;
+        h) show_help; exit 0 ;;
+        *) show_help >&2; exit 1 ;;
+      esac
+    done
+    shift $((OPTIND - 1))
+
+    # Validate arguments
+    if [[ $# -ne 2 ]]; then
+      echo "Error: Expected 2 arguments, got $#" >&2
+      echo >&2
+      show_help >&2
+      exit 1
+    fi
+
+    CLASS_PATTERN="$1"
+    LAUNCH_CMD="$2"
+
+    # Find window by class (regex match)
+    ADDRESS=$($hyprctl clients -j | \
+      $jq -r ".[] | select(.class | test(\"$CLASS_PATTERN\")) | .address" | \
+      head -1)
+
+    if [ -z "$ADDRESS" ]; then
+      # Window doesn't exist -> launch
+      $hyprctl dispatch exec "$LAUNCH_CMD"
+      echo "Launched: $LAUNCH_CMD"
+    else
+      # Window exists -> toggle or focus
+      if [[ -n "$SPECIAL_WS" ]]; then
+        $hyprctl dispatch togglespecialworkspace "$SPECIAL_WS"
+        echo "Toggled special workspace: $SPECIAL_WS"
+      else
+        $hyprctl dispatch focuswindow "address:$ADDRESS"
+        echo "Focused window: $ADDRESS"
+      fi
+    fi
+  '';
+
   rofiKeybindings = pkgs.writeShellScriptBin "rofi-keybindings" ''
     set -euo pipefail
 
@@ -230,6 +308,9 @@ in
     # Rofi scripts
     rofi-powermenu.enable = lib.mkEnableOption "rofi power menu (wlogout replacement)" // { default = true; };
     rofi-keybindings.enable = lib.mkEnableOption "rofi keybindings viewer" // { default = true; };
+
+    # Utility scripts
+    focus-or-launch.enable = lib.mkEnableOption "focus-or-launch (run-or-raise for Hyprland)" // { default = true; };
   };
 
   config = lib.mkIf cfg.enable {
@@ -241,6 +322,8 @@ in
       # Rofi scripts
       (lib.optional cfg.rofi-powermenu.enable rofiPowermenu)
       (lib.optional cfg.rofi-keybindings.enable rofiKeybindings)
+      # Utility scripts
+      (lib.optional cfg.focus-or-launch.enable hyprFocusOrLaunch)
     ];
   };
 }
