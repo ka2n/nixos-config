@@ -23,6 +23,11 @@ in {
         pname = "zen-browser";
         nativeMessagingHosts = cfg.nativeMessagingHosts.packages;
         hasMozSystemDirPatch = true;
+        extraPolicies = {
+          Certificates = {
+            ImportEnterpriseRoots = true;
+          };
+        };
       })
     ];
   };
