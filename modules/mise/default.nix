@@ -31,13 +31,16 @@ in
 
     enableFhsCompat = lib.mkOption {
       type = lib.types.bool;
-      default = true;
+      default = !config.services.envfs.enable;
       description = ''
         Create FHS-compatible symlinks in /usr/bin for common tools.
         Required for building native Ruby gems that hardcode paths like /usr/bin/mkdir.
 
         This is needed because Ruby's extconf.rb generates Makefiles with hardcoded
         /usr/bin paths, which don't exist on NixOS by default.
+
+        Automatically disabled when services.envfs.enable is true, as envfs provides
+        /usr/bin access via a read-only mount.
       '';
     };
 
