@@ -6,7 +6,8 @@ let
     pname = "cica";
     version = "5.0.3";
     src = pkgs.fetchzip {
-      url = "https://github.com/miiton/Cica/releases/download/v${version}/Cica_v${version}.zip";
+      url =
+        "https://github.com/miiton/Cica/releases/download/v${version}/Cica_v${version}.zip";
       hash = "sha256-BtDnfWCfD9NE8tcWSmk8ciiInsspNPTPmAdGzpg62SM=";
       stripRoot = false;
     };
@@ -20,12 +21,9 @@ let
   # Hyprland plugins directory
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyprland-plugins";
-    paths = [
-      inputs.inputactions.packages.x86_64-linux.inputactions-hyprland
-    ];
+    paths = [ inputs.inputactions.packages.x86_64-linux.inputactions-hyprland ];
   };
-in
-{
+in {
   imports = [
     ../modules/zen-browser
     ../modules/mise
@@ -42,7 +40,7 @@ in
   nix.gc.options = "--delete-older-than 7d";
   nix.settings.auto-optimise-store = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  nix.settings.trusted-users = ["root" "@wheel"];
+  nix.settings.trusted-users = [ "root" "@wheel" ];
   nix.settings.accept-flake-config = true;
   nixpkgs.config.allowUnfree = true;
 
@@ -63,16 +61,11 @@ in
   # Timezone and locale
   time.timeZone = "Asia/Tokyo";
   i18n.defaultLocale = "en_US.UTF-8";
-  i18n.extraLocaleSettings = {
-    LC_CTYPE = "ja_JP.UTF-8";
-  };
+  i18n.extraLocaleSettings = { LC_CTYPE = "ja_JP.UTF-8"; };
   i18n.inputMethod.enable = true;
   i18n.inputMethod.type = "fcitx5";
   i18n.inputMethod.fcitx5.waylandFrontend = true;
-  i18n.inputMethod.fcitx5.addons = with pkgs; [
-    fcitx5-gtk
-    fcitx5-cskk
-  ];
+  i18n.inputMethod.fcitx5.addons = with pkgs; [ fcitx5-gtk fcitx5-cskk ];
 
   # fcitx5入力メソッド設定
   i18n.inputMethod.fcitx5.settings = {
@@ -89,15 +82,14 @@ in
   };
 
   systemd.user.targets.hyprland-session = {
-      unitConfig = {
-          Description = "Hyprland compositor session";
-          Documentation = ["man:systemd.special(7)"];
-          BindsTo = ["graphical-session.target"];
-          Wants = ["graphical-session-pre.target"];
-          After = ["graphical-session-pre.target"];
-      };
+    unitConfig = {
+      Description = "Hyprland compositor session";
+      Documentation = [ "man:systemd.special(7)" ];
+      BindsTo = [ "graphical-session.target" ];
+      Wants = [ "graphical-session-pre.target" ];
+      After = [ "graphical-session-pre.target" ];
+    };
   };
-
 
   # Keyboard
   services.xserver.xkb = {
@@ -125,14 +117,14 @@ in
     coreutils
     gawk
     file
-    bubblewrap      # Sandboxing tool
+    bubblewrap # Sandboxing tool
     gh
     wget
     curl
     chezmoi
     tree
     tig
-    ldns          # drill
+    ldns # drill
     dig
     ripgrep
     jq
@@ -143,8 +135,8 @@ in
     peco
     yazi
     pulsemixer
-    wiremix             # PipeWire TUI mixer
-    swaylock            # Fallback screen locker
+    wiremix # PipeWire TUI mixer
+    swaylock # Fallback screen locker
     libsecret
     gcr
     playerctl
@@ -165,7 +157,7 @@ in
 
     # Keyboard/Input
     warpd
-    inputs.inputactions.packages.x86_64-linux.inputactions-hyprland  # Mouse/touchpad gestures (easystroke alternative)
+    inputs.inputactions.packages.x86_64-linux.inputactions-hyprland # Mouse/touchpad gestures (easystroke alternative)
     inputs.inputactions.packages.x86_64-linux.inputactions-ctl
 
     # Development
@@ -173,6 +165,7 @@ in
     python3
     nodejs
     pkgs.claude-code-wrapped
+    alma
     codex
     gemini-cli-bin
     delta
@@ -228,16 +221,16 @@ in
     # System utilities
     blueman
     pavucontrol
-    dex                         # XDG autostart runner
-    tailscale-systray           # Tailscale system tray icon
-    darkman                     # Dark/light mode daemon
+    dex # XDG autostart runner
+    tailscale-systray # Tailscale system tray icon
+    darkman # Dark/light mode daemon
     sound-theme-freedesktop
     pulseaudio
 
     # GUI Settings tools
-    networkmanagerapplet        # nm-applet + nm-connection-editor
-    nwg-look                    # GTK theme settings (lxappearance alternative)
-    cameractrls                 # Webcam settings (Camset)
+    networkmanagerapplet # nm-applet + nm-connection-editor
+    nwg-look # GTK theme settings (lxappearance alternative)
+    cameractrls # Webcam settings (Camset)
     cameractrls-gtk3
 
     # Music
@@ -248,24 +241,24 @@ in
 
     # Wayland / Hyprland
     wl-clipboard
-    clipse                      # Clipboard manager TUI
+    clipse # Clipboard manager TUI
     waybar
     rofi
     hyprpaper
     rose-pine-hyprcursor
     grim
     slurp
-    swappy                      # Screenshot annotation tool
-    mako                        # notification daemon (omarchy style)
+    swappy # Screenshot annotation tool
+    mako # notification daemon (omarchy style)
     libnotify
     darkman
     wlsunset
     glib
-    gtk3                  # gtk-launch
+    gtk3 # gtk-launch
 
     # Theming (omarchy style)
-    gnome-themes-extra          # Adwaita GTK theme
-    yaru-theme                  # Yaru icon theme
+    gnome-themes-extra # Adwaita GTK theme
+    yaru-theme # Yaru icon theme
     nordic
 
     # SKK
@@ -312,7 +305,7 @@ in
   };
 
   # Swaylock (fallback screen locker)
-  security.pam.services.swaylock = {};
+  security.pam.services.swaylock = { };
 
   # Polkit
   security.polkit.enable = true;
@@ -350,17 +343,13 @@ in
   services.displayManager.gdm.wayland = true;
   services.xserver.desktopManager.runXdgAutostartIfNone = true;
   xdg.portal.enable = true;
-  xdg.portal.extraPortals = [
-    pkgs.xdg-desktop-portal-hyprland
-    pkgs.xdg-desktop-portal-gtk
-  ];
+  xdg.portal.extraPortals =
+    [ pkgs.xdg-desktop-portal-hyprland pkgs.xdg-desktop-portal-gtk ];
   xdg.portal.config = {
-    common = {
-      default = ["hyprland" "gtk"];
-    };
+    common = { default = [ "hyprland" "gtk" ]; };
     hyprland = {
-      default = ["hyprland" "gtk"];
-      "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
+      default = [ "hyprland" "gtk" ];
+      "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
     };
   };
 
@@ -388,10 +377,8 @@ in
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
-    nerd-fonts.jetbrains-mono   # omarchy waybar font
-  ]) ++ [
-    cica
-  ];
+    nerd-fonts.jetbrains-mono # omarchy waybar font
+  ]) ++ [ cica ];
 
   fonts.fontconfig = {
     enable = true;
