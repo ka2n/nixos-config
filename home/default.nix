@@ -65,6 +65,10 @@ in {
 
     (pkgs.writeShellScriptBin "claude-notify-complete"
       (builtins.readFile ./dotfiles/local/bin/claude-notify-complete.sh))
+
+    (pkgs.writeShellScriptBin "ndev" ''
+      exec nix develop ~/nixos-config --command "$SHELL"
+    '')
   ];
 
   home.sessionPath = [

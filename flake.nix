@@ -48,6 +48,25 @@
       };
       overlay = import ./pkgs pkgs-unstable;
     in {
+      # 通常利用てんこ盛りパック
+      # Usage: nix develop ~/nixos-config
+      devShells.${system}.default = let
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
+      in pkgs.mkShell {
+        packages = with pkgs; [
+          playwright-driver.browsers
+          jq
+        ];
+
+        shellHook = ''
+          export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
+          export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
+        '';
+      };
+
       nixosConfigurations.nixos-vm = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs pkgs-unstable; };
