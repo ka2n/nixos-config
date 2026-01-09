@@ -217,6 +217,7 @@ in {
     # Media
     vlc
     feh
+    kooha
 
     # System utilities
     blueman
