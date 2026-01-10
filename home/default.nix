@@ -42,6 +42,9 @@ in {
     pkgs.curlie
     pkgs.vhs
 
+    # Docker
+    pkgs.docker-credential-helpers
+
     # Local bin scripts
     (pkgs.writeShellScriptBin "wlprop"
       (builtins.replaceStrings [ "@hyprctl@" "@jq@" "@slurp@" "@awk@" ] [
@@ -136,6 +139,22 @@ in {
       zen_browser = lib.getExe zenBrowser;
       google_chrome = lib.getExe pkgs.google-chrome;
     };
+
+  # Docker credential helpers configuration
+  xdg.configFile."docker/config.json".text = builtins.toJSON {
+    credsStore = "secretservice";
+    credHelpers = {
+      "asia-northeast1-docker.pkg.dev" = "gcloud";
+      "asia.gcr.io" = "gcloud";
+      "eu.gcr.io" = "gcloud";
+      "gcr.io" = "gcloud";
+      "marketplace.gcr.io" = "gcloud";
+      "staging-k8s.gcr.io" = "gcloud";
+      "us-central1-docker.pkg.dev" = "gcloud";
+      "us-east1-docker.pkg.dev" = "gcloud";
+      "us.gcr.io" = "gcloud";
+    };
+  };
 
   # Fish shell configuration and plugins (migrated from fisher)
   # Let home-manager generate config.fish with plugin loaders,
