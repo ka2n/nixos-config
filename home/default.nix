@@ -67,7 +67,7 @@ in {
       (builtins.readFile ./dotfiles/local/bin/claude-notify-complete.sh))
 
     (pkgs.writeShellScriptBin "ndev" ''
-      exec nix develop ~/nixos-config --command "$SHELL"
+      exec nix develop "$HOME/nixos-config" --command "$SHELL"
     '')
 
     (pkgs.writeShellScriptBin "tf-pr" ''
