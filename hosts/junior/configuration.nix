@@ -106,6 +106,7 @@
     "amdgpu.gpu_recovery=1"
     "amdgpu.runpm=0"  # Disable runtime PM - fixes BACO suspend/resume crashes on Polaris
     "amdgpu.noretry=0"  # Enable retry on timeout (may help with fence timeouts)
+    "amdgpu.lockup_timeout=30000"  # Increase timeout from 10s to 30s for heavy workloads
   ];
 
   # Hyprland environment variables for AMD GPU stability
