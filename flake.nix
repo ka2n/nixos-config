@@ -49,7 +49,7 @@
       overlay = import ./pkgs pkgs-unstable;
     in {
       devShells.${system} = import ./devShells.nix {
-        inherit nixpkgs system;
+        inherit nixpkgs nixpkgs-unstable system;
       };
 
       nixosConfigurations.nixos-vm = nixpkgs.lib.nixosSystem {
