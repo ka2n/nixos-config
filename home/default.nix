@@ -156,10 +156,6 @@ in {
         src = pkgs.fishPlugins.done.src;
       }
       {
-        name = "fzf-fish";
-        src = pkgs.fishPlugins.fzf-fish.src;
-      }
-      {
         name = "z";
         src = pkgs.fishPlugins.z.src;
       }

@@ -42,20 +42,16 @@ set -gx LOLCOMMITS_DEVICE "/dev/video0"
 set -gx MIRU_PAGER_STYLE pink
 
 # fzf
-set -U FZF_FIND_FILE_COMMAND "fd --hidden --type f . \$dir --color=always"
-set -U FZF_CD_COMMAND "fd --hidden --type d . \$dir --color=always"
-set -U FZF_DEFAULT_OPTS "--ansi --height=40% --layout=reverse"
+set -U FZF_DEFAULT_OPTS --ansi --height=40% --layout=reverse
 
 
 if type -q fzf
     function fzf_ghq_select_repository
         set -l query (commandline)
-        set -l fzf_flags
-
-        set -a fzf_flags (echo $FZF_DEFAULT_OPTS | string split ' ')
+        set -l fzf_flags $FZF_DEFAULT_OPTS
 
         if test -n $query
-            set fzf_flags --query "$query"
+            set -a fzf_flags --query "$query"
         end
 
         set -a fzf_flags --preview "bat --color=always --style=header,grid --line-range :80 (ghq root)/{}/README.*"
@@ -66,6 +62,72 @@ if type -q fzf
             cd (ghq list --full-path --exact $line)
             commandline -f repaint
         end
+    end
+
+    # Alt-c: ディレクトリ検索してcd (jethrokuan/fzf 互換)
+    function fzf_cd_directory
+        set -l token (commandline --current-token)
+        set -l dir "."
+        set -l fzf_query ""
+
+        # トークンが存在する場合はクエリとして使用
+        if test -n "$token"
+            set -l expanded_token (eval echo -- $token)
+            if test -d "$expanded_token"
+                set dir "$expanded_token"
+            else
+                set fzf_query "$token"
+            end
+        end
+
+        # fd を使ってディレクトリのみを検索
+        set -l fd_cmd (command -v fd || echo "fd")
+        set -l select ($fd_cmd --hidden --type d --color=always . $dir 2>/dev/null | fzf +m --prompt="Directory> " $FZF_DEFAULT_OPTS --query "$fzf_query")
+
+        if not test -z "$select"
+            cd "$select"
+            # コマンドラインの現在のトークンをクリア
+            commandline -t ""
+        end
+
+        commandline -f repaint
+    end
+
+    # Ctrl-t: ファイル/ディレクトリ検索してパスを挿入 (jethrokuan/fzf 互換)
+    function fzf_insert_file_path
+        set -l token (commandline --current-token)
+        set -l dir "."
+        set -l fzf_query ""
+
+        # トークンが存在し、ディレクトリの場合はそれを基準にする
+        if test -n "$token"
+            set -l expanded_token (eval echo -- $token)
+            if test -d "$expanded_token"
+                set dir "$expanded_token"
+            else
+                set fzf_query "$token"
+            end
+        end
+
+        # fd を使用してファイルとディレクトリを検索
+        set -l fd_cmd (command -v fd || echo "fd")
+        set -l results
+        $fd_cmd --hidden --color=always . $dir 2>/dev/null | fzf -m $FZF_DEFAULT_OPTS --query "$fzf_query" | while read -l s
+            set results $results $s
+        end
+
+        if test -z "$results"
+            commandline -f repaint
+            return
+        else
+            commandline -t ""
+        end
+
+        for result in $results
+            commandline -it -- (string escape $result)
+            commandline -it -- " "
+        end
+        commandline -f repaint
     end
 end
 
@@ -150,6 +212,13 @@ if test -e "$HOME/google-cloud-sdk/path.fish.inc"
 end
 
 function fish_user_key_bindings
+  # Alt-c: ディレクトリ検索してcd
+  bind \ec fzf_cd_directory
+
+  # Ctrl-t: ファイル/ディレクトリ検索してパスを挿入
+  bind \ct fzf_insert_file_path
+
+  # Ctrl-]: ghq リポジトリ選択
   bind \c] 'fzf_ghq_select_repository (commandline -b)'
 end
 
