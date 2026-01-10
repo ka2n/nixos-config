@@ -60,6 +60,7 @@
   # Fix artifacts by locking memory clock (mclk) to highest level only
   # GPU clock (sclk) remains dynamic for better power efficiency
   # Root cause: Memory speed unable to keep up with screen refresh rates
+  # Note: udev rule re-applies settings after GPU reset events
   systemd.services.amdgpu-power = {
     description = "AMD GPU Power Management - Lock Memory Clock";
     wantedBy = ["multi-user.target"];
@@ -83,6 +84,12 @@
       done
     '';
   };
+
+  # Reapply AMD GPU settings after GPU reset events
+  services.udev.extraRules = ''
+    # Trigger on AMD GPU changes (after reset, resume, etc.)
+    ACTION=="change", KERNEL=="card[0-9]", SUBSYSTEM=="drm", ATTR{device/vendor}=="0x1002", RUN+="${pkgs.systemd}/bin/systemctl restart --no-block amdgpu-power.service"
+  '';
 
   # AMD GPU Power Management for Polaris (RX 480/570/580)
   # Known issue: GFXOFF feature causes artifacts and crashes on Polaris cards
