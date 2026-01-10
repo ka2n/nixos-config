@@ -1,24 +1,24 @@
 return {
-	{
-		"zbirenbaum/copilot.lua",
-		opts = {
-			copilot_node_command = os.getenv("HOME") .. "/.local/share/mise/installs/node/lts/bin/node",
-			--
-			panel = {
-				enabled = false,
-			},
-			suggestion = {
-				enabled = true,
-				auto_trigger = true,
-				keymap = {
-					accept = "<C-l>",
-					dismiss = "<C-o>",
-					next = "<C-j>",
-					prev = "<C-k>",
-				},
-			},
-		},
-	},
+	--{
+	--	"zbirenbaum/copilot.lua",
+	--	opts = {
+	--		copilot_node_command = os.getenv("HOME") .. "/.local/share/mise/installs/node/lts/bin/node",
+	--		--
+	--		panel = {
+	--			enabled = false,
+	--		},
+	--		suggestion = {
+	--			enabled = true,
+	--			auto_trigger = true,
+	--			keymap = {
+	--				accept = "<C-l>",
+	--				dismiss = "<C-o>",
+	--				next = "<C-j>",
+	--				prev = "<C-k>",
+	--			},
+	--		},
+	--	},
+	--},
 	{
 		"yetone/avante.nvim",
 		event = "VeryLazy",
@@ -36,9 +36,9 @@ return {
 				enable_claude_text_editor_tool_mode = true,
 			},
 			providers = {
-				copilot = {
-					model = "claude-3.5-sonnet",
-				},
+				--copilot = {
+				--	model = "claude-3.5-sonnet",
+				--},
 				groq = {
 					__inherited_from = "openai",
 					api_key_name = "GROQ_API_KEY",
@@ -68,7 +68,7 @@ return {
 			"MunifTanjim/nui.nvim",
 
 			"nvim-tree/nvim-web-devicons",
-			"zbirenbaum/copilot.lua",
+			--"zbirenbaum/copilot.lua",
 			{
 				"HakonHarnes/img-clip.nvim",
 				event = "VeryLazy",
@@ -91,21 +91,21 @@ return {
 			},
 		},
 	},
-	{
-		"CopilotC-Nvim/CopilotChat.nvim",
-		branch = "main",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			"zbirenbaum/copilot.lua",
-		},
-		config = true,
-		cmd = {
-			"CopilotChat",
-			"CopilotChatOpen",
-			"CopilotChatToggle",
-			"CopilotChatPrompts",
-			"CopilotChatModels",
-			"CopilotChatAgents",
-		},
-	},
+    --{
+	--	"CopilotC-Nvim/CopilotChat.nvim",
+	--	branch = "main",
+	--	dependencies = {
+	--		"nvim-lua/plenary.nvim",
+	--		"zbirenbaum/copilot.lua",
+	--	},
+	--	config = true,
+	--	cmd = {
+	--		"CopilotChat",
+	--		"CopilotChatOpen",
+	--		"CopilotChatToggle",
+	--		"CopilotChatPrompts",
+	--		"CopilotChatModels",
+	--		"CopilotChatAgents",
+	--	},
+	--},
 }
