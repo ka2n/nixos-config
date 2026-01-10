@@ -105,7 +105,14 @@
     "amdgpu.ppfeaturemask=0xffff7fff"  # Disable PP_GFXOFF_MASK (bit 15) only
     "amdgpu.gpu_recovery=1"
     "amdgpu.runpm=0"  # Disable runtime PM - fixes BACO suspend/resume crashes on Polaris
+    "amdgpu.noretry=0"  # Enable retry on timeout (may help with fence timeouts)
   ];
+
+  # Hyprland environment variables for AMD GPU stability
+  # Disable explicit sync on Polaris (known to cause crashes)
+  environment.sessionVariables = {
+    WLR_DRM_NO_ATOMIC = "1";  # Disable atomic modesetting (reduces fence timeouts)
+  };
 
   # Force RGB output for HDMI (DELL S2722QC)
   hardware.display.dellS2722qcRgb.enable = true;
