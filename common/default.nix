@@ -372,7 +372,12 @@ in {
   };
 
   # Docker
-  virtualisation.docker.enable = true;
+  virtualisation.docker = {
+    enable = true;
+    daemon.settings = {
+      registry-mirrors = [ "https://mirror.gcr.io" ];
+    };
+  };
 
   fonts.packages = (with pkgs; [
     noto-fonts
