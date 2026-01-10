@@ -7,6 +7,7 @@
     ./hardware-configuration.nix
     ../../common
     ../../modules/display-switch.nix
+    ../../modules/display/dell-s2722qc-edid.nix
     inputs.home-manager.nixosModules.home-manager
   ];
 
