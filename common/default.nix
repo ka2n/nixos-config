@@ -57,6 +57,9 @@ in {
   # Workaround for iptables 1.8.11 bug breaking Docker bridge networks
   # https://github.com/NixOS/nixpkgs/issues/417641
   networking.firewall.trustedInterfaces = [ "br+" ];
+  services.avahi.enable = true;
+  services.avahi.nssmdns4 = true;
+  services.avahi.ipv6 = false;
 
   # Timezone and locale
   time.timeZone = "Asia/Tokyo";
