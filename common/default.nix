@@ -360,6 +360,7 @@ in {
   # Services
   services.openssh.enable = true;
   services.tailscale.enable = true;
+  programs.mosh.enable = true;
 
   # Bluetooth
   hardware.bluetooth.enable = true;
