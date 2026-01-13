@@ -47,6 +47,7 @@
         config.allowUnfree = true;
       };
       overlay = import ./pkgs pkgs-unstable;
+      configRevision = self.rev or self.dirtyRev or "dirty";
     in {
       devShells.${system} = import ./devShells.nix {
         inherit nixpkgs nixpkgs-unstable system;
@@ -54,7 +55,7 @@
 
       nixosConfigurations.nixos-vm = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = { inherit inputs pkgs-unstable; };
+        specialArgs = { inherit inputs pkgs-unstable configRevision; };
         modules = [
           { nixpkgs.overlays = [ overlay ]; }
           inputs.sops-nix.nixosModules.sops
@@ -64,7 +65,7 @@
 
       nixosConfigurations.wk2511058 = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = { inherit inputs pkgs-unstable; };
+        specialArgs = { inherit inputs pkgs-unstable configRevision; };
         modules = [
           { nixpkgs.overlays = [ overlay ]; }
           inputs.sops-nix.nixosModules.sops
@@ -75,7 +76,7 @@
 
       nixosConfigurations.junior = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = { inherit inputs pkgs-unstable; };
+        specialArgs = { inherit inputs pkgs-unstable configRevision; };
         modules = [
           { nixpkgs.overlays = [ overlay ]; }
           inputs.sops-nix.nixosModules.sops

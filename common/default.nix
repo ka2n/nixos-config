@@ -1,5 +1,5 @@
 # Common configuration shared across all hosts
-{ config, pkgs, lib, inputs, pkgs-unstable, ... }:
+{ config, pkgs, lib, inputs, pkgs-unstable, configRevision, ... }:
 
 let
   cica = pkgs.stdenvNoCC.mkDerivation rec {
@@ -34,6 +34,9 @@ in {
     ../modules/display/dell-s2722qc-edid.nix
     ../modules/display/aquamarine-broadcast-rgb.nix
   ];
+  # System revision tracking
+  system.configurationRevision = configRevision;
+
   # Nix settings
   nix.gc.automatic = true;
   nix.gc.dates = "weekly";
