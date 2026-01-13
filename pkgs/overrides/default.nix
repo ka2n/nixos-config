@@ -3,18 +3,18 @@
 { pkgs-unstable }:
 
 {
-  # claude-code 2.1.2 (nixpkgs-unstable has 2.0.76)
+  # claude-code 2.1.6 (nixpkgs-unstable has 2.0.76)
   # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/by-name/cl/claude-code/package.nix
   claude-code = pkgs-unstable.buildNpmPackage {
     pname = "claude-code";
-    version = "2.1.2";
+    version = "2.1.6";
 
     src = pkgs-unstable.fetchzip {
-      url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-2.1.2.tgz";
-      hash = "sha256-PpNXyZ3xoZ/4lCvtErltkdsL/1hDRyiicblvhykgROw=";
+      url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-2.1.6.tgz";
+      hash = "sha256-M2ZLGnrvNki7B2jOh4Uq2SfSxkICh76uRIFogq+kKZ8=";
     };
 
-    npmDepsHash = "sha256-KdVaAYXCy+oMN9b1lLeIRiGp/Zb29T4b3pvDp8O1v/M=";
+    npmDepsHash = "sha256-Y+4ZcfEJJg4/XYc3vNLw4R5OJz3FlYvgQpkB739jKAQ=";
 
     postPatch = ''
       cp ${./claude-code-package-lock.json} package-lock.json
