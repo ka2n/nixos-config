@@ -173,6 +173,7 @@ in {
     warpd
     inputs.inputactions.packages.x86_64-linux.inputactions-hyprland # Mouse/touchpad gestures (easystroke alternative)
     inputs.inputactions.packages.x86_64-linux.inputactions-ctl
+    hyprtag # Tag-based window management for Hyprland (dwm-style)
 
     # Development
     go
