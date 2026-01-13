@@ -44,6 +44,14 @@ in {
   nix.settings.accept-flake-config = true;
   nixpkgs.config.allowUnfree = true;
 
+  # Show diff of updates with nvd
+  system.activationScripts.diff = {
+    supportsDryActivation = true;
+    text = ''
+      ${pkgs.nvd}/bin/nvd --nix-bin-dir=${pkgs.nix}/bin diff /run/current-system "$systemConfig"
+    '';
+  };
+
   # Bootloader
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
