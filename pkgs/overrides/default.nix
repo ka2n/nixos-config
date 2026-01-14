@@ -14,7 +14,7 @@
       hash = "sha256-s/XPemwJYPUNFBgWo00VQ6W6eFIy44y9lFoRN0Duk9I=";
     };
 
-    npmDepsHash = "sha256-Y+4ZcfEJJg4/XYc3vNLw4R5OJz3FlYvgQpkB739jKAQ=";
+    npmDepsHash = "sha256-BW3mW3fRXrv+TgW3q+Rc43o0q3t1ra/XUqlUSiA0hTU=";
 
     postPatch = ''
       cp ${./claude-code-package-lock.json} package-lock.json
