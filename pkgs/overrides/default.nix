@@ -3,15 +3,15 @@
 { pkgs-unstable }:
 
 {
-  # claude-code 2.1.6 (nixpkgs-unstable has 2.0.76)
+  # claude-code 2.1.7 (nixpkgs-unstable has 2.0.76)
   # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/by-name/cl/claude-code/package.nix
   claude-code = pkgs-unstable.buildNpmPackage {
     pname = "claude-code";
-    version = "2.1.6";
+    version = "2.1.7";
 
     src = pkgs-unstable.fetchzip {
-      url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-2.1.6.tgz";
-      hash = "sha256-M2ZLGnrvNki7B2jOh4Uq2SfSxkICh76uRIFogq+kKZ8=";
+      url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-2.1.7.tgz";
+      hash = "sha256-s/XPemwJYPUNFBgWo00VQ6W6eFIy44y9lFoRN0Duk9I=";
     };
 
     npmDepsHash = "sha256-Y+4ZcfEJJg4/XYc3vNLw4R5OJz3FlYvgQpkB739jKAQ=";

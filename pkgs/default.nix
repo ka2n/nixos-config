@@ -4,9 +4,8 @@ let
   overrides = import ./overrides { inherit pkgs-unstable; };
 in
 {
-  # Claude CLI wrapper with ENABLE_TOOL_SEARCH environment variable
+  # Claude CLI wrapper
   claude-code-wrapped = final.writeShellScriptBin "claude" ''
-    export ENABLE_TOOL_SEARCH="true"
     exec ${overrides.claude-code}/bin/claude "$@"
   '';
 
