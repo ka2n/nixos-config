@@ -241,10 +241,8 @@ in {
   in pkgs.replaceVars ./dotfiles/lf/lfrc {
     previewer = "${lf-previewer-sandboxed}";
   };
-  xdg.configFile."waybar" = {
-    source = ./dotfiles/waybar;
-    recursive = true;
-  };
+  xdg.configFile."waybar/config.jsonc".source = ./dotfiles/waybar/config.jsonc;
+  xdg.configFile."waybar/style.css".source = ./dotfiles/waybar/style.css;
   xdg.configFile."hypr" = {
     source = ./dotfiles/hypr;
     recursive = true;

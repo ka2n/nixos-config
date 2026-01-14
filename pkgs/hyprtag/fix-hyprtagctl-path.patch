@@ -1,0 +1,7 @@
+--- a/hyprtagctl
++++ b/hyprtagctl
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+
+-echo $@ | socat - UNIX-CONNECT:/tmp/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.hyprtagctl.sock
++echo $@ | socat - UNIX-CONNECT:${XDG_RUNTIME_DIR:-/tmp}/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.hyprtagctl.sock

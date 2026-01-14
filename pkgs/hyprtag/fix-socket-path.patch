@@ -1,0 +1,13 @@
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -197,7 +197,9 @@ async fn handle_ctrl_socket(tx: mpsc::Sender<Ctrl>, stream: UnixStream) {
+
+ pub(crate) fn hyprland_dir() -> anyhow::Result<PathBuf> {
+     let sig = std::env::var("HYPRLAND_INSTANCE_SIGNATURE")?;
+-    Ok(Path::new("/tmp/hypr").join(sig))
++    let runtime_dir = std::env::var("XDG_RUNTIME_DIR")
++        .unwrap_or_else(|_| "/tmp".to_string());
++    Ok(Path::new(&runtime_dir).join("hypr").join(sig))
+ }
+
+ fn parse_line<'a>(line: &'a str) -> anyhow::Result<(&'a str, &'a str, &'a str)> {
