@@ -33,8 +33,8 @@ output_status() {
             # Active tag - bold
             text="$text <b>$i</b>"
         elif [ "$is_occupied" = "yes" ]; then
-            # Occupied but not active - normal
-            text="$text $i"
+            # Occupied but not active - dimmed
+            text="$text <span alpha='50%'>$i</span>"
         fi
         # Empty tags are not shown
     done
