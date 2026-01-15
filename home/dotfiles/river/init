@@ -243,20 +243,25 @@ riverctl map normal None XF86AudioPrev spawn "playerctl previous"
 ### WINDOW RULES ###
 ###################
 
-# Float rules
-riverctl float-filter-add app-id "clipse"
-riverctl float-filter-add app-id "Zeal"
-riverctl float-filter-add app-id "GoldenDict"
-riverctl float-filter-add app-id "copyq"
-riverctl float-filter-add app-id "Pavumeter"
-riverctl float-filter-add app-id "Around"
-riverctl float-filter-add app-id "wiremix"
-riverctl float-filter-add app-id "bluetui"
+# TUI apps - float with fixed size (matching Hyprland)
+riverctl rule-add -app-id "clipse" float
+riverctl rule-add -app-id "clipse" dimensions 622 652
+riverctl rule-add -app-id "wiremix" float
+riverctl rule-add -app-id "wiremix" dimensions 622 652
+riverctl rule-add -app-id "bluetui" float
+riverctl rule-add -app-id "bluetui" dimensions 622 652
+
+# Other floating apps
+riverctl rule-add -app-id "Zeal" float
+riverctl rule-add -app-id "GoldenDict" float
+riverctl rule-add -app-id "copyq" float
+riverctl rule-add -app-id "Pavumeter" float
+riverctl rule-add -app-id "Around" float
 
 # Float by title
-riverctl float-filter-add title "Picture-in-Picture"
-riverctl float-filter-add title "About"
-riverctl float-filter-add title "Organizer"
+riverctl rule-add -title "Picture-in-Picture" float
+riverctl rule-add -title "About" float
+riverctl rule-add -title "Organizer" float
 
 ###################
 ### CSD (Client Side Decoration) ###
