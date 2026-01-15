@@ -242,6 +242,7 @@ in {
     previewer = "${lf-previewer-sandboxed}";
   };
   xdg.configFile."waybar/config.jsonc".source = ./dotfiles/waybar/config.jsonc;
+  xdg.configFile."waybar/config-river.jsonc".source = ./dotfiles/waybar/config-river.jsonc;
   xdg.configFile."waybar/style.css".source = ./dotfiles/waybar/style.css;
   xdg.configFile."hypr" = {
     source = ./dotfiles/hypr;
@@ -411,6 +412,67 @@ in {
     };
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
+
+  # InputActions Standalone daemon (for River - mouse gestures via uinput)
+  systemd.user.services.inputactionsd = {
+    Unit = {
+      Description = "InputActions Daemon (standalone)";
+      PartOf = [ "river-session.target" ];
+      After = [ "river-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.inputactions-standalone}/bin/inputactionsd";
+      Restart = "on-failure";
+      RestartSec = "5s";
+    };
+    Install = { WantedBy = [ "river-session.target" ]; };
+  };
+
+  # InputActions client (for River - window info provider)
+  systemd.user.services.inputactions-client = {
+    Unit = {
+      Description = "InputActions Client (standalone)";
+      PartOf = [ "river-session.target" ];
+      After = [ "river-session.target" "inputactionsd.service" ];
+      Requires = [ "inputactionsd.service" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.inputactions-standalone}/bin/inputactions-client";
+      Restart = "on-failure";
+      RestartSec = "5s";
+    };
+    Install = { WantedBy = [ "river-session.target" ]; };
+  };
+
+  # River window manager
+  wayland.windowManager.river = {
+    enable = true;
+    package = null; # Use system package from programs.river.enable
+    systemd.enable = true; # Auto-start river-session.target
+
+    extraSessionVariables = {
+      MOZ_ENABLE_WAYLAND = "1";
+      XCURSOR_THEME = "Adwaita";
+      XCURSOR_SIZE = "24";
+    };
+  };
+
+  # River init script (managed separately for flexibility)
+  # Use mkForce to override home-manager's river module generated init
+  xdg.configFile."river/init" = lib.mkForce {
+    source = ./dotfiles/river/init;
+    executable = true;
+  };
+
+  # swayidle configuration for River
+  xdg.configFile."swayidle/config".source =
+    if variant == "laptop" then
+      ./dotfiles/swayidle/config-laptop
+    else
+      ./dotfiles/swayidle/config-desktop;
+
+  # swaylock configuration
+  xdg.configFile."swaylock/config".source = ./dotfiles/swaylock/config;
 
   programs.firefox = {
     enable = true;

@@ -105,6 +105,17 @@ in {
     };
   };
 
+  # River session target (for River compositor)
+  systemd.user.targets.river-session = {
+    unitConfig = {
+      Description = "River compositor session";
+      Documentation = [ "man:systemd.special(7)" ];
+      BindsTo = [ "graphical-session.target" ];
+      Wants = [ "graphical-session-pre.target" ];
+      After = [ "graphical-session-pre.target" ];
+    };
+  };
+
   # Keyboard
   services.xserver.xkb = {
     layout = "us";
@@ -171,8 +182,9 @@ in {
 
     # Keyboard/Input
     warpd
-    inputs.inputactions.packages.x86_64-linux.inputactions-hyprland # Mouse/touchpad gestures (easystroke alternative)
+    inputs.inputactions.packages.x86_64-linux.inputactions-hyprland # Mouse/touchpad gestures for Hyprland
     inputs.inputactions.packages.x86_64-linux.inputactions-ctl
+    inputactions-standalone # Mouse/touchpad gestures standalone (for River)
     hyprtag # Tag-based window management for Hyprland (dwm-style)
 
     # Development
@@ -255,7 +267,7 @@ in {
     # Password Manager
     keeper-desktop
 
-    # Wayland / Hyprland
+    # Wayland / Hyprland / River
     wl-clipboard
     clipse # Clipboard manager TUI
     waybar
@@ -271,6 +283,8 @@ in {
     wlsunset
     glib
     gtk3 # gtk-launch
+    wlopm # DPMS control for wlroots compositors
+    swayidle # Idle management for River
 
     # Theming (omarchy style)
     gnome-themes-extra # Adwaita GTK theme
@@ -313,6 +327,9 @@ in {
   programs.hyprland.enable = true;
   programs.hyprlock.enable = true;
   services.hypridle.enable = true;
+
+  # River
+  programs.river.enable = true;
 
   # Override hypridle to only start under hyprland-session.target (not gdm-greeter)
   systemd.user.services.hypridle = {
@@ -359,12 +376,19 @@ in {
   services.displayManager.gdm.wayland = true;
   services.xserver.desktopManager.runXdgAutostartIfNone = true;
   xdg.portal.enable = true;
-  xdg.portal.extraPortals =
-    [ pkgs.xdg-desktop-portal-hyprland pkgs.xdg-desktop-portal-gtk ];
+  xdg.portal.extraPortals = [
+    pkgs.xdg-desktop-portal-hyprland
+    pkgs.xdg-desktop-portal-wlr # For River
+    pkgs.xdg-desktop-portal-gtk
+  ];
   xdg.portal.config = {
     common = { default = [ "hyprland" "gtk" ]; };
     hyprland = {
       default = [ "hyprland" "gtk" ];
+      "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+    };
+    river = {
+      default = [ "wlr" "gtk" ];
       "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
     };
   };
@@ -378,6 +402,10 @@ in {
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
   services.blueman.enable = true;
+
+  # uinput for InputActions Standalone (user must be in 'uinput' group)
+  # Also configured by modules/xremap.nix
+  hardware.uinput.enable = true;
 
   # Audio (PipeWire)
   services.pipewire = {
