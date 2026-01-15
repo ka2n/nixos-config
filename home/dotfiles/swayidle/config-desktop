@@ -1,0 +1,18 @@
+# swayidle configuration for River (desktop)
+# Matching hypridle-desktop.conf timings
+
+# Lock screen after 15 minutes (900 seconds)
+timeout 900 'loginctl lock-session'
+
+# Turn off screen after 30 minutes (1800 seconds)
+timeout 1800 'wlopm --off "*"'
+resume 'wlopm --on "*"'
+
+# Suspend after 120 minutes (7200 seconds)
+timeout 7200 'systemctl suspend'
+
+# Before sleep
+before-sleep 'loginctl lock-session'
+
+# Lock command
+lock 'swaylock -f'
