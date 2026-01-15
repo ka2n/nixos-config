@@ -12,12 +12,8 @@ in {
   config = mkIf cfg.enable {
     environment.systemPackages = [ pkgs.xremap ];
 
-    # Enable uinput for xremap
+    # Enable uinput for xremap (user must be in 'uinput' group)
+    # Also used by InputActions Standalone
     hardware.uinput.enable = true;
-
-    # udev rules for /dev/uinput access
-    services.udev.extraRules = ''
-      KERNEL=="uinput", GROUP="users", MODE="0660"
-    '';
   };
 }
