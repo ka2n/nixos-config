@@ -4,6 +4,23 @@
 # See: https://codeberg.org/river/wiki
 
 ###################
+### ENVIRONMENT ###
+###################
+
+# HiDPI / Cursor settings (same as Hyprland)
+export XCURSOR_THEME=Adwaita
+export XCURSOR_SIZE=24
+export GDK_SCALE=2
+export QT_SCALE_FACTOR=2
+
+# Input Method
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx
+export SDL_IM_MODULE=fcitx
+export GLFW_IM_MODULE=ibus
+
+###################
 ### VARIABLES ###
 ###################
 
@@ -12,6 +29,16 @@ terminal="alacritty"
 menu="rofi -show drun"
 browser="zen"
 fileManager="thunar"
+
+###################
+### MONITORS ###
+###################
+
+# Monitor layout (same as Hyprland):
+#   eDP-1 (left) | HDMI-A-1 (right)
+# Run wlr-randr without args to see available outputs
+wlr-randr --output eDP-1 --scale 2 --pos 0,0 2>/dev/null
+wlr-randr --output HDMI-A-1 --scale 2 --pos 1920,0 2>/dev/null
 
 ###################
 ### AUTOSTART ###

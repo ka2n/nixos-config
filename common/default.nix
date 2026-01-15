@@ -285,6 +285,7 @@ in {
     gtk3 # gtk-launch
     wlopm # DPMS control for wlroots compositors
     swayidle # Idle management for River
+    wlr-randr # Monitor configuration for wlroots compositors (River)
 
     # Theming (omarchy style)
     gnome-themes-extra # Adwaita GTK theme
