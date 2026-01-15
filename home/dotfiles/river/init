@@ -1,0 +1,241 @@
+#!/bin/sh
+
+# River configuration - migrated from Hyprland
+# See: https://codeberg.org/river/wiki
+
+###################
+### VARIABLES ###
+###################
+
+mod="Super"
+terminal="alacritty"
+menu="rofi -show drun"
+browser="zen"
+fileManager="thunar"
+
+###################
+### AUTOSTART ###
+###################
+
+# Session initialization
+riverctl spawn "dbus-update-activation-environment --systemd --all"
+riverctl spawn "systemctl --user start river-session.target"
+
+# UI
+riverctl spawn "waybar -c ~/.config/waybar/config-river.jsonc"
+riverctl spawn "thunar --daemon"
+riverctl spawn "dex -a"
+
+# Clipboard history
+riverctl spawn "clipse -listen"
+
+# Configurations
+riverctl spawn "dconf write /org/gnome/desktop/interface/gtk-key-theme \"'Emacs'\""
+riverctl spawn "wlsunset -l 35.6 -L 139.8"
+
+# Services
+riverctl spawn "systemctl --user start xremap"
+riverctl spawn "systemctl --user start yaskkserv2"
+
+# Idle management
+riverctl spawn swayidle
+
+###################
+### INPUT ###
+###################
+
+riverctl set-repeat 99 200
+
+# Focus follows mouse disabled
+riverctl focus-follows-cursor disabled
+
+# Natural scroll
+riverctl input "*" natural-scroll enabled
+
+# Disable mouse acceleration
+riverctl input "*" accel-profile flat
+
+###################
+### APPEARANCE ###
+###################
+
+# Border colors (from Hyprland config)
+riverctl border-color-focused 0x2e9ef4
+riverctl border-color-unfocused 0x222222
+riverctl border-width 2
+
+# Background color (handled by swaybg or similar)
+riverctl spawn "swaybg -c '#c79081'"
+
+###################
+### LAYOUT ###
+###################
+
+# Use rivertile as the layout generator
+riverctl default-layout rivertile
+
+# Start rivertile
+riverctl spawn "rivertile -view-padding 5 -outer-padding 10"
+
+###################
+### KEYBINDINGS ###
+###################
+
+# Core
+riverctl map normal $mod Return spawn "$terminal"
+riverctl map normal $mod+Shift Q close
+riverctl map normal $mod D spawn "$menu"
+riverctl map normal $mod Y spawn "$fileManager"
+
+# Focus (vim style)
+riverctl map normal $mod H focus-view left
+riverctl map normal $mod J focus-view down
+riverctl map normal $mod K focus-view up
+riverctl map normal $mod L focus-view right
+
+# Move window (vim style)
+riverctl map normal $mod+Shift H swap left
+riverctl map normal $mod+Shift J swap down
+riverctl map normal $mod+Shift K swap up
+riverctl map normal $mod+Shift L swap right
+
+# Focus (arrow keys)
+riverctl map normal $mod Left focus-view left
+riverctl map normal $mod Down focus-view down
+riverctl map normal $mod Up focus-view up
+riverctl map normal $mod Right focus-view right
+
+# Move window (arrow keys)
+riverctl map normal $mod+Shift Left swap left
+riverctl map normal $mod+Shift Down swap down
+riverctl map normal $mod+Shift Up swap up
+riverctl map normal $mod+Shift Right swap right
+
+###################
+### TAGS (dwm-style) ###
+###################
+
+# Tag 1-9 bindings
+for i in $(seq 1 9); do
+    tags=$((1 << ($i - 1)))
+
+    # Show tag (switch to tag)
+    riverctl map normal $mod $i set-focused-tags $tags
+
+    # Move window to tag
+    riverctl map normal $mod+Shift $i set-view-tags $tags
+
+    # Toggle tag (show multiple tags simultaneously)
+    riverctl map normal $mod+Control $i toggle-focused-tags $tags
+done
+
+# Show all tags
+all_tags=$(((1 << 32) - 1))
+riverctl map normal $mod 0 set-focused-tags $all_tags
+riverctl map normal $mod+Shift 0 set-view-tags $all_tags
+
+# Focus next/previous output (monitor)
+riverctl map normal $mod Period focus-output next
+riverctl map normal $mod Comma focus-output previous
+
+# Move window to next/previous output
+riverctl map normal $mod+Shift N send-to-output next
+
+###################
+### LAYOUT CONTROL ###
+###################
+
+# Fullscreen
+riverctl map normal $mod F toggle-fullscreen
+
+# Floating
+riverctl map normal $mod+Shift Space toggle-float
+
+# Cycle focus between tiling/floating
+riverctl map normal $mod Space focus-view next
+
+# Resize with mod+right-click
+riverctl map-pointer normal $mod BTN_RIGHT resize-view
+riverctl map-pointer normal $mod BTN_LEFT move-view
+riverctl map-pointer normal $mod BTN_MIDDLE toggle-float
+
+# Layout controls
+riverctl map normal $mod+Alt H send-layout-cmd rivertile "main-ratio -0.05"
+riverctl map normal $mod+Alt L send-layout-cmd rivertile "main-ratio +0.05"
+riverctl map normal $mod+Alt+Shift H send-layout-cmd rivertile "main-count +1"
+riverctl map normal $mod+Alt+Shift L send-layout-cmd rivertile "main-count -1"
+
+###################
+### APPS ###
+###################
+
+riverctl map normal $mod+Shift W spawn "$browser"
+riverctl map normal $mod+Shift O spawn "obsidian"
+
+# Screenshot
+riverctl map normal None Print spawn 'grim -g "$(slurp)" ~/Desktop/$(date +%Y%m%d%H%M%S).png && thunar ~/Desktop/'
+riverctl map normal Control Print spawn 'grim -g "$(slurp)" - | wl-copy'
+
+# Notification (mako)
+riverctl map normal $mod+Control Period spawn "makoctl menu rofi -dmenu"
+riverctl map normal $mod+Control Comma spawn "makoctl restore"
+riverctl map normal $mod+Control C spawn "makoctl dismiss -a"
+
+# Clipboard history
+riverctl map normal Control semicolon spawn "alacritty --class clipse -e clipse"
+
+# Reload config
+riverctl map normal $mod+Shift R spawn "riverctl spawn '$HOME/.config/river/init'"
+
+# Power menu
+riverctl map normal $mod+Shift E spawn "rofi-powermenu"
+
+###################
+### MEDIA KEYS ###
+###################
+
+riverctl map normal None XF86AudioRaiseVolume spawn "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"
+riverctl map normal None XF86AudioLowerVolume spawn "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+riverctl map normal None XF86AudioMute spawn "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+riverctl map normal None XF86AudioMicMute spawn "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
+riverctl map normal None XF86MonBrightnessUp spawn "brightnessctl -e4 -n2 set 5%+"
+riverctl map normal None XF86MonBrightnessDown spawn "brightnessctl -e4 -n2 set 5%-"
+riverctl map normal None XF86AudioNext spawn "playerctl next"
+riverctl map normal None XF86AudioPause spawn "playerctl play-pause"
+riverctl map normal None XF86AudioPlay spawn "playerctl play-pause"
+riverctl map normal None XF86AudioPrev spawn "playerctl previous"
+
+###################
+### WINDOW RULES ###
+###################
+
+# Float rules
+riverctl float-filter-add app-id "clipse"
+riverctl float-filter-add app-id "Zeal"
+riverctl float-filter-add app-id "GoldenDict"
+riverctl float-filter-add app-id "copyq"
+riverctl float-filter-add app-id "Pavumeter"
+riverctl float-filter-add app-id "Around"
+riverctl float-filter-add app-id "wiremix"
+riverctl float-filter-add app-id "bluetui"
+
+# Float by title
+riverctl float-filter-add title "Picture-in-Picture"
+riverctl float-filter-add title "About"
+riverctl float-filter-add title "Organizer"
+
+###################
+### CSD (Client Side Decoration) ###
+###################
+
+# Prefer server-side decorations
+riverctl rule-add ssd
+
+###################
+### PASSTHROUGH MODE ###
+###################
+
+# Super+F11 to enter passthrough mode (all keybindings disabled)
+riverctl declare-mode passthrough
+riverctl map normal $mod F11 enter-mode passthrough
+riverctl map passthrough $mod F11 enter-mode normal
