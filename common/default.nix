@@ -116,6 +116,21 @@ in {
     };
   };
 
+  # Kanshi - auto display configuration for River
+  systemd.user.services.kanshi = {
+    unitConfig = {
+      Description = "Dynamic display configuration";
+      Documentation = [ "man:kanshi(1)" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.kanshi}/bin/kanshi";
+      Restart = "on-failure";
+    };
+    wantedBy = [ "river-session.target" ];
+  };
+
   # Keyboard
   services.xserver.xkb = {
     layout = "us";
@@ -286,6 +301,7 @@ in {
     wlopm # DPMS control for wlroots compositors
     swayidle # Idle management for River
     wlr-randr # Monitor configuration for wlroots compositors (River)
+    kanshi # Auto display configuration for wlroots compositors
 
     # Theming (omarchy style)
     gnome-themes-extra # Adwaita GTK theme

@@ -472,6 +472,9 @@ in {
     executable = true;
   };
 
+  # Kanshi - auto display configuration for River
+  xdg.configFile."kanshi/config".source = ./dotfiles/kanshi/config;
+
   # swayidle configuration for River
   xdg.configFile."swayidle/config".source =
     if variant == "laptop" then

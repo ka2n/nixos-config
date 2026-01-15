@@ -36,6 +36,32 @@
   color: #555555;
 }
 
+#tags button {
+  padding: 0 8px;
+  background-color: transparent;
+  background-image: none;
+  color: #888888;
+  box-shadow: none;
+  opacity: 0.5;
+}
+
+#tags button.focused {
+  color: #ffffff;
+  font-weight: bold;
+  border-bottom: 1px solid #ffffff;
+  padding-bottom: 2px;
+  opacity: 1;
+}
+
+#tags button.occupied {
+  opacity: 0.8;
+}
+
+#tags button.urgent {
+  color: #ff7043;
+  opacity: 1;
+}
+
 #clock {
   margin-left: 8px;
 }

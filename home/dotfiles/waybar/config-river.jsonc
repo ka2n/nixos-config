@@ -20,7 +20,8 @@
     "battery"
   ],
   "river/tags": {
-    "num-tags": 9
+    "num-tags": 9,
+    "hide-vacant": true
   },
   "river/mode": {
     "format": " {}"
