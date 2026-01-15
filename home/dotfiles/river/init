@@ -259,6 +259,30 @@ riverctl float-filter-add title "Organizer"
 riverctl rule-add ssd
 
 ###################
+### RESIZE MODE ###
+###################
+
+# Super+R to enter resize mode (same as Hyprland)
+riverctl declare-mode resize
+riverctl map normal $mod R enter-mode resize
+
+# Resize bindings (vim style) - with repeat on hold
+riverctl map -repeat resize None H resize horizontal -50
+riverctl map -repeat resize None J resize vertical 50
+riverctl map -repeat resize None K resize vertical -50
+riverctl map -repeat resize None L resize horizontal 50
+
+# Resize bindings (arrow keys) - with repeat on hold
+riverctl map -repeat resize None Left resize horizontal -50
+riverctl map -repeat resize None Down resize vertical 50
+riverctl map -repeat resize None Up resize vertical -50
+riverctl map -repeat resize None Right resize horizontal 50
+
+# Exit resize mode
+riverctl map resize None Return enter-mode normal
+riverctl map resize None Escape enter-mode normal
+
+###################
 ### PASSTHROUGH MODE ###
 ###################
 
