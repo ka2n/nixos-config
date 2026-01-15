@@ -1,17 +1,19 @@
 # Kanshi - auto display configuration for wlroots compositors
 # https://sr.ht/~emersion/kanshi/
 
-# Dual monitor: eDP-1 (left) + HDMI-A-1 (right)
+# Dual monitor: eDP-1 (left) + HDMI-A-1 (right, main)
 # eDP-1: 2880x1800 / 1.5 = 1920x1200 logical
 # HDMI-A-1: 3840x2160 / 1.5 = 2560x1440 logical
 profile dual {
     output eDP-1 position 0,0 scale 1.5
     output HDMI-A-1 position 1920,0 scale 1.5
+    exec makoctl mode -s dual
 }
 
 # Laptop only
 profile laptop {
     output eDP-1 position 0,0 scale 1.5
+    exec makoctl mode -s default
 }
 
 # External monitor only

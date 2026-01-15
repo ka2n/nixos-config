@@ -21,3 +21,6 @@ invisible=false
 
 [urgency=critical]
 default-timeout=0
+
+[mode=dual]
+output=HDMI-A-1
