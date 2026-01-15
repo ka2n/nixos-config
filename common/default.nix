@@ -424,6 +424,18 @@ in {
   # Also configured by modules/xremap.nix
   hardware.uinput.enable = true;
 
+  # InputActions Daemon (requires root for libinput/uinput access)
+  systemd.services.inputactionsd = {
+    description = "InputActions Daemon (standalone)";
+    wantedBy = [ "graphical.target" ];
+    after = [ "graphical.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.inputactions-standalone}/bin/inputactionsd";
+      Restart = "on-failure";
+      RestartSec = "5s";
+    };
+  };
+
   # Audio (PipeWire)
   services.pipewire = {
     enable = true;

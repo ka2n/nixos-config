@@ -421,28 +421,13 @@ in {
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
-  # InputActions Standalone daemon (for River - mouse gestures via uinput)
-  systemd.user.services.inputactionsd = {
-    Unit = {
-      Description = "InputActions Daemon (standalone)";
-      PartOf = [ "river-session.target" ];
-      After = [ "river-session.target" ];
-    };
-    Service = {
-      ExecStart = "${pkgs.inputactions-standalone}/bin/inputactionsd";
-      Restart = "on-failure";
-      RestartSec = "5s";
-    };
-    Install = { WantedBy = [ "river-session.target" ]; };
-  };
-
   # InputActions client (for River - window info provider)
+  # Note: inputactionsd runs as system service (requires root)
   systemd.user.services.inputactions-client = {
     Unit = {
       Description = "InputActions Client (standalone)";
       PartOf = [ "river-session.target" ];
-      After = [ "river-session.target" "inputactionsd.service" ];
-      Requires = [ "inputactionsd.service" ];
+      After = [ "river-session.target" ];
     };
     Service = {
       ExecStart = "${pkgs.inputactions-standalone}/bin/inputactions-client";
