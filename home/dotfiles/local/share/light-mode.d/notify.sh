@@ -1,3 +1,4 @@
 #!/bin/sh
+notify_send=@notify_send@
 
-notify-send "Light mode!"
+$notify_send "Light mode!"

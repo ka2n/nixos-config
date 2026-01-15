@@ -1,3 +1,4 @@
 #!/bin/sh
+notify_send=@notify_send@
 
-notify-send "Dark mode!"
+$notify_send "Dark mode!"

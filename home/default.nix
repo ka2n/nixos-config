@@ -296,19 +296,27 @@ in {
 
   # Darkman hooks
   home.file.".local/share/dark-mode.d/notify.sh" = {
-    source = ./dotfiles/local/share/dark-mode.d/notify.sh;
+    source = pkgs.replaceVars ./dotfiles/local/share/dark-mode.d/notify.sh {
+      notify_send = lib.getExe pkgs.libnotify;
+    };
     executable = true;
   };
   home.file.".local/share/dark-mode.d/theme.sh" = {
-    source = ./dotfiles/local/share/dark-mode.d/theme.sh;
+    source = pkgs.replaceVars ./dotfiles/local/share/dark-mode.d/theme.sh {
+      dconf = lib.getExe' pkgs.dconf "dconf";
+    };
     executable = true;
   };
   home.file.".local/share/light-mode.d/notify.sh" = {
-    source = ./dotfiles/local/share/light-mode.d/notify.sh;
+    source = pkgs.replaceVars ./dotfiles/local/share/light-mode.d/notify.sh {
+      notify_send = lib.getExe pkgs.libnotify;
+    };
     executable = true;
   };
   home.file.".local/share/light-mode.d/theme.sh" = {
-    source = ./dotfiles/local/share/light-mode.d/theme.sh;
+    source = pkgs.replaceVars ./dotfiles/local/share/light-mode.d/theme.sh {
+      dconf = lib.getExe' pkgs.dconf "dconf";
+    };
     executable = true;
   };
 
