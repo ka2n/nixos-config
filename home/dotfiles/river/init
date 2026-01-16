@@ -13,6 +13,10 @@ export XCURSOR_SIZE=24
 export GDK_SCALE=1.5
 export QT_SCALE_FACTOR=1.5
 
+# Session type (required for xdg-desktop-portal backend selection)
+export XDG_CURRENT_DESKTOP=river
+export XDG_SESSION_TYPE=wayland
+
 # Input Method
 export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
@@ -38,8 +42,9 @@ fileManager="thunar"
 ###################
 
 # Session initialization
-riverctl spawn "dbus-update-activation-environment --systemd --all"
-riverctl spawn "systemctl --user start river-session.target"
+# Import environment to D-Bus and systemd (must run directly, not via riverctl spawn)
+dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
+systemctl --user start river-session.target
 
 # Kill existing processes on reload to prevent duplicates
 # Note: NixOS wraps binaries (e.g., .waybar-wrapped), so -x won't match
