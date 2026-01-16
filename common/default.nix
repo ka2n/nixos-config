@@ -211,6 +211,7 @@ in {
     codex
     gemini-cli-bin
     delta
+    jujutsu
 
     # Build tools
     gcc
