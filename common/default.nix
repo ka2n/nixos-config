@@ -468,6 +468,35 @@ in {
       monospace = [ "Cica" "Noto Sans Mono CJK JP" ];
       emoji = [ "Noto Color Emoji" ];
     };
+    localConf = ''
+      <?xml version="1.0"?>
+      <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+      <fontconfig>
+        <!-- lang=ja の場合、CJK JPフォントを優先 -->
+        <match target="pattern">
+          <test name="lang" compare="contains">
+            <string>ja</string>
+          </test>
+          <test name="family" qual="any">
+            <string>sans-serif</string>
+          </test>
+          <edit name="family" mode="prepend" binding="strong">
+            <string>Noto Sans CJK JP</string>
+          </edit>
+        </match>
+        <match target="pattern">
+          <test name="lang" compare="contains">
+            <string>ja</string>
+          </test>
+          <test name="family" qual="any">
+            <string>serif</string>
+          </test>
+          <edit name="family" mode="prepend" binding="strong">
+            <string>Noto Serif CJK JP</string>
+          </edit>
+        </match>
+      </fontconfig>
+    '';
   };
 
   # Local CA for HTTPS development (Caddy)
