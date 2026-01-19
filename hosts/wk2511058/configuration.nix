@@ -47,7 +47,7 @@ in {
     isNormalUser = true;
     createHome = true;
     uid = 1001;
-    extraGroups = [ "networkmanager" "wheel" "docker" "uinput" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" "uinput" "libvirtd" ];
   };
 
   services.azure-entra = {

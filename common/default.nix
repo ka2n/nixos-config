@@ -144,7 +144,7 @@ in {
   users.users.k2 = {
     isNormalUser = true;
     description = "k2";
-    extraGroups = [ "networkmanager" "wheel" "docker" "uinput" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" "uinput" "libvirtd" ];
   };
 
   # Common packages
@@ -452,6 +452,16 @@ in {
       registry-mirrors = [ "https://mirror.gcr.io" ];
     };
   };
+
+  # KVM/QEMU virtualization
+  virtualisation.libvirtd = {
+    enable = true;
+    qemu = {
+      package = pkgs.qemu_kvm;
+      swtpm.enable = true; # TPM emulation (Windows 11)
+    };
+  };
+  programs.virt-manager.enable = true;
 
   fonts.packages = (with pkgs; [
     noto-fonts
