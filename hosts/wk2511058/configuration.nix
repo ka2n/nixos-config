@@ -49,6 +49,7 @@ in {
 
   services.azure-entra = {
     enable = true;
+    debugFlag = false;
     browserSso.chrome = true;
     pamServices = [ "passwd" "login" "systemd-user" "hyprlock" "swaylock" ];
     userMap.katsuma = privateConfig.username;

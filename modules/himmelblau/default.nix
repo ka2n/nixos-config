@@ -77,11 +77,10 @@ in {
         connection_timeout = 30
         db_path = /var/cache/himmelblaud/himmelblau.cache.db
         debug = ${lib.boolToString cfg.debugFlag}
-        domains = ${builtins.head privateConfig.domains}
+        domain = ${builtins.head privateConfig.domains}
         enable_experimental_mfa = true
         enable_hello = true
         enable_sfa_fallback = true
-        allow_console_password_only = true
         hello_pin_min_length = 6
         home_alias = CN
         home_attr = CN
@@ -97,6 +96,10 @@ in {
         socket_path = /var/run/himmelblaud/socket
         task_socket_path = /var/run/himmelblaud/task_sock
         use_etc_skel = false
+
+        [offline_breakglass]
+        enabled = true
+        ttl = 7d
       '' + lib.optionalString (cfg.userMap != { }) ''
         user_map_file = /etc/himmelblau/user-map
       '';
@@ -191,8 +194,10 @@ in {
           # Add tss group for TPM access via tpm2-abrmd
           SupplementaryGroups = [ "tss" ];
           CacheDirectory = "himmelblaud";
+          CacheDirectoryMode = "0700";
           RuntimeDirectory = "himmelblaud";
           StateDirectory = "himmelblaud";
+          StateDirectoryMode = "0700";
           PrivateTmp = true;
           # Disable PrivateDevices to allow tpmrm0 access for TPM binding
           PrivateDevices = false;
