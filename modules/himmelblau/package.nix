@@ -5,6 +5,7 @@
 , runCommand
 , writeText
 , pkg-config
+, python3
 , talloc
 , tevent
 , ding-libs
@@ -34,6 +35,7 @@ let
     "^fuzz.*"
     "^src.*"
     "^man.*"
+    "^docs-xml.*"
     "^Cargo\\.toml$"
     "^Cargo\\.lock$"
     "^scripts.*"
@@ -53,6 +55,7 @@ let
 
   nativeBuildInputs = [
     pkg-config
+    python3
     rustPlatform.bindgenHook
   ];
 
