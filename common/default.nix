@@ -347,7 +347,7 @@ in {
   services.hypridle.enable = true;
 
   # River
-  programs.river.enable = true;
+  programs.river-classic.enable = true;
 
   # Override hypridle to only start under hyprland-session.target (not gdm-greeter)
   systemd.user.services.hypridle = {
@@ -448,9 +448,7 @@ in {
   # Docker
   virtualisation.docker = {
     enable = true;
-    daemon.settings = {
-      registry-mirrors = [ "https://mirror.gcr.io" ];
-    };
+    daemon.settings = { registry-mirrors = [ "https://mirror.gcr.io" ]; };
   };
 
   # KVM/QEMU virtualization
