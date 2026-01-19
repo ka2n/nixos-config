@@ -5,8 +5,7 @@
 timeout 300 'loginctl lock-session'
 
 # Turn off screen after 7 minutes (420 seconds)
-timeout 420 'wlopm --off "*"'
-resume 'wlopm --on "*"'
+timeout 420 'wlopm --off "*"' resume 'wlopm --on "*"'
 
 # Suspend after 30 minutes (1800 seconds)
 timeout 1800 'systemctl suspend'
