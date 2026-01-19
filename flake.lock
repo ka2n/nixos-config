@@ -65,16 +65,16 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1768492066,
-        "narHash": "sha256-mJ8nSHksZ8+nbPWNnjc9A0UeJBj052+Gh3JEfPnq/W0=",
+        "lastModified": 1768520301,
+        "narHash": "sha256-Rov9iBr4ezizcgXB6PW87NEODTLGUdbR2nxtzsDGyM4=",
         "owner": "himmelblau-idm",
         "repo": "himmelblau",
-        "rev": "2418ec22e24a8d1410078f884a89752fa4f0e1a1",
+        "rev": "556a910eadbb8efd57a7e5eb6b996f2c7a7f463d",
         "type": "github"
       },
       "original": {
         "owner": "himmelblau-idm",
-        "ref": "stable-2.x",
+        "ref": "main",
         "repo": "himmelblau",
         "type": "github"
       }
