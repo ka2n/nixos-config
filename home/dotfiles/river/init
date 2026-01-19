@@ -248,6 +248,11 @@ riverctl map normal None XF86AudioPrev spawn "playerctl previous"
 ### WINDOW RULES ###
 ###################
 
+# Default tags for applications
+riverctl rule-add -app-id "zen" tags 4        # Tag 3 (1 << 2)
+riverctl rule-add -app-id "Slack" tags 256    # Tag 9 (1 << 8)
+riverctl rule-add -app-id "chrome-ekkgfahjgapfldoebpeoimefnlikpcne-*" tags 128  # Tag 8: Gather
+
 # TUI apps - float with fixed size (matching Hyprland)
 riverctl rule-add -app-id "clipse" float
 riverctl rule-add -app-id "clipse" dimensions 622 652
