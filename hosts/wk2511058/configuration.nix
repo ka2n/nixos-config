@@ -1,5 +1,5 @@
 # Laptop-specific configuration
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, pkgs-unstable, lib, inputs, ... }:
 
 let
   himmelblauPkg = pkgs.callPackage ../../modules/himmelblau/package.nix {
@@ -19,7 +19,10 @@ in {
 
   #boot.kernelPackages = pkgs.linuxPackages_zen;
 
-  environment.systemPackages = with pkgs; [ foot brightnessctl ];
+  environment.systemPackages = [
+    pkgs.foot
+    pkgs.brightnessctl
+  ];
 
   home-manager = {
     useGlobalPkgs = true;
@@ -70,6 +73,10 @@ in {
       "Integrated Camera: Integrated C" = 50;
     };
   };
+
+  # Intel NPU support (from unstable until nixpkgs-25.11 includes the module)
+  hardware.graphics.extraPackages = [ pkgs-unstable.intel-npu-driver ];
+  hardware.firmware = [ pkgs-unstable.intel-npu-driver.firmware ];
 
   system.stateVersion = "25.11";
 }
