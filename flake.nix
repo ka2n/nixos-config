@@ -17,7 +17,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     himmelblau = {
-      url = "github:himmelblau-idm/himmelblau/main";
+      url = "github:himmelblau-idm/himmelblau/stable-2.x";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     inputactions = {
