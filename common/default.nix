@@ -38,14 +38,19 @@ in {
   system.configurationRevision = configRevision;
 
   # Nix settings
-  nix.gc.automatic = true;
-  nix.gc.dates = "weekly";
-  nix.gc.options = "--delete-older-than 7d";
   nix.settings.auto-optimise-store = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.settings.trusted-users = [ "root" "@wheel" ];
   nix.settings.accept-flake-config = true;
   nixpkgs.config.allowUnfree = true;
+
+  # nh - Nix helper
+  programs.nh = {
+    enable = true;
+    clean.enable = true;
+    clean.extraArgs = "--keep-since 4d --keep 3";
+    flake = "/home/shared/nixos-config";
+  };
 
   # Show diff of updates with nvd
   system.activationScripts.diff = {
