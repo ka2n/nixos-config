@@ -17,17 +17,12 @@ let
       runHook postInstall
     '';
   };
-
-  # Hyprland plugins directory
-  hypr-plugin-dir = pkgs.symlinkJoin {
-    name = "hyprland-plugins";
-    paths = [ inputs.inputactions.packages.x86_64-linux.inputactions-hyprland ];
-  };
 in {
   imports = [
     ../modules/zen-browser
     ../modules/mise
-    ../modules/hypr-scripts
+    ../modules/wayland-scripts
+    ../modules/river
     ../modules/xremap.nix
     ../modules/webcam-flicker.nix
     ../modules/local-ca
@@ -97,16 +92,6 @@ in {
       "Groups/0/Items/0".Name = "cskk";
       "Groups/0/Items/1".Name = "keyboard-us";
       GroupOrder."0" = "Default";
-    };
-  };
-
-  systemd.user.targets.hyprland-session = {
-    unitConfig = {
-      Description = "Hyprland compositor session";
-      Documentation = [ "man:systemd.special(7)" ];
-      BindsTo = [ "graphical-session.target" ];
-      Wants = [ "graphical-session-pre.target" ];
-      After = [ "graphical-session-pre.target" ];
     };
   };
 
@@ -202,10 +187,8 @@ in {
 
     # Keyboard/Input
     warpd
-    inputs.inputactions.packages.x86_64-linux.inputactions-hyprland # Mouse/touchpad gestures for Hyprland
     inputs.inputactions.packages.x86_64-linux.inputactions-ctl
     inputactions-standalone # Mouse/touchpad gestures standalone (for River)
-    hyprtag # Tag-based window management for Hyprland (dwm-style)
 
     # Development
     go
@@ -288,13 +271,11 @@ in {
     # Password Manager
     keeper-desktop
 
-    # Wayland / Hyprland / River
+    # Wayland / River
     wl-clipboard
     clipse # Clipboard manager TUI
     waybar
     rofi
-    hyprpaper
-    rose-pine-hyprcursor
     grim
     slurp
     swappy # Screenshot annotation tool
@@ -327,9 +308,6 @@ in {
   # Add $HOME/.local/bin to PATH
   environment.sessionVariables.PATH = [ "$HOME/.local/bin" ];
 
-  # Hyprland plugins directory
-  environment.sessionVariables.HYPR_PLUGIN_DIR = "${hypr-plugin-dir}/lib";
-
   # GTK Emacs keybindings (Ctrl-W for word delete, etc.)
   environment.sessionVariables.GTK_KEY_THEME = "Emacs";
 
@@ -346,21 +324,10 @@ in {
   # Zen Browser
   programs.zen-browser.enable = true;
 
-  # Hyprland
-  programs.hyprland.enable = true;
-  programs.hyprlock.enable = true;
-  services.hypridle.enable = true;
+  # River (with fallback init for users without ~/.config/river/init)
+  programs.river-with-fallback.enable = true;
 
-  # River
-  programs.river-classic.enable = true;
-
-  # Override hypridle to only start under hyprland-session.target (not gdm-greeter)
-  systemd.user.services.hypridle = {
-    wantedBy = lib.mkForce [ "hyprland-session.target" ];
-    after = lib.mkForce [ "hyprland-session.target" ];
-  };
-
-  # Swaylock (fallback screen locker)
+  # Swaylock (screen locker)
   security.pam.services.swaylock = { };
 
   # Polkit
@@ -388,8 +355,8 @@ in {
   # mise - polyglot runtime manager
   programs.mise.enable = true;
 
-  # Hyprland utility scripts (terminal wrappers, rofi scripts)
-  programs.hypr-scripts.enable = true;
+  # Wayland utility scripts (terminal wrappers, rofi scripts)
+  programs.wayland-scripts.enable = true;
 
   # NoiseTorch - microphone noise suppression
   programs.noisetorch.enable = true;
@@ -400,16 +367,11 @@ in {
   services.xserver.desktopManager.runXdgAutostartIfNone = true;
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [
-    pkgs.xdg-desktop-portal-hyprland
-    pkgs.xdg-desktop-portal-wlr # For River
+    pkgs.xdg-desktop-portal-wlr
     pkgs.xdg-desktop-portal-gtk
   ];
   xdg.portal.config = {
-    common = { default = [ "hyprland" "gtk" ]; };
-    hyprland = {
-      default = [ "hyprland" "gtk" ];
-      "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
-    };
+    common = { default = [ "wlr" "gtk" ]; };
     river = {
       default = [ "wlr" "gtk" ];
       "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];

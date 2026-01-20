@@ -46,14 +46,6 @@ in {
     pkgs.docker-credential-helpers
 
     # Local bin scripts
-    (pkgs.writeShellScriptBin "wlprop"
-      (builtins.replaceStrings [ "@hyprctl@" "@jq@" "@slurp@" "@awk@" ] [
-        "${lib.getExe' pkgs.hyprland "hyprctl"}"
-        "${lib.getExe pkgs.jq}"
-        "${lib.getExe pkgs.slurp}"
-        "${lib.getExe' pkgs.gawk "awk"}"
-      ] (builtins.readFile ./dotfiles/local/bin/wlprop.sh)))
-
     (pkgs.writeShellScriptBin "find-parent-package-dir"
       (builtins.replaceStrings [ "@git@" ] [ "${lib.getExe pkgs.git}" ]
         (builtins.readFile ./dotfiles/local/bin/find-parent-package-dir.sh)))
