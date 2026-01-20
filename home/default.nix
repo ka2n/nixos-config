@@ -41,6 +41,7 @@ in {
     pkgs.lsd
     pkgs.curlie
     pkgs.vhs
+    pkgs.git-wt
 
     # Docker
     pkgs.docker-credential-helpers
@@ -234,7 +235,8 @@ in {
     previewer = "${lf-previewer-sandboxed}";
   };
   xdg.configFile."waybar/config.jsonc".source = ./dotfiles/waybar/config.jsonc;
-  xdg.configFile."waybar/config-river.jsonc".source = ./dotfiles/waybar/config-river.jsonc;
+  xdg.configFile."waybar/config-river.jsonc".source =
+    ./dotfiles/waybar/config-river.jsonc;
   xdg.configFile."waybar/style.css".source = ./dotfiles/waybar/style.css;
   xdg.configFile."hypr" = {
     source = ./dotfiles/hypr;
@@ -453,11 +455,10 @@ in {
   xdg.configFile."kanshi/config".source = ./dotfiles/kanshi/config;
 
   # swayidle configuration for River
-  xdg.configFile."swayidle/config".source =
-    if variant == "laptop" then
-      ./dotfiles/swayidle/config-laptop
-    else
-      ./dotfiles/swayidle/config-desktop;
+  xdg.configFile."swayidle/config".source = if variant == "laptop" then
+    ./dotfiles/swayidle/config-laptop
+  else
+    ./dotfiles/swayidle/config-desktop;
 
   # swaylock configuration
   xdg.configFile."swaylock/config".source = ./dotfiles/swaylock/config;

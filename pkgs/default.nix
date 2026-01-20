@@ -18,7 +18,7 @@ in
   keeper-desktop = final.callPackage ./keeper-desktop { };
   display-switch = final.callPackage ./display-switch { };
   alma = final.callPackage ./alma { };
-  hyprtag = final.callPackage ./hyprtag { };
+  git-wt = final.callPackage ./git-wt { };
   inputactions-standalone = final.callPackage ./inputactions-standalone { };
 
   # Cursor 2.2.20 - Update from nixpkgs 2.1.42
