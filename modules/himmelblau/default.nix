@@ -17,7 +17,7 @@ in {
 
     debugFlag = lib.mkOption {
       type = lib.types.bool;
-      default = false;
+      default = true;
       description =
         "Whether to pass the debug (-d) flag to the himmelblaud binary";
     };
@@ -46,7 +46,8 @@ in {
     userMap = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       default = { };
-      description = "Mapping of local usernames to UPNs for Local User Mapping feature";
+      description =
+        "Mapping of local usernames to UPNs for Local User Mapping feature";
       example = { katsuma = "katsuma@example.onmicrosoft.com"; };
     };
   };
