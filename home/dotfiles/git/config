@@ -83,6 +83,10 @@
   root = ~/go/src
   root = ~/src
 
+[wt]
+  basedir = {gitroot}/.wt
+  copyignored = true
+
 [credential]
   helper = !gh auth git-credential
 
