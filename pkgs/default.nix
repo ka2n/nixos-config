@@ -20,6 +20,7 @@ in
   alma = final.callPackage ./alma { };
   git-wt = final.callPackage ./git-wt { };
   inputactions-standalone = final.callPackage ./inputactions-standalone { };
+  pencil = final.callPackage ./pencil { };
 
   # Cursor 2.2.20 - Update from nixpkgs 2.1.42
   # Patches:
