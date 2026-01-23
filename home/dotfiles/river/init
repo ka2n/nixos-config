@@ -51,7 +51,7 @@ systemctl --user start river-session.target
 pkill waybar 2>/dev/null
 pkill clipse 2>/dev/null
 pkill wlsunset 2>/dev/null
-pkill swayidle 2>/dev/null
+# swayidle removed - using hypridle (systemd service) for both Hyprland and River
 
 # UI
 riverctl spawn "waybar -c ~/.config/waybar/config-river.jsonc"
@@ -69,8 +69,7 @@ riverctl spawn "wlsunset -l 35.6 -L 139.8"
 riverctl spawn "systemctl --user start xremap"
 riverctl spawn "systemctl --user start yaskkserv2"
 
-# Idle management
-riverctl spawn swayidle
+# Idle management handled by hypridle (systemd service)
 
 ###################
 ### INPUT ###

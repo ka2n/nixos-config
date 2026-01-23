@@ -166,6 +166,7 @@ in {
     yazi
     pulsemixer
     wiremix # PipeWire TUI mixer
+    hyprlock # Screen locker (works with both Hyprland and River)
     swaylock # Fallback screen locker
     libsecret
     gcr
@@ -327,7 +328,8 @@ in {
   # River (with fallback init for users without ~/.config/river/init)
   programs.river-with-fallback.enable = true;
 
-  # Swaylock (screen locker)
+  # Screen lockers (PAM authentication)
+  security.pam.services.hyprlock = { };
   security.pam.services.swaylock = { };
 
   # Polkit
