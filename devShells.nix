@@ -12,14 +12,23 @@ in {
   # 通常利用てんこ盛りパック
   # Usage: nix develop ~/nixos-config
   default = pkgs.mkShell {
-    packages = (with pkgs; [
-      playwright-driver.browsers
-      jq
-      volta
-      openssl.dev
-    ]) ++ (with pkgs-unstable; [
-      prisma-engines_7
-    ]);
+    packages =
+      (with pkgs; [
+        playwright-driver.browsers
+        jq
+        volta
+        openssl.dev
+        lsof
+        # Web development tools
+        curl
+        wget
+        entr
+        watchexec
+        tree
+        netcat
+        sqlite
+      ])
+      ++ (with pkgs-unstable; [ prisma-engines_7 ]);
 
     shellHook = ''
       # Playwright configuration
@@ -32,8 +41,12 @@ in {
       export VOLTA_FEATURE_PNPM=1
 
       # NixOS compatibility for Volta-installed binaries
-      export NIX_LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath (with pkgs; [ stdenv.cc.cc openssl ])}"
-      export NIX_LD="${pkgs.lib.fileContents "${pkgs.stdenv.cc}/nix-support/dynamic-linker"}"
+      export NIX_LD_LIBRARY_PATH="${
+        pkgs.lib.makeLibraryPath (with pkgs; [ stdenv.cc.cc openssl ])
+      }"
+      export NIX_LD="${
+        pkgs.lib.fileContents "${pkgs.stdenv.cc}/nix-support/dynamic-linker"
+      }"
 
       # Prisma configuration
       export PKG_CONFIG_PATH="${pkgs.openssl.dev}/lib/pkgconfig"
