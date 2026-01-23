@@ -3,29 +3,26 @@
 { pkgs-unstable }:
 
 {
-  # claude-code 2.1.14 (nixpkgs-unstable has 2.0.76)
-  # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/by-name/cl/claude-code/package.nix
-  claude-code = pkgs-unstable.buildNpmPackage {
+  # claude-code 2.1.17 (nixpkgs-unstable has 2.0.76)
+  # Binary distribution from official GCS bucket
+  claude-code = pkgs-unstable.stdenv.mkDerivation {
     pname = "claude-code";
-    version = "2.1.14";
+    version = "2.1.17";
 
-    src = pkgs-unstable.fetchzip {
-      url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-2.1.14.tgz";
-      hash = "sha256-QiBvRm1iMtO3mmlu5a/aKaJzcAQxeBW7yLK4R4k6SU0=";
+    src = pkgs-unstable.fetchurl {
+      url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.17/linux-x64/claude";
+      hash = "sha256-Eai8LezhzXcXpMETiDpXMJVRFHVUVZXSsOlvGI1lHg8=";
     };
 
-    npmDepsHash = "sha256-PIhayi4wNoP4XxWpEIH7/Ycq1mBAMcE4vDuLCTW7/bE=";
+    nativeBuildInputs = [ pkgs-unstable.makeWrapper ];
 
-    postPatch = ''
-      cp ${./claude-code-package-lock.json} package-lock.json
-    '';
+    dontUnpack = true;
+    dontStrip = true;
+    dontPatchELF = true;
 
-    dontNpmBuild = true;
-
-    env.AUTHORIZED = "1";
-
-    postInstall = ''
-      wrapProgram $out/bin/claude \
+    installPhase = ''
+      install -Dm755 $src $out/bin/.claude-unwrapped
+      makeWrapper $out/bin/.claude-unwrapped $out/bin/claude \
         --set DISABLE_AUTOUPDATER 1 \
         --unset DEV
     '';
