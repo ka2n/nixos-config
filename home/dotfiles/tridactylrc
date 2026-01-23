@@ -25,6 +25,7 @@ autocmd DocStart ^https://old.reddit.com mode ignore
 autocmd DocStart ^https://reddit.com mode ignore
 autocmd DocStart ^https://messenger.com mode ignore
 autocmd DocStart ^https://calendar.notion.so mode ignore
+autocmd DocStart ^https://www.figma.com/board/ mode ignore
 
 unbindurl --mode=insert scrapbox\.io <C-i>
 unbindurl --mode=normal www.rememberthemilk.com gt
