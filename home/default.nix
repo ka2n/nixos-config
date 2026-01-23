@@ -282,6 +282,32 @@ in {
     recursive = true;
   };
 
+  # xdg-desktop-portal configuration
+  # Note: User-level config completely overrides system-level (NixOS) config
+  # So we must include all settings here, not just darkman
+  # extraPortals also required - sets NIX_XDG_DESKTOP_PORTAL_DIR to user profile
+  xdg.portal = {
+    enable = true;
+    xdgOpenUsePortal = true;
+    extraPortals = [
+      pkgs.xdg-desktop-portal-gtk
+      pkgs.xdg-desktop-portal-wlr
+      pkgs.darkman
+      pkgs.gnome-keyring
+    ];
+    config = {
+      common = {
+        default = [ "wlr" "gtk" ];
+        "org.freedesktop.impl.portal.Settings" = [ "darkman" ];
+      };
+      river = {
+        default = [ "wlr" "gtk" ];
+        "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+        "org.freedesktop.impl.portal.Settings" = [ "darkman" ];
+      };
+    };
+  };
+
   # xdg-open URL handler
   xdg.mimeApps = {
     enable = true;

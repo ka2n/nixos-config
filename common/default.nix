@@ -286,7 +286,7 @@ in {
     glib
     gtk3 # gtk-launch
     wlopm # DPMS control for wlroots compositors
-    hypridle # Idle management (works with both Hyprland and River)
+    # hypridle is managed by home-manager services.hypridle (avoid systemd unit conflict)
     wlr-randr # Monitor configuration for wlroots compositors (River)
     kanshi # Auto display configuration for wlroots compositors
 
@@ -366,15 +366,10 @@ in {
   services.displayManager.gdm.wayland = true;
   services.xserver.desktopManager.runXdgAutostartIfNone = true;
   xdg.portal.enable = true;
-  xdg.portal.extraPortals = [
-    pkgs.xdg-desktop-portal-wlr
-    pkgs.xdg-desktop-portal-gtk
-  ];
-  xdg.portal.config = {
-    common = { default = [ "wlr" "gtk" ]; };
-    river = {
-      default = [ "wlr" "gtk" ];
-      "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+  xdg.portal.wlr = {
+    enable = true;
+    settings.screencast = {
+      chooser_type = "default";  # auto-detect slurp/wofi/rofi/bemenu
     };
   };
 
