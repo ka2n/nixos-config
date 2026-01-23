@@ -242,11 +242,37 @@ in {
     source = ./dotfiles/hypr;
     recursive = true;
   };
-  # Override hypridle.conf based on variant
-  xdg.configFile."hypr/hypridle.conf".source = if variant == "laptop" then
-    ./dotfiles/hypr/hypridle-laptop.conf
-  else
-    ./dotfiles/hypr/hypridle-desktop.conf;
+  # hypridle - idle management (works with both Hyprland and River)
+  services.hypridle = {
+    enable = true;
+    systemdTarget = "river-session.target";
+    settings = let
+      lockTimeout = if variant == "laptop" then 300 else 900;
+      screenOffTimeout = if variant == "laptop" then 420 else 1800;
+      suspendTimeout = if variant == "laptop" then 1800 else 7200;
+    in {
+      general = {
+        lock_cmd = "pidof hyprlock || hyprlock --grace 10";
+        before_sleep_cmd = "loginctl lock-session";
+        after_sleep_cmd = "wlopm --on '*'";
+      };
+      listener = [
+        {
+          timeout = lockTimeout;
+          on-timeout = "loginctl lock-session";
+        }
+        {
+          timeout = screenOffTimeout;
+          on-timeout = "wlopm --off '*'";
+          on-resume = "wlopm --on '*'";
+        }
+        {
+          timeout = suspendTimeout;
+          on-timeout = "systemctl suspend";
+        }
+      ];
+    };
+  };
   xdg.configFile."alacritty" = {
     source = ./dotfiles/alacritty;
     recursive = true;
@@ -453,15 +479,6 @@ in {
 
   # Kanshi - auto display configuration for River
   xdg.configFile."kanshi/config".source = ./dotfiles/kanshi/config;
-
-  # swayidle configuration for River
-  xdg.configFile."swayidle/config".source = if variant == "laptop" then
-    ./dotfiles/swayidle/config-laptop
-  else
-    ./dotfiles/swayidle/config-desktop;
-
-  # swaylock configuration
-  xdg.configFile."swaylock/config".source = ./dotfiles/swaylock/config;
 
   programs.firefox = {
     enable = true;

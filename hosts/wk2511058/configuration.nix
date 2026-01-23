@@ -54,7 +54,7 @@ in {
     enable = true;
     debugFlag = false;
     browserSso.chrome = true;
-    pamServices = [ "passwd" "login" "systemd-user" "hyprlock" "swaylock" ];
+    pamServices = [ "passwd" "login" "systemd-user" "hyprlock" ];
     userMap.katsuma = privateConfig.username;
   };
 

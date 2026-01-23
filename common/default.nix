@@ -167,7 +167,6 @@ in {
     pulsemixer
     wiremix # PipeWire TUI mixer
     hyprlock # Screen locker (works with both Hyprland and River)
-    swaylock # Fallback screen locker
     libsecret
     gcr
     playerctl
@@ -287,7 +286,7 @@ in {
     glib
     gtk3 # gtk-launch
     wlopm # DPMS control for wlroots compositors
-    swayidle # Idle management for River
+    hypridle # Idle management (works with both Hyprland and River)
     wlr-randr # Monitor configuration for wlroots compositors (River)
     kanshi # Auto display configuration for wlroots compositors
 
@@ -328,9 +327,8 @@ in {
   # River (with fallback init for users without ~/.config/river/init)
   programs.river-with-fallback.enable = true;
 
-  # Screen lockers (PAM authentication)
+  # Screen locker (PAM authentication)
   security.pam.services.hyprlock = { };
-  security.pam.services.swaylock = { };
 
   # Polkit
   security.polkit.enable = true;
