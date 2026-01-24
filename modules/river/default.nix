@@ -1,7 +1,8 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
 let
   cfg = config.programs.river-with-fallback;
+  riverClassic = inputs.river-classic.packages.${pkgs.system}.default;
 
   # Fallback init script for users without ~/.config/river/init
   fallbackInit = pkgs.writeShellScript "river-fallback-init" ''
@@ -45,9 +46,9 @@ let
   # Wrapper: use ~/.config/river/init if exists, otherwise fallback
   riverWrapper = pkgs.writeShellScriptBin "river-with-fallback" ''
     if [ -x "$HOME/.config/river/init" ]; then
-      exec ${pkgs.river-classic}/bin/river
+      exec ${riverClassic}/bin/river
     else
-      exec ${pkgs.river-classic}/bin/river -c ${fallbackInit}
+      exec ${riverClassic}/bin/river -c ${fallbackInit}
     fi
   '';
 
@@ -71,7 +72,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    programs.river-classic.enable = true;
+    environment.systemPackages = [ riverClassic ];
     services.displayManager.sessionPackages = [ riverSession ];
   };
 }
