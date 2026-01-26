@@ -28,6 +28,10 @@ if type -q mise
     mise activate fish | source
 end
 
+if type -q git-wt
+    git-wt --init fish | source
+end
+
 #set -gx VOLTA_HOME "$HOME/.volta"
 #set -gx PATH "$VOLTA_HOME/bin" $PATH
 
