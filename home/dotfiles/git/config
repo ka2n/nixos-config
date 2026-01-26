@@ -84,7 +84,7 @@
   root = ~/src
 
 [wt]
-  basedir = .wt
+  basedir = .worktrees
   copyignored = true
 
 [credential]
