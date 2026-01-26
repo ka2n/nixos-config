@@ -84,7 +84,7 @@
   root = ~/src
 
 [wt]
-  basedir = {gitroot}/.wt
+  basedir = .wt
   copyignored = true
 
 [credential]
