@@ -13,6 +13,9 @@
 ## Document and Resource Management
 - If there is reference information, save it in the external-docs/ directory.
 - When cloning external repositories, use shallow clones with clear naming: `git clone --depth 1 <REPO_URL> external-docs/<REPO_NAME>`
+- For API documentation:
+  - Prefer JSON Schema or OpenAPI spec files when available (download directly)
+  - Otherwise, use `save-url-to-doc <URL>` to convert web docs to markdown
 
 ## Agent launch rules
 

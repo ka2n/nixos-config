@@ -42,6 +42,7 @@ in {
     pkgs.curlie
     pkgs.vhs
     pkgs.git-wt
+    pkgs.go-readability
 
     # Docker
     pkgs.docker-credential-helpers
@@ -65,6 +66,19 @@ in {
     (pkgs.writeShellScriptBin "ndev" ''
       exec nix develop "$HOME/nixos-config" --command "$SHELL"
     '')
+
+    (pkgs.writeShellScriptBin "save-url-to-doc"
+      (builtins.replaceStrings
+        [ "@readability@" "@git@" "@wl_paste@" "@sed@" "@mkdir@" "@mv@" ]
+        [
+          (lib.getExe pkgs.go-readability)
+          (lib.getExe pkgs.git)
+          (lib.getExe' pkgs.wl-clipboard "wl-paste")
+          (lib.getExe' pkgs.gnused "sed")
+          (lib.getExe' pkgs.coreutils "mkdir")
+          (lib.getExe' pkgs.coreutils "mv")
+        ]
+        (builtins.readFile ./dotfiles/local/bin/save-url-to-doc.sh)))
 
     (pkgs.writeShellScriptBin "tf-pr" ''
       set -euo pipefail

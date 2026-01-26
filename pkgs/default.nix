@@ -19,6 +19,7 @@ in
   display-switch = final.callPackage ./display-switch { };
   alma = final.callPackage ./alma { };
   git-wt = final.callPackage ./git-wt { };
+  go-readability = final.callPackage ./go-readability { };
   inputactions-standalone = final.callPackage ./inputactions-standalone { };
   pencil = final.callPackage ./pencil { };
 
