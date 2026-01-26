@@ -1,5 +1,11 @@
 # NixOS Configuration
 
+## Rebuild and Switch
+
+- home-manager is also managed by NixOS, so `nixos-rebuild switch` is required
+- `nh os` can also be used (recommended)
+- Permission is only for testing builds (`nixos-rebuild build` or `nh os build`), not for switching
+
 ## Activation Scripts
 
 - `coreutils` commands (`cat`, `mkdir`, `chmod`, `rm`, `tr`) are in PATH
