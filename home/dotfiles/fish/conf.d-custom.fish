@@ -133,6 +133,30 @@ if type -q fzf
         end
         commandline -f repaint
     end
+
+    # Alt-w: git worktree selection
+    function fzf_git_worktree_select
+        set -l query (commandline)
+        set -l fzf_flags $FZF_DEFAULT_OPTS
+
+        if test -n "$query"
+            set -a fzf_flags --query "$query"
+        end
+
+        git wt 2>/dev/null | tail -n+2 | fzf $fzf_flags | read line
+
+        if [ $line ]
+            # Extract branch name (2nd column)
+            set -l branch (echo $line | awk '{print $2}')
+            git wt $branch
+            commandline -f repaint
+        end
+    end
+
+    # wt command: shortcut for fzf_git_worktree_select
+    function wt
+        fzf_git_worktree_select
+    end
 end
 
 if type -q op
@@ -224,6 +248,9 @@ function fish_user_key_bindings
 
   # Ctrl-]: ghq リポジトリ選択
   bind \c] 'fzf_ghq_select_repository (commandline -b)'
+
+  # Alt-w: git worktree selection
+  bind \ew fzf_git_worktree_select
 end
 
 
