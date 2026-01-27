@@ -263,7 +263,7 @@ in {
     settings = let
       lockTimeout = if variant == "laptop" then 300 else 900;
       screenOffTimeout = if variant == "laptop" then 420 else 1800;
-      suspendTimeout = if variant == "laptop" then 1800 else 7200;
+      suspendTimeout = if variant == "laptop" then 1800 else 28800;
     in {
       general = {
         lock_cmd = "pidof hyprlock || hyprlock --grace 10";
