@@ -355,11 +355,11 @@
         "nixpkgs-wayland": "nixpkgs-wayland"
       },
       "locked": {
-        "lastModified": 1769297226,
-        "narHash": "sha256-xFcU1YIc4ou3VFO+6cf5+xY22E64qxeYFMboziQZV6w=",
+        "lastModified": 1769388451,
+        "narHash": "sha256-4WINHvoj0xDQNHdk+Zrp7PizIyZMThkVAuYzJJX7OcI=",
         "ref": "refs/heads/main",
-        "rev": "6a7e27647692e20e388ea2d910d24e6607880f87",
-        "revCount": 1375,
+        "rev": "f0ff19a6c65ed2d108ae1e3ed1a7866a7b0e0b70",
+        "revCount": 1398,
         "type": "git",
         "url": "https://codeberg.org/ka2n/river-classic"
       },
