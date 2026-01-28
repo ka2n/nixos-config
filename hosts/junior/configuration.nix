@@ -25,6 +25,9 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.supportedFilesystems = ["ntfs"];
 
+  # Enable kernel debugfs for amdgpu_evict_vram access
+  boot.kernel.sysctl."kernel.sysrq" = 1;  # Enable SysRq for emergency recovery
+
   environment.systemPackages = with pkgs; [
     foot
     ntfs3g
@@ -91,6 +94,50 @@
     ACTION=="change", KERNEL=="card[0-9]", SUBSYSTEM=="drm", ATTR{device/vendor}=="0x1002", RUN+="${pkgs.systemd}/bin/systemctl restart --no-block amdgpu-power.service"
   '';
 
+  # AMD GPU VRAM Eviction before Suspend
+  # Polaris GPUs crash on resume if VRAM cannot be saved to RAM (OOM during eviction)
+  # This service forces VRAM eviction before suspend, allowing swap usage if needed
+  # Source: https://nyanpasu64.gitlab.io/blog/amdgpu-sleep-wake-hang/
+  systemd.services.amdgpu-suspend = {
+    description = "AMD GPU suspend preparation";
+    before = ["sleep.target"];
+    wantedBy = ["sleep.target"];
+    serviceConfig = {
+      Type = "oneshot";
+    };
+    script = ''
+      # Sync filesystem to prevent data loss
+      sync
+
+      # Drop caches to free up RAM for VRAM eviction
+      echo 3 > /proc/sys/vm/drop_caches
+
+      # Evict VRAM to system RAM for each AMD GPU
+      # Reading this debugfs file triggers the driver to move VRAM contents to RAM
+      for evict in /sys/kernel/debug/dri/*/amdgpu_evict_vram; do
+        if [ -r "$evict" ]; then
+          cat "$evict" > /dev/null 2>&1 || true
+        fi
+      done
+    '';
+  };
+
+  # Restore AMD GPU settings after resume
+  systemd.services.amdgpu-resume = {
+    description = "AMD GPU resume restoration";
+    after = ["suspend.target" "hibernate.target" "hybrid-sleep.target"];
+    wantedBy = ["suspend.target" "hibernate.target" "hybrid-sleep.target"];
+    serviceConfig = {
+      Type = "oneshot";
+    };
+    script = ''
+      # Wait for GPU to stabilize after resume
+      sleep 3
+      # Restart amdgpu-power to reapply memory clock settings
+      ${pkgs.systemd}/bin/systemctl restart amdgpu-power.service || true
+    '';
+  };
+
   # AMD GPU Power Management for Polaris (RX 480/570/580)
   # Known issue: GFXOFF feature causes artifacts and crashes on Polaris cards
   # Solution: Disable GFXOFF (bit 15) while keeping other power-saving features
@@ -105,6 +152,8 @@
     "amdgpu.ppfeaturemask=0xffff7fff"  # Disable PP_GFXOFF_MASK (bit 15) only
     "amdgpu.gpu_recovery=1"
     "amdgpu.runpm=0"  # Disable runtime PM - fixes BACO suspend/resume crashes on Polaris
+    "amdgpu.bapm=0"   # Disable Bidirectional Application Power Management
+    "amdgpu.aspm=0"   # Disable PCIe Active State Power Management
     "amdgpu.noretry=0"  # Enable retry on timeout (may help with fence timeouts)
     "amdgpu.lockup_timeout=30000"  # Increase timeout from 10s to 30s for heavy workloads
   ];
