@@ -3,16 +3,15 @@
 { pkgs-unstable }:
 
 {
-  # claude-code 2.1.20 (nixpkgs-unstable has 2.0.76)
+  # claude-code 2.1.27 (nixpkgs-unstable has 2.0.76)
   # Binary distribution from official GCS bucket
   claude-code = pkgs-unstable.stdenv.mkDerivation {
     pname = "claude-code";
-    version = "2.1.20";
+    version = "2.1.27";
 
     src = pkgs-unstable.fetchurl {
-      url =
-        "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.20/linux-x64/claude";
-      hash = "sha256-+dNpj1N4pIbbLU7qXID5XCzrQQ+86p/8VwO1qslXT8w=";
+      url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.27/linux-x64/claude";
+      hash = "sha256-JN+R3SULbX9qD4slav+rbHpL3vpksezorKMjXV9eQEQ=";
     };
 
     nativeBuildInputs = [ pkgs-unstable.makeWrapper ];
