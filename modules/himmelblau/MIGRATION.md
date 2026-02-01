@@ -97,37 +97,54 @@ $ cachix use himmelblau
 
 **期間:** 5分
 
-### 0.1 Cachix のインストールと設定
+### 0.1 NixOS設定にCachixを追加
 
-```bash
-# Cachix のインストール
-nix profile install 'nixpkgs#cachix'
+**このリポジトリはFlake baseのため、`common/default.nix` で設定済みです。**
 
-# Himmelblau キャッシュの有効化
-cachix use himmelblau
+設定内容を確認:
+
+```nix
+# common/default.nix (既に設定済み)
+nix.settings.substituters = [
+  "https://cache.nixos.org"
+  "https://himmelblau.cachix.org"
+];
+nix.settings.trusted-public-keys = [
+  "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+  "himmelblau.cachix.org-1:yu8mq/NIBYsZHWzo4SOge97gpf02qugdZFT/JdRkswc="
+];
 ```
 
-これで `~/.config/nix/nix.conf` または `/etc/nix/nix.conf` に以下が追加されます:
-
-```
-extra-substituters = https://himmelblau.cachix.org
-extra-trusted-public-keys = himmelblau.cachix.org-1:...
-```
+**メリット:**
+- リポジトリをcloneした全員が自動的にキャッシュを利用可能
+- 設定がgit管理される
+- チーム全体で一貫した環境
 
 ### 0.2 動作確認
 
 ```bash
+# 設定をビルドして反映
+nixos-rebuild build
+
 # キャッシュが有効か確認
 nix show-config | grep substituters
 
 # 以下のような出力が表示されるはず:
-# extra-substituters = https://himmelblau.cachix.org ...
+# substituters = https://cache.nixos.org https://himmelblau.cachix.org
 ```
 
 **検証項目:**
-- [ ] Cachix がインストールされている
-- [ ] himmelblau キャッシュが設定に追加されている
-- [ ] substituters に himmelblau.cachix.org が含まれている
+- [ ] `common/default.nix` に substituters が設定されている
+- [ ] `nix show-config` で himmelblau.cachix.org が含まれている
+
+**参考: 個人環境での設定方法**
+
+個人環境でのみ試す場合は以下も可能:
+
+```bash
+nix profile install 'nixpkgs#cachix'
+cachix use himmelblau
+```
 
 ## Zen Browser について
 

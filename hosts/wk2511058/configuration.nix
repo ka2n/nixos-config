@@ -2,9 +2,8 @@
 { config, pkgs, pkgs-unstable, lib, inputs, ... }:
 
 let
-  himmelblauPkg = pkgs.callPackage ../../modules/himmelblau/package.nix {
-    himmelblauSrc = inputs.himmelblau;
-  };
+  # Use upstream package from flake (same as in modules/himmelblau/default.nix)
+  himmelblauPkg = inputs.himmelblau.packages.${pkgs.system}.himmelblau;
   privateConfig = import ../../private/laptop.nix;
 in {
   imports = [

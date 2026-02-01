@@ -3,8 +3,8 @@
 let
   cfg = config.services.azure-entra;
   privateConfig = import ../../private/laptop.nix;
-  himmelblauPkg =
-    pkgs.callPackage ./package.nix { himmelblauSrc = inputs.himmelblau; };
+  # Use upstream package from flake (cached on Cachix)
+  himmelblauPkg = inputs.himmelblau.packages.${pkgs.system}.himmelblau;
 in {
   options.services.azure-entra = {
     enable = lib.mkEnableOption "Azure Entra ID authentication via Himmelblau";
