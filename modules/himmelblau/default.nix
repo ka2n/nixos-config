@@ -3,8 +3,31 @@
 let
   cfg = config.services.azure-entra;
   privateConfig = import ../../private/laptop.nix;
-  himmelblauPkg =
-    pkgs.callPackage ./package.nix { himmelblauSrc = inputs.himmelblau; };
+  # Use upstream package from flake (cached on Cachix)
+  # Add passthru attributes for compatibility with home-manager
+  upstreamPkg = inputs.himmelblau.packages.${pkgs.system}.himmelblau;
+  himmelblauPkg = upstreamPkg.overrideAttrs (oldAttrs: {
+    passthru = (oldAttrs.passthru or { }) // {
+      # Native messaging host packages for home-manager compatibility
+      # Public package installs to lib/mozilla/ and lib/chromium/, but home-manager
+      # expects separate packages with specific directory structures
+      firefoxNativeMessagingHost = pkgs.runCommand "linux-entra-sso-firefox" { } ''
+        mkdir -p $out/lib/mozilla/native-messaging-hosts
+        cp ${upstreamPkg}/lib/mozilla/native-messaging-hosts/linux_entra_sso.json \
+           $out/lib/mozilla/native-messaging-hosts/
+      '';
+      chromeNativeMessagingHost = pkgs.runCommand "linux-entra-sso-chrome" { } ''
+        mkdir -p $out/etc/opt/chrome/native-messaging-hosts
+        cp ${upstreamPkg}/lib/chromium/native-messaging-hosts/linux_entra_sso.json \
+           $out/etc/opt/chrome/native-messaging-hosts/
+      '';
+      chromiumNativeMessagingHost = pkgs.runCommand "linux-entra-sso-chromium" { } ''
+        mkdir -p $out/etc/chromium/native-messaging-hosts
+        cp ${upstreamPkg}/lib/chromium/native-messaging-hosts/linux_entra_sso.json \
+           $out/etc/chromium/native-messaging-hosts/
+      '';
+    };
+  });
 in {
   options.services.azure-entra = {
     enable = lib.mkEnableOption "Azure Entra ID authentication via Himmelblau";
@@ -207,8 +230,7 @@ in {
 
       himmelblaud-tasks = {
         description = "Himmelblau Local Tasks";
-        after = [ "himmelblaud.service" ];
-        requires = [ "himmelblaud.service" ];
+        bindsTo = [ "himmelblaud.service" ];
         wantedBy = [ "multi-user.target" ];
         path = [ pkgs.shadow pkgs.bash ];
         unitConfig = {

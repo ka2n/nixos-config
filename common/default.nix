@@ -37,6 +37,16 @@ in {
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.settings.trusted-users = [ "root" "@wheel" ];
   nix.settings.accept-flake-config = true;
+
+  # Binary caches
+  nix.settings.substituters = [
+    "https://cache.nixos.org"
+    "https://himmelblau.cachix.org"
+  ];
+  nix.settings.trusted-public-keys = [
+    "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+    "himmelblau.cachix.org-1:yu8mq/NIBYsZHWzo4SOge97gpf02qugdZFT/JdRkswc="
+  ];
   nixpkgs.config.allowUnfree = true;
 
   # nh - Nix helper
@@ -370,6 +380,16 @@ in {
     enable = true;
     settings.screencast = {
       chooser_type = "default";  # auto-detect slurp/wofi/rofi/bemenu
+    };
+  };
+  # System-level portal configuration
+  # Note: User-level config (home-manager) overrides this via NIX_XDG_DESKTOP_PORTAL_DIR
+  xdg.portal.config = {
+    common = {
+      default = [ "wlr" "gtk" ];
+    };
+    river = {
+      default = [ "wlr" "gtk" ];
     };
   };
 

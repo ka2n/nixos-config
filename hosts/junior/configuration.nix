@@ -18,7 +18,7 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "backup";
-    extraSpecialArgs = { inherit inputs; variant = "desktop"; himmelblauPkg = null; };
+    extraSpecialArgs = { inherit inputs; variant = "desktop"; };
     users.k2 = import ../../home/default.nix;
   };
 

@@ -2,9 +2,6 @@
 { config, pkgs, pkgs-unstable, lib, inputs, ... }:
 
 let
-  himmelblauPkg = pkgs.callPackage ../../modules/himmelblau/package.nix {
-    himmelblauSrc = inputs.himmelblau;
-  };
   privateConfig = import ../../private/laptop.nix;
 in {
   imports = [
@@ -29,7 +26,7 @@ in {
     useUserPackages = false;
     backupFileExtension = "backup";
     extraSpecialArgs = {
-      inherit inputs himmelblauPkg;
+      inherit inputs;
       variant = "laptop";
     };
     users.katsuma = { ... }: {

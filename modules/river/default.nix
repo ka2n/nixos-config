@@ -6,9 +6,6 @@ let
   # Stable version from nixpkgs
   riverStable = pkgs.river-classic;
 
-  # Dev version from fork (with nixpkgs-wayland's wlroots)
-  riverDev = inputs.river-classic.packages.${pkgs.system}.default;
-
   # Helper to create wrapper for a river package
   mkRiverWrapper = name: riverPkg: pkgs.writeShellScriptBin name ''
     if [ -x "$HOME/.config/river/init" ]; then
@@ -57,11 +54,10 @@ let
     ${pkgs.waybar}/bin/waybar &
   '';
 
-  # Wrappers
+  # Wrapper
   riverWrapper = mkRiverWrapper "river-with-fallback" riverStable;
-  riverDevWrapper = mkRiverWrapper "river-with-fallback-dev" riverDev;
 
-  # Session packages for GDM
+  # Session package for GDM
   riverSession = pkgs.runCommand "river-session" {
     passthru.providedSessions = [ "river" ];
   } ''
@@ -69,22 +65,8 @@ let
     cat > $out/share/wayland-sessions/river.desktop << EOF
 [Desktop Entry]
 Name=River
-Comment=A dynamic tiling Wayland compositor (stable)
+Comment=A dynamic tiling Wayland compositor
 Exec=${riverWrapper}/bin/river-with-fallback
-Type=Application
-DesktopNames=river
-EOF
-  '';
-
-  riverDevSession = pkgs.runCommand "river-dev-session" {
-    passthru.providedSessions = [ "river-dev" ];
-  } ''
-    mkdir -p $out/share/wayland-sessions
-    cat > $out/share/wayland-sessions/river-dev.desktop << EOF
-[Desktop Entry]
-Name=River (Dev)
-Comment=A dynamic tiling Wayland compositor (dev fork with toplevel-capture)
-Exec=${riverDevWrapper}/bin/river-with-fallback-dev
 Type=Application
 DesktopNames=river
 EOF
@@ -95,7 +77,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [ riverStable riverDev ];
-    services.displayManager.sessionPackages = [ riverSession riverDevSession ];
+    environment.systemPackages = [ riverStable ];
+    services.displayManager.sessionPackages = [ riverSession ];
   };
 }

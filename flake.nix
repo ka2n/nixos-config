@@ -16,10 +16,9 @@
       url = "github:NitorCreations/nix-mdatp";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    himmelblau = {
-      url = "github:himmelblau-idm/himmelblau/stable-2.x";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # Use main branch (v3.0.0) for native messaging host support
+    # Don't follow nixpkgs to use Cachix cache (built against nixpkgs-25.05)
+    himmelblau.url = "github:himmelblau-idm/himmelblau";
     inputactions = {
       # Pinned to Dec 2025 revision compatible with nixos-25.11's Hyprland
       url = "github:taj-ny/InputActions/2eb2a2450ddc85befb770c60d5baf9ced7d1197d";
