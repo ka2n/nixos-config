@@ -372,6 +372,16 @@ in {
       chooser_type = "default";  # auto-detect slurp/wofi/rofi/bemenu
     };
   };
+  # System-level portal configuration
+  # Note: User-level config (home-manager) overrides this via NIX_XDG_DESKTOP_PORTAL_DIR
+  xdg.portal.config = {
+    common = {
+      default = [ "wlr" "gtk" ];
+    };
+    river = {
+      default = [ "wlr" "gtk" ];
+    };
+  };
 
   # Services
   services.openssh.enable = true;
