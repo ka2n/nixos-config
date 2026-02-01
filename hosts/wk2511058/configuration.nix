@@ -2,8 +2,6 @@
 { config, pkgs, pkgs-unstable, lib, inputs, ... }:
 
 let
-  # Use upstream package from flake (same as in modules/himmelblau/default.nix)
-  himmelblauPkg = inputs.himmelblau.packages.${pkgs.system}.himmelblau;
   privateConfig = import ../../private/laptop.nix;
 in {
   imports = [
@@ -28,7 +26,7 @@ in {
     useUserPackages = false;
     backupFileExtension = "backup";
     extraSpecialArgs = {
-      inherit inputs himmelblauPkg;
+      inherit inputs;
       variant = "laptop";
     };
     users.katsuma = { ... }: {

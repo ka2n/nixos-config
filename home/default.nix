@@ -1,7 +1,8 @@
-{ config, pkgs, inputs, lib, osConfig ? null, variant ? "desktop"
-, himmelblauPkg ? null, ... }:
+{ config, pkgs, inputs, lib, osConfig ? null, variant ? "desktop", ... }:
 let
-  hasHimmelblau = himmelblauPkg != null;
+  # Check if himmelblau is enabled via NixOS module and get package from there
+  hasHimmelblau = osConfig.services.azure-entra.enable or false;
+  himmelblauPkg = if hasHimmelblau then osConfig.services.azure-entra.package else null;
   zenBrowser = pkgs.wrapFirefox
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped {
       pname = "zen-browser";
