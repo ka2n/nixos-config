@@ -12,8 +12,7 @@ Thumbs.db
 !.github
 .cursor
 
-**/CLAUDE.local.md
-
-**/.claude/settings.local.json
+*.local.md
+*.local.json
 
 external-docs
