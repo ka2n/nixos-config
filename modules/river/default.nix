@@ -7,7 +7,7 @@ let
   riverStable = pkgs.river-classic;
 
   # Dev version from fork (with nixpkgs-wayland's wlroots)
-  riverDev = inputs.river-classic.packages.${pkgs.system}.default;
+  riverDev = inputs.river-classic.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
   # Helper to create wrapper for a river package
   mkRiverWrapper = name: riverPkg: pkgs.writeShellScriptBin name ''
