@@ -4,6 +4,13 @@
 
 
 ## Tools
+
+### Missing Commands
+When a command is not found, try these approaches:
+- `, <cmd>` - Run command with temporary package (home-manager's comma). Example: `, cowsay hello`
+- `nix-shell -p '<pkg>'` - Enter shell with package available. Example: `nix-shell -p jq`
+
+### Available Tools
 - `gemini` is google gemini cli. You can use it for web search. Run web search via Task Tool with `gemini -p 'WebSearch: ...'`.
 - When you create git worktree, use `git wt`. How to use: `git-wt --help`
 - Use Codex for analysis when bug fixes fail 3+ times
