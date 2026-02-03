@@ -17,14 +17,30 @@ Codex is an AI-powered CLI tool that can help with complex debugging, code analy
 
 ## The File-Based Pattern
 
-Codex works best with a file-based input/output pattern:
+Codex works best with a file-based input/output pattern. To avoid conflicts between multiple sessions and preserve history, use session directories with timestamped files.
+
+### Step 0: Initialize Session Directory (First time per session)
+
+```bash
+export CODEX_SESSION_DIR=$(mktemp -d /tmp/claude-codex-XXXXXX)
+echo "Codex session: $CODEX_SESSION_DIR"
+```
+
+This creates a unique directory like `/tmp/claude-codex-a1b2c3/` for the current session.
 
 ### Step 1: Create a Question File
 
-Write your question and all relevant context to `/tmp/question.txt`:
+Generate a timestamped filename and write your question:
+
+```bash
+QUESTION_FILE="$CODEX_SESSION_DIR/question-$(date +%Y%m%d-%H%M%S).txt"
+REPLY_FILE="${QUESTION_FILE/question/reply}"
+```
+
+Write your question and all relevant context to `$QUESTION_FILE`:
 
 ```
-Write to /tmp/question.txt:
+Write to $QUESTION_FILE:
 - Clear problem statement
 - The specific error or symptom
 - The relevant code (full functions, not snippets)
@@ -49,8 +65,6 @@ Key observations:
 Can you identify:
 1. [Specific question 1]
 2. [Specific question 2]
-
-Please write a detailed analysis to /tmp/reply.txt
 ```
 
 ### Step 2: Invoke Codex
@@ -58,38 +72,62 @@ Please write a detailed analysis to /tmp/reply.txt
 Use this command pattern:
 
 ```bash
-cat /tmp/question.txt | codex exec -o /tmp/reply.txt --full-auto
+codex exec -o "$REPLY_FILE" --full-auto < "$QUESTION_FILE"
 ```
 
 Flags:
 - `exec`: Non-interactive execution mode (required for CLI use)
-- `-o /tmp/reply.txt`: Write output to this file
+- `-o "$REPLY_FILE"`: Write output to timestamped reply file
 - `--full-auto`: Run autonomously without prompts
 
 ### Step 3: Read the Reply
 
 ```bash
-Read /tmp/reply.txt
+Read $REPLY_FILE
 ```
 
 Codex will provide detailed analysis. Evaluate its suggestions critically - it may identify real bugs but can occasionally misinterpret specifications.
 
+### Reviewing History
+
+List all Q&A pairs in the session:
+```bash
+ls -la "$CODEX_SESSION_DIR"
+```
+
+Example output:
+```
+question-20250204-143022.txt
+reply-20250204-143022.txt
+question-20250204-144511.txt
+reply-20250204-144511.txt
+```
+
 ## Example Session
 
-```
-# 1. Create the question
-Write /tmp/question.txt with:
+```bash
+# 0. Initialize session (once per Claude Code session)
+export CODEX_SESSION_DIR=$(mktemp -d /tmp/claude-codex-XXXXXX)
+
+# 1. Create timestamped files
+QUESTION_FILE="$CODEX_SESSION_DIR/question-$(date +%Y%m%d-%H%M%S).txt"
+REPLY_FILE="${QUESTION_FILE/question/reply}"
+
+# 2. Write the question
+Write $QUESTION_FILE with:
 - Problem: "Progressive JPEG decoder fails at block 1477 with Huffman error"
 - Code: [full AC refinement function]
 - Questions: "Identify bugs in EOB handling, ZRL handling, run counting"
 
-# 2. Invoke Codex
-cat /tmp/question.txt | codex exec -o /tmp/reply.txt --full-auto
+# 3. Invoke Codex
+codex exec -o "$REPLY_FILE" --full-auto < "$QUESTION_FILE"
 
-# 3. Read and apply
-Read /tmp/reply.txt
+# 4. Read and apply
+Read $REPLY_FILE
 # Codex identified 12 potential bugs with detailed explanations
 # Evaluate each, verify against spec, apply fixes
+
+# 5. For follow-up questions, repeat steps 1-4 (new timestamp)
 ```
 
 ## Tips
