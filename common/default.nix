@@ -42,10 +42,12 @@ in {
   nix.settings.substituters = [
     "https://cache.nixos.org"
     "https://himmelblau.cachix.org"
+    "https://ryoppippi.cachix.org"
   ];
   nix.settings.trusted-public-keys = [
     "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     "himmelblau.cachix.org-1:yu8mq/NIBYsZHWzo4SOge97gpf02qugdZFT/JdRkswc="
+    "ryoppippi.cachix.org-1:b2LbtWNvJeL/qb1B6TYOMK+apaCps4SCbzlPRfSQIms="
   ];
   nixpkgs.config.allowUnfree = true;
 
@@ -204,7 +206,7 @@ in {
     go
     python3
     nodejs
-    pkgs.claude-code-wrapped
+    pkgs.claude-code
     alma
     codex
     gemini-cli-bin

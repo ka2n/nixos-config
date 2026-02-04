@@ -1,13 +1,7 @@
 pkgs-unstable:
 final: prev:
-let
-  overrides = import ./overrides { inherit pkgs-unstable; };
-in
 {
-  # Claude CLI wrapper
-  claude-code-wrapped = final.writeShellScriptBin "claude" ''
-    exec ${overrides.claude-code}/bin/claude "$@"
-  '';
+  # claude-code is provided by claude-code-overlay (with wrapper included)
 
   libcskk = final.callPackage ./libcskk { };
   fcitx5-cskk = final.callPackage ./fcitx5-cskk {

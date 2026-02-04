@@ -37,6 +37,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     river-classic.url = "git+https://codeberg.org/ka2n/river-classic";
+    claude-code-overlay.url = "github:ryoppippi/claude-code-overlay";
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, ... }@inputs:
@@ -57,7 +58,7 @@
         inherit system;
         specialArgs = { inherit inputs pkgs-unstable configRevision; };
         modules = [
-          { nixpkgs.overlays = [ overlay ]; }
+          { nixpkgs.overlays = [ inputs.claude-code-overlay.overlays.default overlay ]; }
           inputs.sops-nix.nixosModules.sops
           ./hosts/nixos-vm/configuration.nix
         ];
@@ -67,7 +68,7 @@
         inherit system;
         specialArgs = { inherit inputs pkgs-unstable configRevision; };
         modules = [
-          { nixpkgs.overlays = [ overlay ]; }
+          { nixpkgs.overlays = [ inputs.claude-code-overlay.overlays.default overlay ]; }
           inputs.sops-nix.nixosModules.sops
           ./hosts/wk2511058/configuration.nix
           nixos-hardware.nixosModules.lenovo-thinkpad-x1-13th-gen
@@ -78,7 +79,7 @@
         inherit system;
         specialArgs = { inherit inputs pkgs-unstable configRevision; };
         modules = [
-          { nixpkgs.overlays = [ overlay ]; }
+          { nixpkgs.overlays = [ inputs.claude-code-overlay.overlays.default overlay ]; }
           inputs.sops-nix.nixosModules.sops
           inputs.disko.nixosModules.disko
           ./hosts/junior/configuration.nix
