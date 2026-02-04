@@ -47,8 +47,18 @@
         inherit system;
         config.allowUnfree = true;
       };
-      overlay = import ./pkgs pkgs-unstable;
       configRevision = self.rev or self.dirtyRev or "dirty";
+
+      # Common modules for all hosts
+      commonModules = [
+        {
+          nixpkgs.overlays = [
+            inputs.claude-code-overlay.overlays.default
+            (import ./pkgs pkgs-unstable)
+          ];
+        }
+        inputs.sops-nix.nixosModules.sops
+      ];
     in {
       devShells.${system} = import ./devShells.nix {
         inherit nixpkgs nixpkgs-unstable system;
@@ -57,9 +67,7 @@
       nixosConfigurations.nixos-vm = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs pkgs-unstable configRevision; };
-        modules = [
-          { nixpkgs.overlays = [ inputs.claude-code-overlay.overlays.default overlay ]; }
-          inputs.sops-nix.nixosModules.sops
+        modules = commonModules ++ [
           ./hosts/nixos-vm/configuration.nix
         ];
       };
@@ -67,9 +75,7 @@
       nixosConfigurations.wk2511058 = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs pkgs-unstable configRevision; };
-        modules = [
-          { nixpkgs.overlays = [ inputs.claude-code-overlay.overlays.default overlay ]; }
-          inputs.sops-nix.nixosModules.sops
+        modules = commonModules ++ [
           ./hosts/wk2511058/configuration.nix
           nixos-hardware.nixosModules.lenovo-thinkpad-x1-13th-gen
         ];
@@ -78,9 +84,7 @@
       nixosConfigurations.junior = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs pkgs-unstable configRevision; };
-        modules = [
-          { nixpkgs.overlays = [ inputs.claude-code-overlay.overlays.default overlay ]; }
-          inputs.sops-nix.nixosModules.sops
+        modules = commonModules ++ [
           inputs.disko.nixosModules.disko
           ./hosts/junior/configuration.nix
         ];
