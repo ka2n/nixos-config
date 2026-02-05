@@ -183,6 +183,7 @@ in {
     gcr
     playerctl
     bluetui
+    zoom-us
 
     # From aqua migration (system-level tools)
     yq-go
@@ -381,18 +382,14 @@ in {
   xdg.portal.wlr = {
     enable = true;
     settings.screencast = {
-      chooser_type = "default";  # auto-detect slurp/wofi/rofi/bemenu
+      chooser_type = "default"; # auto-detect slurp/wofi/rofi/bemenu
     };
   };
   # System-level portal configuration
   # Note: User-level config (home-manager) overrides this via NIX_XDG_DESKTOP_PORTAL_DIR
   xdg.portal.config = {
-    common = {
-      default = [ "wlr" "gtk" ];
-    };
-    river = {
-      default = [ "wlr" "gtk" ];
-    };
+    common = { default = [ "wlr" "gtk" ]; };
+    river = { default = [ "wlr" "gtk" ]; };
   };
 
   # Services
