@@ -71,8 +71,9 @@ in {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Use latest kernel (can be overridden by host-specific config)
-  boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+  # Use Zen kernel for desktop-optimized performance (low latency, interactive)
+  boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_zen;
+  boot.kernelParams = [ "mitigations=off" ];
 
   # Networking
   networking.networkmanager.enable = true;

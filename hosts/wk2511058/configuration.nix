@@ -14,8 +14,6 @@ in {
 
   networking.hostName = "wk2511058";
 
-  #boot.kernelPackages = pkgs.linuxPackages_zen;
-
   environment.systemPackages = [
     pkgs.foot
     pkgs.brightnessctl
