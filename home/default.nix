@@ -29,7 +29,7 @@ in {
     pkgs.imagemagick # for convert and identify
 
     # Phase 3: Additional packages
-    pkgs.tailscale-systray
+    # tailscale-systray removed - using official `tailscale systray` command
 
     # From aqua migration (user-level tools)
     pkgs.ghq
@@ -440,16 +440,20 @@ in {
   programs.nix-index-database.comma.enable = true;
 
   # Systemd user services
+  # Tailscale systray (official command, not third-party package)
+  # https://tailscale.com/kb/1597/linux-systray
   systemd.user.services.tailscale-systray = {
     Unit = {
-      Description = "Tailscale systray";
+      Description = "Tailscale System Tray";
+      Documentation = [ "https://tailscale.com/kb/1597/linux-systray" ];
+      Requires = [ "dbus.service" ];
+      After = [ "dbus.service" "graphical-session.target" ];
       PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
     };
     Service = {
-      ExecStart = "${lib.getExe pkgs.tailscale-systray}";
-      Restart = "on-failure";
       Type = "simple";
+      ExecStart = "${pkgs.tailscale}/bin/tailscale systray";
+      Restart = "on-failure";
     };
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };

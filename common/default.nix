@@ -267,7 +267,7 @@ in {
     blueman
     pavucontrol
     dex # XDG autostart runner
-    tailscale-systray # Tailscale system tray icon
+    # tailscale-systray removed - using official `tailscale systray` command
     darkman # Dark/light mode daemon
     sound-theme-freedesktop
     pulseaudio
