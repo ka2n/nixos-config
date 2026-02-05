@@ -30,3 +30,9 @@ When a command is not found, try these approaches:
 
 - After completing large code changes (3 or more files, or 100+ lines), you must launch the code-reviewer agent.
 - When changes span multiple files, launch code-reviewer agents in parallel.
+
+## Skills and Agents
+
+- Skills: `home/dotfiles/claude/skills/<name>/SKILL.md`
+- Agents: `home/dotfiles/claude/agents/<name>.md`
+- To add skill to agent: add `skills: <skill-name>` in frontmatter
