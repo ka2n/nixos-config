@@ -7,6 +7,9 @@ in {
   # Use latest stable kernel instead of zen for better thermal management
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  # Firmware updates (EC firmware is managed by hardware, fwupd for BIOS/UEFI updates)
+  services.fwupd.enable = true;
+
   imports = [
     ./hardware-configuration.nix
     ../../common
