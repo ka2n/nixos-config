@@ -81,6 +81,11 @@ in {
         ]
         (builtins.readFile ./dotfiles/local/bin/save-url-to-doc.sh)))
 
+    (pkgs.writeShellScriptBin "git-delete-merged"
+      (builtins.replaceStrings [ "@git@" "@git_wt@" ]
+        [ (lib.getExe pkgs.git) (lib.getExe pkgs.git-wt) ]
+        (builtins.readFile ./dotfiles/local/bin/git-delete-merged.sh)))
+
     (pkgs.writeShellScriptBin "tf-pr" ''
       set -euo pipefail
 

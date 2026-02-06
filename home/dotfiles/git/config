@@ -23,7 +23,6 @@
   psuh = push
   puhs = push
   comimt = commit
-  delete-merged = "!git branch --merged | grep -v -e '*' -e 'master' -e 'main' | xargs -I % git branch -d %"
   branches = branch -a
   tags = tag
   rc = rebase --continue
