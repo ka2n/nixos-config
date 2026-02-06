@@ -4,6 +4,9 @@
 let
   privateConfig = import ../../private/laptop.nix;
 in {
+  # Use latest stable kernel instead of zen for better thermal management
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
   imports = [
     ./hardware-configuration.nix
     ../../common
