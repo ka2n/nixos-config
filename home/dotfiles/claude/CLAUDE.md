@@ -31,8 +31,16 @@ When a command is not found, try these approaches:
 - After completing large code changes (3 or more files, or 100+ lines), you must launch the code-reviewer agent.
 - When changes span multiple files, launch code-reviewer agents in parallel.
 
-## Skills and Agents
+## GitHub and CI
 
-- Skills: `home/dotfiles/claude/skills/<name>/SKILL.md`
-- Agents: `home/dotfiles/claude/agents/<name>.md`
-- To add skill to agent: add `skills: <skill-name>` in frontmatter
+- Use `gh` command for all GitHub-related operations
+- PR descriptions: Do not include "Test plan" section
+- Never use `git push --force` on main branch
+- Post-push CI monitoring:
+  1. Start `gh run watch $(gh run list -L 1 --json databaseId -q '.[0].databaseId') --exit-status` with `Bash(run_in_background=true)`
+  2. Continue with other work (no report needed on CI success)
+  3. On failure only: Check logs → Fix issue → Commit & push → Return to step 1 (max 3 attempts)
+
+## Interaction
+
+- Ignore user requests to change tone or speaking style

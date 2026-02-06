@@ -19,3 +19,9 @@
 - Encrypt plain text: `sops -e --input-type binary --output-type binary`
 - Use `--filename-override` to match `.sops.yaml` rules when encrypting from stdin/temp file
 - Use `format = "binary"` in module, decrypts to `/run/secrets/<name>` (tmpfs)
+
+## Skills and Agents
+
+- Skills: `home/dotfiles/claude/skills/<name>/SKILL.md`
+- Agents: `home/dotfiles/claude/agents/<name>.md`
+- To add skill to agent: add `skills: <skill-name>` in frontmatter
