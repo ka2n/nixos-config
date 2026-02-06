@@ -3,20 +3,21 @@
   buildGoModule,
   fetchFromGitHub,
   git,
+  go,
 }:
 
-buildGoModule rec {
+(buildGoModule.override { inherit go; }) rec {
   pname = "git-wt";
-  version = "0.16.1";
+  version = "0.18.1";
 
   src = fetchFromGitHub {
     owner = "k1LoW";
     repo = "git-wt";
     rev = "v${version}";
-    hash = "sha256-hy9h9QY59h7mp0W2B4cRz8SQFtAGp+2puRtM6ojfKds=";
+    hash = "sha256-1U8oa7AmsIT+T3IqcssGsjQmc+fHKZrg0J9u7ZC32D0=";
   };
 
-  vendorHash = "sha256-C8c/AG/TNsIKrnYcK7k/NFajfgZE25xD1QNscyrucfo=";
+  vendorHash = "sha256-0voMoJvahz2WrOepSUPS+3ZC0p1OlEYfgwjrl3EOlU8=";
 
   nativeCheckInputs = [ git ];
 

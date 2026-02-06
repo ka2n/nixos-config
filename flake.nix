@@ -38,6 +38,7 @@
     };
     river-classic.url = "git+https://codeberg.org/ka2n/river-classic";
     claude-code-overlay.url = "github:ryoppippi/claude-code-overlay";
+    go-overlay.url = "github:purpleclay/go-overlay";
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, ... }@inputs:
@@ -54,6 +55,7 @@
         {
           nixpkgs.overlays = [
             inputs.claude-code-overlay.overlays.default
+            inputs.go-overlay.overlays.default
             (import ./pkgs pkgs-unstable)
           ];
         }
