@@ -209,6 +209,7 @@ in {
     python3
     nodejs
     pkgs.claude-code
+    playwright-mcp
     alma
     codex
     gemini-cli-bin
