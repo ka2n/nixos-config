@@ -18,7 +18,11 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "backup";
-    extraSpecialArgs = { inherit inputs; variant = "desktop"; };
+    extraSpecialArgs = {
+      inherit inputs;
+      variant = "desktop";
+      riverBackgroundColor = "#c79081";
+    };
     users.k2 = import ../../home/default.nix;
   };
 

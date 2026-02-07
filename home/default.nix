@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, lib, osConfig ? null, variant ? "desktop", ... }:
+{ config, pkgs, inputs, lib, osConfig ? null, variant ? "desktop", riverBackgroundColor ? null, ... }:
 let
   # Check if himmelblau is enabled via NixOS module and get package from there
   hasHimmelblau = osConfig.services.azure-entra.enable or false;
@@ -27,6 +27,7 @@ in {
     pkgs.ffmpegthumbnailer
     pkgs.chafa
     pkgs.imagemagick # for convert and identify
+  ] ++ lib.optional (riverBackgroundColor != null) pkgs.swaybg ++ [
 
     # Phase 3: Additional packages
     # tailscale-systray removed - using official `tailscale systray` command
@@ -528,7 +529,13 @@ in {
   # River init script (managed separately for flexibility)
   # Use mkForce to override home-manager's river module generated init
   xdg.configFile."river/init" = lib.mkForce {
-    source = ./dotfiles/river/init;
+    source = let
+      swaybgSpawn = if riverBackgroundColor != null
+        then "riverctl spawn \"swaybg -c '${riverBackgroundColor}'\""
+        else "# No background color configured (using default)";
+      initContent = builtins.readFile ./dotfiles/river/init;
+    in pkgs.writeShellScript "river-init"
+      (builtins.replaceStrings ["@swaybg_spawn@"] [swaybgSpawn] initContent);
     executable = true;
   };
 
