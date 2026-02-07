@@ -48,6 +48,11 @@ in {
     # Docker
     pkgs.docker-credential-helpers
 
+    (pkgs.writeShellScriptBin "docker-compose-gc"
+      (builtins.replaceStrings [ "@docker@" "@jq@" ]
+        [ (lib.getExe' pkgs.docker "docker") (lib.getExe pkgs.jq) ]
+        (builtins.readFile ./dotfiles/local/bin/docker-compose-gc.sh)))
+
     # Local bin scripts
     (pkgs.writeShellScriptBin "find-parent-package-dir"
       (builtins.replaceStrings [ "@git@" ] [ "${lib.getExe pkgs.git}" ]
