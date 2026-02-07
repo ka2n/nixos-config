@@ -27,6 +27,7 @@ in {
         tree
         netcat
         sqlite
+        stripe-cli
       ])
       ++ (with pkgs-unstable; [ prisma-engines_7 ]);
 
