@@ -32,6 +32,7 @@ in {
     extraSpecialArgs = {
       inherit inputs;
       variant = "laptop";
+      riverBackgroundColor = null;
     };
     users.katsuma = { ... }: {
       imports = [ ../../home ];
