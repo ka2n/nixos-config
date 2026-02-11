@@ -1,4 +1,4 @@
-name: Update claude-code-overlay
+name: Update Claude Code and Codex CLI
 
 on:
   schedule:
@@ -23,8 +23,8 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
-      - name: Update claude-code-overlay
-        run: nix flake update claude-code-overlay
+      - name: Update claude-code-overlay and codex-cli-nix
+        run: nix flake update claude-code-overlay codex-cli-nix
 
       - name: Check for changes
         id: check_changes
@@ -41,7 +41,7 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add flake.lock
-          git commit -m "chore: update claude-code-overlay
+          git commit -m "chore: update claude-code-overlay and codex-cli-nix
 
           Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
           git push
