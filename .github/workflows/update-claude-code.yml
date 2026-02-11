@@ -1,0 +1,47 @@
+name: Update claude-code-overlay
+
+on:
+  schedule:
+    # Run twice daily: 9:00 AM and 9:00 PM JST (00:00 and 12:00 UTC)
+    - cron: '0 0 * * *'  # 9:00 AM JST
+    - cron: '0 12 * * *' # 9:00 PM JST
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v30
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Update claude-code-overlay
+        run: nix flake update claude-code-overlay
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet flake.lock; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add flake.lock
+          git commit -m "chore: update claude-code-overlay
+
+          Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+          git push
