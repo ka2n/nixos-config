@@ -229,6 +229,7 @@ in {
     ncurses
     gdbm
     openssl
+    cacert
     rustup
     groff
     autoconf
