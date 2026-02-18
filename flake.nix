@@ -40,6 +40,7 @@
     claude-code-overlay.url = "github:ryoppippi/claude-code-overlay";
     codex-cli-nix.url = "github:sadjow/codex-cli-nix";
     go-overlay.url = "github:purpleclay/go-overlay";
+    playwright.url = "github:pietdevries94/playwright-web-flake";
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, ... }@inputs:
@@ -69,6 +70,12 @@
     in {
       devShells.${system} = import ./devShells.nix {
         inherit nixpkgs nixpkgs-unstable system;
+        playwright = inputs.playwright.packages.${system};
+      };
+
+      templates.default = {
+        path = ./templates/default;
+        description = "General web development environment with Node.js, Playwright, and Prisma";
       };
 
       nixosConfigurations.nixos-vm = nixpkgs.lib.nixosSystem {

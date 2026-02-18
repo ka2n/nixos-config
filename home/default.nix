@@ -74,6 +74,9 @@ in {
       exec nix develop "$HOME/nixos-config" --command "$SHELL"
     '')
 
+    (pkgs.writeShellScriptBin "new-project"
+      (builtins.readFile ./dotfiles/local/bin/new-project.sh))
+
     (pkgs.writeShellScriptBin "save-url-to-doc"
       (builtins.replaceStrings
         [ "@readability@" "@git@" "@wl_paste@" "@sed@" "@mkdir@" "@mv@" ]
@@ -173,6 +176,12 @@ in {
       "us-east1-docker.pkg.dev" = "gcloud";
       "us.gcr.io" = "gcloud";
     };
+  };
+
+  # direnv with nix-direnv integration (Home Manager recommended way)
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
   };
 
   # Fish shell configuration and plugins (migrated from fisher)

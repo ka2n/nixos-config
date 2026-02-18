@@ -1,4 +1,4 @@
-{ nixpkgs, nixpkgs-unstable, system }:
+{ nixpkgs, nixpkgs-unstable, system, playwright }:
 let
   pkgs = import nixpkgs {
     inherit system;
@@ -13,27 +13,34 @@ in {
   # Usage: nix develop ~/nixos-config
   default = pkgs.mkShell {
     packages =
-      (with pkgs; [
-        playwright-driver.browsers
-        jq
-        volta
-        openssl.dev
-        lsof
+      [
+        # Playwright (via playwright-web-flake)
+        playwright.playwright-test
+
+        # Node.js tools
+        pkgs.jq
+        pkgs.volta
+        pkgs.openssl.dev
+        pkgs.lsof
+
         # Web development tools
-        curl
-        wget
-        entr
-        watchexec
-        tree
-        netcat
-        sqlite
-        stripe-cli
-      ])
-      ++ (with pkgs-unstable; [ prisma-engines_7 ]);
+        pkgs.curl
+        pkgs.wget
+        pkgs.entr
+        pkgs.watchexec
+        pkgs.tree
+        pkgs.netcat
+        pkgs.sqlite
+        pkgs.stripe-cli
+
+        # Prisma
+        pkgs-unstable.prisma-engines_7
+      ];
 
     shellHook = ''
       # Playwright configuration
-      export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
+      export PLAYWRIGHT_BROWSERS_PATH=${playwright.playwright-driver.browsers}
+      export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
       export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
 
       # Volta configuration
