@@ -4,6 +4,8 @@ Thumbs.db
 *.swp
 .envrc
 .direnv
+flake.nix
+flake.lock
 .agignore
 .git
 .tool-versions
