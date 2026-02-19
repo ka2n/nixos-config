@@ -1,8 +1,10 @@
-{ config, pkgs, inputs, lib, osConfig ? null, variant ? "desktop", riverBackgroundColor ? null, ... }:
+{ config, pkgs, inputs, lib, osConfig ? null, variant ? "desktop"
+, riverBackgroundColor ? null, ... }:
 let
   # Check if himmelblau is enabled via NixOS module and get package from there
   hasHimmelblau = osConfig.services.azure-entra.enable or false;
-  himmelblauPkg = if hasHimmelblau then osConfig.services.azure-entra.package else null;
+  himmelblauPkg =
+    if hasHimmelblau then osConfig.services.azure-entra.package else null;
   zenBrowser = pkgs.wrapFirefox
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped {
       pname = "zen-browser";
@@ -50,9 +52,10 @@ in {
     pkgs.docker-credential-helpers
 
     (pkgs.writeShellScriptBin "docker-compose-gc"
-      (builtins.replaceStrings [ "@docker@" "@jq@" ]
-        [ (lib.getExe' pkgs.docker "docker") (lib.getExe pkgs.jq) ]
-        (builtins.readFile ./dotfiles/local/bin/docker-compose-gc.sh)))
+      (builtins.replaceStrings [ "@docker@" "@jq@" ] [
+        (lib.getExe' pkgs.docker "docker")
+        (lib.getExe pkgs.jq)
+      ] (builtins.readFile ./dotfiles/local/bin/docker-compose-gc.sh)))
 
     # Local bin scripts
     (pkgs.writeShellScriptBin "find-parent-package-dir"
@@ -77,23 +80,27 @@ in {
     (pkgs.writeShellScriptBin "new-project"
       (builtins.readFile ./dotfiles/local/bin/new-project.sh))
 
-    (pkgs.writeShellScriptBin "save-url-to-doc"
-      (builtins.replaceStrings
-        [ "@readability@" "@git@" "@wl_paste@" "@sed@" "@mkdir@" "@mv@" ]
-        [
-          (lib.getExe pkgs.go-readability)
-          (lib.getExe pkgs.git)
-          (lib.getExe' pkgs.wl-clipboard "wl-paste")
-          (lib.getExe' pkgs.gnused "sed")
-          (lib.getExe' pkgs.coreutils "mkdir")
-          (lib.getExe' pkgs.coreutils "mv")
-        ]
-        (builtins.readFile ./dotfiles/local/bin/save-url-to-doc.sh)))
+    (pkgs.writeShellScriptBin "save-url-to-doc" (builtins.replaceStrings [
+      "@readability@"
+      "@git@"
+      "@wl_paste@"
+      "@sed@"
+      "@mkdir@"
+      "@mv@"
+    ] [
+      (lib.getExe pkgs.go-readability)
+      (lib.getExe pkgs.git)
+      (lib.getExe' pkgs.wl-clipboard "wl-paste")
+      (lib.getExe' pkgs.gnused "sed")
+      (lib.getExe' pkgs.coreutils "mkdir")
+      (lib.getExe' pkgs.coreutils "mv")
+    ] (builtins.readFile ./dotfiles/local/bin/save-url-to-doc.sh)))
 
     (pkgs.writeShellScriptBin "git-delete-merged"
-      (builtins.replaceStrings [ "@git@" "@git_wt@" ]
-        [ (lib.getExe pkgs.git) (lib.getExe pkgs.git-wt) ]
-        (builtins.readFile ./dotfiles/local/bin/git-delete-merged.sh)))
+      (builtins.replaceStrings [ "@git@" "@git_wt@" ] [
+        (lib.getExe pkgs.git)
+        (lib.getExe pkgs.git-wt)
+      ] (builtins.readFile ./dotfiles/local/bin/git-delete-merged.sh)))
 
     (pkgs.writeShellScriptBin "tf-pr" ''
       set -euo pipefail
@@ -182,6 +189,7 @@ in {
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
+    config = { global.hide_env_diff = true; };
   };
 
   # Fish shell configuration and plugins (migrated from fisher)
@@ -284,7 +292,7 @@ in {
     settings = let
       lockTimeout = if variant == "laptop" then 300 else 900;
       screenOffTimeout = if variant == "laptop" then 420 else 1800;
-      suspendTimeout = if variant == "laptop" then 1800 else 48*60*60;
+      suspendTimeout = if variant == "laptop" then 1800 else 48 * 60 * 60;
     in {
       general = {
         lock_cmd = "pidof hyprlock || hyprlock --grace 10";
@@ -539,12 +547,13 @@ in {
   # Use mkForce to override home-manager's river module generated init
   xdg.configFile."river/init" = lib.mkForce {
     source = let
-      swaybgSpawn = if riverBackgroundColor != null
-        then "riverctl spawn \"swaybg -c '${riverBackgroundColor}'\""
-        else "# No background color configured (using default)";
+      swaybgSpawn = if riverBackgroundColor != null then
+        ''riverctl spawn "swaybg -c '${riverBackgroundColor}'"''
+      else
+        "# No background color configured (using default)";
       initContent = builtins.readFile ./dotfiles/river/init;
     in pkgs.writeShellScript "river-init"
-      (builtins.replaceStrings ["@swaybg_spawn@"] [swaybgSpawn] initContent);
+    (builtins.replaceStrings [ "@swaybg_spawn@" ] [ swaybgSpawn ] initContent);
     executable = true;
   };
 
