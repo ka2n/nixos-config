@@ -96,6 +96,9 @@ in {
       (lib.getExe' pkgs.coreutils "mv")
     ] (builtins.readFile ./dotfiles/local/bin/save-url-to-doc.sh)))
 
+    (pkgs.writeShellScriptBin "ralph"
+      (builtins.readFile ./dotfiles/local/bin/ralph.sh))
+
     (pkgs.writeShellScriptBin "git-delete-merged"
       (builtins.replaceStrings [ "@git@" "@git_wt@" ] [
         (lib.getExe pkgs.git)
