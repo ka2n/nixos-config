@@ -197,7 +197,7 @@ in {
 
     # Shell enhancements
     starship
-    atuin
+    inputs.atuin.packages.x86_64-linux.atuin
 
     # Keyboard/Input
     warpd

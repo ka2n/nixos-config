@@ -41,6 +41,7 @@
     codex-cli-nix.url = "github:sadjow/codex-cli-nix";
     go-overlay.url = "github:purpleclay/go-overlay";
     playwright.url = "github:pietdevries94/playwright-web-flake";
+    atuin.url = "github:atuinsh/atuin";
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, ... }@inputs:
