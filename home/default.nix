@@ -422,6 +422,15 @@ in {
     recursive = true;
   };
 
+  # Codex CLI: AGENTS.md (share same source as CLAUDE.md)
+  home.file.".codex/AGENTS.md".source = ./dotfiles/claude/CLAUDE.md;
+
+  # Codex CLI: Skills (reuse Claude skills)
+  home.file.".codex/skills/save-url-to-doc" = {
+    source = ./dotfiles/claude/skills/save-url-to-doc;
+    recursive = true;
+  };
+
   # Phase 0: Claude settings.local.json (inline management with stop hook)
   home.file.".claude/settings.local.json".text = builtins.toJSON {
     outputStyle = "default";
