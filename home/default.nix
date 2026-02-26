@@ -438,6 +438,22 @@ in {
     source = ./dotfiles/codex/skills/code-simplifier;
     recursive = true;
   };
+  home.file.".agents/skills/commit" = {
+    source = ./dotfiles/codex/skills/commit;
+    recursive = true;
+  };
+  home.file.".agents/skills/commit-push" = {
+    source = ./dotfiles/codex/skills/commit-push;
+    recursive = true;
+  };
+  home.file.".agents/skills/commit-push-pr" = {
+    source = ./dotfiles/codex/skills/commit-push-pr;
+    recursive = true;
+  };
+  home.file.".agents/skills/pr-comments" = {
+    source = ./dotfiles/codex/skills/pr-comments;
+    recursive = true;
+  };
 
   # Phase 0: Claude settings.local.json (inline management with stop hook)
   home.file.".claude/settings.local.json".text = builtins.toJSON {
