@@ -426,8 +426,16 @@ in {
   home.file.".codex/AGENTS.md".source = ./dotfiles/claude/CLAUDE.md;
 
   # Codex CLI: Skills (reuse Claude skills)
-  home.file.".codex/skills/save-url-to-doc" = {
+  home.file.".agents/skills/save-url-to-doc" = {
     source = ./dotfiles/claude/skills/save-url-to-doc;
+    recursive = true;
+  };
+  home.file.".agents/skills/code-reviewer" = {
+    source = ./dotfiles/codex/skills/code-reviewer;
+    recursive = true;
+  };
+  home.file.".agents/skills/code-simplifier" = {
+    source = ./dotfiles/codex/skills/code-simplifier;
     recursive = true;
   };
 
