@@ -162,6 +162,7 @@ in {
     file
     bubblewrap # Sandboxing tool
     gh
+    gh-markdown-preview
     wget
     curl
     chezmoi
