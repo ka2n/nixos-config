@@ -5,6 +5,9 @@
 
 ## Tools
 
+### Nix Development Shells
+- When a project has `flake.nix`, use `nix develop` as needed to get the development environment
+
 ### Missing Commands
 When a command is not found, try these approaches:
 - `, <cmd>` - Run command with temporary package (home-manager's comma). Example: `, cowsay hello`
