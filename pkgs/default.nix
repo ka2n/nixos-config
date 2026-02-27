@@ -1,7 +1,17 @@
 pkgs-unstable:
 final: prev:
 {
-  # claude-code is provided by claude-code-overlay (with wrapper included)
+  # claude-code: override to remove CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC
+  claude-code = prev.claude-code.overrideAttrs (oldAttrs: {
+    postFixup = ''
+      wrapProgram $out/bin/claude \
+        --prefix PATH : ${final.gh}/bin \
+        --set DISABLE_AUTOUPDATER 1 \
+        --set DISABLE_NON_ESSENTIAL_MODEL_CALLS 1 \
+        --set DISABLE_TELEMETRY 1 \
+        --set DISABLE_INSTALLATION_CHECKS 1
+    '';
+  });
 
   libcskk = final.callPackage ./libcskk { };
   fcitx5-cskk = final.callPackage ./fcitx5-cskk {
