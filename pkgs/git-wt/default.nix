@@ -8,16 +8,16 @@
 
 (buildGoModule.override { inherit go; }) rec {
   pname = "git-wt";
-  version = "0.18.1";
+  version = "0.25.0";
 
   src = fetchFromGitHub {
     owner = "k1LoW";
     repo = "git-wt";
     rev = "v${version}";
-    hash = "sha256-1U8oa7AmsIT+T3IqcssGsjQmc+fHKZrg0J9u7ZC32D0=";
+    hash = "sha256-QdyONDVokpOaH5dI5v1rmaymCgIiWZ16h26FAIsAHPc=";
   };
 
-  vendorHash = "sha256-0voMoJvahz2WrOepSUPS+3ZC0p1OlEYfgwjrl3EOlU8=";
+  vendorHash = "sha256-O4vqouNxvA3GvrnpRO6GXDD8ysPfFCaaSJVFj2ufxwI=";
 
   nativeCheckInputs = [ git ];
 
