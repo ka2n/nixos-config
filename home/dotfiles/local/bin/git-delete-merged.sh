@@ -78,11 +78,22 @@ if [ "$with_worktrees" = true ]; then
                 if [ "$wt_path" != "$main_worktree" ]; then
                     # Check if branch is merged
                     if $git branch --merged | sed 's/^[* +] //' | grep -qxF "$branch"; then
+                        # Skip if worktree has uncommitted changes
+                        if [ -n "$($git -C "$wt_path" status --porcelain 2>/dev/null)" ]; then
+                            echo "Skipping (dirty worktree): $branch"
+                            continue
+                        fi
+                        # Skip if branch has commits not pushed to remote
+                        if $git rev-parse --verify "origin/$branch" >/dev/null 2>&1 &&
+                           [ "$($git rev-list "origin/$branch..$branch" --count)" -gt 0 ]; then
+                            echo "Skipping (unpushed commits): $branch"
+                            continue
+                        fi
                         if [ "$dry_run" = true ]; then
                             echo "[dry-run] Would remove worktree + branch: $branch"
                         else
                             echo "Removing worktree + branch: $branch"
-                            $git_wt -d "$branch"
+                            $git_wt -D "$branch"
                         fi
                     fi
                 fi
