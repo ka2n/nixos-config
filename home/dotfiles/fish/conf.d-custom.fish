@@ -143,11 +143,12 @@ if type -q fzf
             set -a fzf_flags --query "$query"
         end
 
-        git wt 2>/dev/null | tail -n+2 | fzf $fzf_flags | read line
+        # Format: "* branch  path" (current) or "  branch  path"
+        git wt --json 2>/dev/null | jq -r '.[] | (if .current then "* " else "  " end) + .branch + "\t" + .path' | fzf $fzf_flags | read line
 
         if [ $line ]
-            # Extract branch name (2nd column)
-            set -l branch (echo $line | awk '{print $2}')
+            set -l branch (echo $line | sed 's/^[* ] *//' | cut -f1)
+            commandline -r ""
             git wt $branch
             commandline -f repaint
         end
