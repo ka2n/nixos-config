@@ -431,63 +431,25 @@ in {
   # Codex CLI: AGENTS.md (share same source as CLAUDE.md)
   home.file.".codex/AGENTS.md".source = ./dotfiles/claude/CLAUDE.md;
 
-  # Codex CLI: Skills (reuse Claude skills)
-  home.file.".agents/skills/save-url-to-doc" = {
-    source = ./dotfiles/claude/skills/save-url-to-doc;
-    recursive = true;
-  };
-  home.file.".agents/skills/code-reviewer" = {
-    source = ./dotfiles/codex/skills/code-reviewer;
-    recursive = true;
-  };
-  home.file.".agents/skills/code-simplifier" = {
-    source = ./dotfiles/codex/skills/code-simplifier;
-    recursive = true;
-  };
-  home.file.".agents/skills/commit" = {
-    source = ./dotfiles/codex/skills/commit;
-    recursive = true;
-  };
-  home.file.".agents/skills/commit-push" = {
-    source = ./dotfiles/codex/skills/commit-push;
-    recursive = true;
-  };
-  home.file.".agents/skills/commit-push-pr" = {
-    source = ./dotfiles/codex/skills/commit-push-pr;
-    recursive = true;
-  };
-  home.file.".agents/skills/pr-comments" = {
-    source = ./dotfiles/codex/skills/pr-comments;
-    recursive = true;
-  };
-  home.file.".codex/skills/save-url-to-doc" = {
-    source = ./dotfiles/claude/skills/save-url-to-doc;
-    recursive = true;
-  };
-  home.file.".codex/skills/code-reviewer" = {
-    source = ./dotfiles/codex/skills/code-reviewer;
-    recursive = true;
-  };
-  home.file.".codex/skills/code-simplifier" = {
-    source = ./dotfiles/codex/skills/code-simplifier;
-    recursive = true;
-  };
-  home.file.".codex/skills/commit" = {
-    source = ./dotfiles/codex/skills/commit;
-    recursive = true;
-  };
-  home.file.".codex/skills/commit-push" = {
-    source = ./dotfiles/codex/skills/commit-push;
-    recursive = true;
-  };
-  home.file.".codex/skills/commit-push-pr" = {
-    source = ./dotfiles/codex/skills/commit-push-pr;
-    recursive = true;
-  };
-  home.file.".codex/skills/pr-comments" = {
-    source = ./dotfiles/codex/skills/pr-comments;
-    recursive = true;
-  };
+  # Codex CLI: Skills (copy as real files, not symlinks)
+  home.activation.agentsSkills = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    skills_dir="$HOME/.agents/skills"
+    mkdir -p "$skills_dir"
+
+    for skill in save-url-to-doc code-reviewer simplify commit commit-push commit-push-pr pr-comments; do
+      rm -rf "$skills_dir/$skill"
+    done
+
+    cp -rL ${./dotfiles/claude/skills/save-url-to-doc} "$skills_dir/save-url-to-doc"
+    cp -rL ${./dotfiles/codex/skills/code-reviewer} "$skills_dir/code-reviewer"
+    cp -rL ${./dotfiles/codex/skills/simplify} "$skills_dir/simplify"
+    cp -rL ${./dotfiles/codex/skills/commit} "$skills_dir/commit"
+    cp -rL ${./dotfiles/codex/skills/commit-push} "$skills_dir/commit-push"
+    cp -rL ${./dotfiles/codex/skills/commit-push-pr} "$skills_dir/commit-push-pr"
+    cp -rL ${./dotfiles/codex/skills/pr-comments} "$skills_dir/pr-comments"
+
+    chmod -R u+w "$skills_dir"
+  '';
 
   # Phase 0: Claude settings.local.json (inline management with stop hook)
   home.file.".claude/settings.local.json".text = builtins.toJSON {
