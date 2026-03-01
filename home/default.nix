@@ -96,6 +96,12 @@ in {
       (lib.getExe' pkgs.coreutils "mv")
     ] (builtins.readFile ./dotfiles/local/bin/save-url-to-doc.sh)))
 
+    (pkgs.writeShellScriptBin "caffeine-toggle"
+      (builtins.readFile ./dotfiles/local/bin/caffeine-toggle.sh))
+
+    (pkgs.writeShellScriptBin "caffeine-status"
+      (builtins.readFile ./dotfiles/local/bin/caffeine-status.sh))
+
     (pkgs.writeShellScriptBin "ralph"
       (builtins.readFile ./dotfiles/local/bin/ralph.sh))
 

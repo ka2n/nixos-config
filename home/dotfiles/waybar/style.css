@@ -66,10 +66,15 @@
   margin-left: 8px;
 }
 
+#custom-caffeine.on {
+  color: #ffcc00;
+}
+
 #battery,
 #pulseaudio,
 #network,
 #bluetooth,
+#custom-caffeine,
 #power-profiles-daemon {
   min-width: 12px;
   margin: 0 7px;

@@ -13,6 +13,7 @@
   ],
   "modules-right": [
     "tray",
+    "custom/caffeine",
     "power-profiles-daemon",
     "bluetooth",
     "network",
@@ -123,6 +124,12 @@
         ""
       ]
     }
+  },
+  "custom/caffeine": {
+    "exec": "caffeine-status",
+    "return-type": "json",
+    "interval": 2,
+    "on-click": "caffeine-toggle"
   },
   "tray": {
     "icon-size": 14,
