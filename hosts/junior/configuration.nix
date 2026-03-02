@@ -35,6 +35,10 @@
     ntfs3g
   ];
 
+  # Display manager (ly - TUI, no GPU rendering issues with Polaris)
+  services.displayManager.ly.enable = true;
+  security.pam.services.ly.enableGnomeKeyring = true;
+
   # AMD Polaris GPU fixes
   hardware.amdgpu.polaris.enable = true;
 
