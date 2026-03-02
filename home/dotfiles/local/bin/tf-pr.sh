@@ -38,14 +38,15 @@ guess_pr() {
         pr_nums="$current_branch_pr"
     fi
 
-    merge_prs=$($git log --merges --format='%s' -- . 2>/dev/null \
-        | grep -oP '#\K[0-9]+' \
-        | head -10 \
-        | sort -un)
-
-    if [ -n "$merge_prs" ]; then
-        pr_nums=$(printf '%s\n%s' "$pr_nums" "$merge_prs" | sort -un | grep -v '^$')
-    fi
+    # Find PRs associated with recent commits that touched current directory
+    commit_shas=$($git log --format='%H' -20 -- . 2>/dev/null)
+    for sha in $commit_shas; do
+        pr=$($gh pr list --search "$sha" --state all --json number -q '.[0].number' 2>/dev/null) || true
+        if [ -n "$pr" ]; then
+            pr_nums=$(printf '%s\n%s' "$pr_nums" "$pr")
+        fi
+    done
+    pr_nums=$(printf '%s' "$pr_nums" | sort -un | grep -v '^$') || true
 
     if [ -z "$pr_nums" ]; then
         echo "No PRs found for the current branch or directory." >&2
