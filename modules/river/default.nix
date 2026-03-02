@@ -57,7 +57,7 @@ let
   # Wrapper
   riverWrapper = mkRiverWrapper "river-with-fallback" riverStable;
 
-  # Session package for GDM
+  # Session package for greetd/GDM
   riverSession = pkgs.runCommand "river-session" {
     passthru.providedSessions = [ "river" ];
   } ''
@@ -77,7 +77,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [ riverStable ];
+    environment.systemPackages = [ riverStable riverSession ];
     services.displayManager.sessionPackages = [ riverSession ];
   };
 }
