@@ -77,7 +77,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [ riverStable riverSession ];
+    environment.systemPackages = [ riverStable ];
     services.displayManager.sessionPackages = [ riverSession ];
   };
 }
