@@ -111,27 +111,12 @@ in {
         (lib.getExe pkgs.git-wt)
       ] (builtins.readFile ./dotfiles/local/bin/git-delete-merged.sh)))
 
-    (pkgs.writeShellScriptBin "tf-pr" ''
-      set -euo pipefail
-
-      if [ $# -lt 1 ]; then
-        echo "Usage: tf-pr <PR_NUM> [plan|apply]" >&2
-        exit 1
-      fi
-
-      PR_NUM="$1"
-      ACTION="''${2:-plan}"
-
-      if [ "$ACTION" != "plan" ] && [ "$ACTION" != "apply" ]; then
-        echo "Error: action must be 'plan' or 'apply'" >&2
-        exit 1
-      fi
-
-      OWNER=$(${lib.getExe pkgs.gh} repo view --json owner -q '.owner.login')
-      REPO=$(${lib.getExe pkgs.gh} repo view --json name -q '.name')
-
-      exec tfcmt -owner "$OWNER" -repo "$REPO" -pr "$PR_NUM" "$ACTION" -- terraform "$ACTION"
-    '')
+    (pkgs.writeShellScriptBin "tf-pr"
+      (builtins.replaceStrings [ "@gh@" "@git@" "@jq@" ] [
+        (lib.getExe pkgs.gh)
+        (lib.getExe pkgs.git)
+        (lib.getExe pkgs.jq)
+      ] (builtins.readFile ./dotfiles/local/bin/tf-pr.sh)))
   ];
 
   home.sessionPath = [
