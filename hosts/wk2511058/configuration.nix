@@ -52,6 +52,11 @@ in {
     extraGroups = [ "networkmanager" "wheel" "docker" "uinput" "libvirtd" ];
   };
 
+  # Display manager (GDM - required for himmelblau Azure Entra integration)
+  services.displayManager.gdm.enable = true;
+  services.displayManager.gdm.wayland = true;
+  security.pam.services.gdm.enableGnomeKeyring = true;
+
   services.azure-entra = {
     enable = true;
     debugFlag = false;
