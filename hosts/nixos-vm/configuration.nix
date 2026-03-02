@@ -14,10 +14,12 @@
     foot  # CPU rendering, works in VM
   ];
 
-  # Display manager (GDM)
-  services.displayManager.gdm.enable = true;
-  services.displayManager.gdm.wayland = true;
-  security.pam.services.gdm.enableGnomeKeyring = true;
+  # Display manager (greetd+tuigreet - Wayland native, lightweight TUI)
+  services.greetd = {
+    enable = true;
+    settings.default_session.command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --remember-user-session --sessions /run/current-system/sw/share/wayland-sessions";
+  };
+  security.pam.services.greetd.enableGnomeKeyring = true;
 
   # VirtualBox guest additions
   virtualisation.virtualbox.guest.enable = true;

@@ -52,16 +52,18 @@ in {
     extraGroups = [ "networkmanager" "wheel" "docker" "uinput" "libvirtd" ];
   };
 
-  # Display manager (GDM - required for himmelblau Azure Entra integration)
-  services.displayManager.gdm.enable = true;
-  services.displayManager.gdm.wayland = true;
-  security.pam.services.gdm.enableGnomeKeyring = true;
+  # Display manager (greetd+tuigreet - Wayland native, supports himmelblau PAM_TEXT_INFO for MFA)
+  services.greetd = {
+    enable = true;
+    settings.default_session.command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --remember-user-session --sessions /run/current-system/sw/share/wayland-sessions";
+  };
+  security.pam.services.greetd.enableGnomeKeyring = true;
 
   services.azure-entra = {
     enable = true;
     debugFlag = false;
     browserSso.chrome = true;
-    pamServices = [ "passwd" "login" "systemd-user" "hyprlock" ];
+    pamServices = [ "passwd" "login" "systemd-user" "hyprlock" "greetd" ];
     userMap.katsuma = privateConfig.username;
   };
 

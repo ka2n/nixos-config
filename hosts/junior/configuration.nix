@@ -35,9 +35,12 @@
     ntfs3g
   ];
 
-  # Display manager (ly - TUI, no GPU rendering issues with Polaris)
-  services.displayManager.ly.enable = true;
-  security.pam.services.ly.enableGnomeKeyring = true;
+  # Display manager (greetd+tuigreet - Wayland native, lightweight TUI)
+  services.greetd = {
+    enable = true;
+    settings.default_session.command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --remember-user-session --sessions /run/current-system/sw/share/wayland-sessions";
+  };
+  security.pam.services.greetd.enableGnomeKeyring = true;
 
   # AMD Polaris GPU fixes
   hardware.amdgpu.polaris.enable = true;
