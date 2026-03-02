@@ -85,8 +85,8 @@
 [wt]
   basedir = .worktrees
   copyignored = true
-  hook = "if [ -f .envrc ]; then direnv allow; fi"
-  deletehook = docker-compose-gc
+  hook = git-wt-hook
+  deletehook = git-wt-deletehook
 
 [credential]
   helper = !gh auth git-credential
