@@ -52,8 +52,9 @@ in {
     pkgs.docker-credential-helpers
 
     (pkgs.writeShellScriptBin "git-wt-hook"
-      (builtins.replaceStrings [ "@direnv@" ] [
+      (builtins.replaceStrings [ "@direnv@" "@mise@" ] [
         (lib.getExe pkgs.direnv)
+        (lib.getExe pkgs.mise)
       ] (builtins.readFile ./dotfiles/local/bin/git-wt-hook.sh)))
 
     (pkgs.writeShellScriptBin "git-wt-deletehook"
