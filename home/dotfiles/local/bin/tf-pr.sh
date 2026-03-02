@@ -28,27 +28,45 @@ run_tfcmt() {
 }
 
 guess_pr() {
-    # Find merge commits that changed files under the current directory
-    pr_nums=$($git log --merges --format='%s' -- . 2>/dev/null \
+    # Collect PR numbers from two sources:
+    # 1. Current branch's associated PR
+    # 2. Merge commits that changed files under the current directory
+    pr_nums=""
+
+    current_branch_pr=$($gh pr view --json number -q '.number' 2>/dev/null) || true
+    if [ -n "$current_branch_pr" ]; then
+        pr_nums="$current_branch_pr"
+    fi
+
+    merge_prs=$($git log --merges --format='%s' -- . 2>/dev/null \
         | grep -oP '#\K[0-9]+' \
         | head -10 \
         | sort -un)
 
+    if [ -n "$merge_prs" ]; then
+        pr_nums=$(printf '%s\n%s' "$pr_nums" "$merge_prs" | sort -un | grep -v '^$')
+    fi
+
     if [ -z "$pr_nums" ]; then
-        echo "No PRs found for files in the current directory." >&2
+        echo "No PRs found for the current branch or directory." >&2
         exit 1
     fi
 
     # Collect PR info
     i=0
     for pr in $pr_nums; do
-        info=$($gh pr view "$pr" --json number,title,url 2>/dev/null) || continue
+        info=$($gh pr view "$pr" --json number,title,url,headRefName 2>/dev/null) || continue
         i=$((i + 1))
         num=$(echo "$info" | $jq -r '.number')
         title=$(echo "$info" | $jq -r '.title')
         url=$(echo "$info" | $jq -r '.url')
+        branch=$(echo "$info" | $jq -r '.headRefName')
         eval "pr_num_$i=$num"
-        printf "%d) #%s %s\n   %s\n" "$i" "$num" "$title" "$url"
+        label=""
+        if [ "$branch" = "$($git branch --show-current 2>/dev/null)" ]; then
+            label=" (current branch)"
+        fi
+        printf "%d) #%s %s%s\n   %s\n" "$i" "$num" "$title" "$label" "$url"
     done
 
     if [ "$i" -eq 0 ]; then
