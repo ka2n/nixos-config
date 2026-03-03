@@ -47,7 +47,10 @@ in {
     pkgs.vhs
     pkgs.git-wt
     pkgs.go-readability
-    pkgs-unstable.octorus
+    pkgs.octorus
+    (pkgs.writeShellScriptBin "octorus" ''
+      exec ${pkgs.octorus}/bin/or "$@"
+    '')
 
     # Docker
     pkgs.docker-credential-helpers
