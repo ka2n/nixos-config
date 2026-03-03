@@ -405,6 +405,10 @@ in {
   home.file.".local/share/applications/x-open-url.desktop".source =
     ./dotfiles/local/share/applications/x-open-url.desktop;
 
+  # Disable tray applets autostart (using TUI wrappers via waybar instead)
+  xdg.configFile."autostart/nm-applet.desktop".text = "[Desktop Entry]\nHidden=true\n";
+  xdg.configFile."autostart/blueman.desktop".text = "[Desktop Entry]\nHidden=true\n";
+
   # Darkman hooks
   home.file.".local/share/dark-mode.d/notify.sh" = {
     source = pkgs.replaceVars ./dotfiles/local/share/dark-mode.d/notify.sh {
