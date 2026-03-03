@@ -280,7 +280,6 @@ in {
   in pkgs.replaceVars ./dotfiles/lf/lfrc {
     previewer = "${lf-previewer-sandboxed}";
   };
-  xdg.configFile."waybar/config.jsonc".source = ./dotfiles/waybar/config.jsonc;
   xdg.configFile."waybar/config-river.jsonc".source =
     ./dotfiles/waybar/config-river.jsonc;
   xdg.configFile."waybar/style.css".source = ./dotfiles/waybar/style.css;
@@ -323,6 +322,7 @@ in {
     source = ./dotfiles/alacritty;
     recursive = true;
   };
+  xdg.configFile."xdg-terminals.list".text = "Alacritty.desktop\n";
   xdg.configFile."nvim" = {
     source = ./dotfiles/nvim;
     recursive = true;
