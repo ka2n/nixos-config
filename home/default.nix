@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, lib, osConfig ? null, variant ? "desktop"
+{ config, pkgs, pkgs-unstable, inputs, lib, osConfig ? null, variant ? "desktop"
 , riverBackgroundColor ? null, ... }:
 let
   # Check if himmelblau is enabled via NixOS module and get package from there
@@ -47,7 +47,7 @@ in {
     pkgs.vhs
     pkgs.git-wt
     pkgs.go-readability
-    pkgs.octorus
+    pkgs-unstable.octorus
 
     # Docker
     pkgs.docker-credential-helpers

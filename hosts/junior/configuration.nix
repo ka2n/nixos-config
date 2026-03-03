@@ -1,5 +1,5 @@
 # Desktop-specific configuration
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, pkgs-unstable, lib, inputs, ... }:
 
 {
   imports = [
@@ -19,7 +19,7 @@
     useUserPackages = true;
     backupFileExtension = "backup";
     extraSpecialArgs = {
-      inherit inputs;
+      inherit inputs pkgs-unstable;
       variant = "desktop";
       riverBackgroundColor = "#c79081";
     };

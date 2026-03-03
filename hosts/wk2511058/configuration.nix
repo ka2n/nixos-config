@@ -30,7 +30,7 @@ in {
     useUserPackages = false;
     backupFileExtension = "backup";
     extraSpecialArgs = {
-      inherit inputs;
+      inherit inputs pkgs-unstable;
       variant = "laptop";
       riverBackgroundColor = null;
     };
