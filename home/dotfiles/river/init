@@ -259,6 +259,8 @@ riverctl rule-add -app-id "wiremix" float
 riverctl rule-add -app-id "wiremix" dimensions 622 652
 riverctl rule-add -app-id "bluetui" float
 riverctl rule-add -app-id "bluetui" dimensions 622 652
+riverctl rule-add -app-id "gazelle" float
+riverctl rule-add -app-id "gazelle" dimensions 622 652
 
 # Other floating apps
 riverctl rule-add -app-id "Zeal" float
