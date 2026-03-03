@@ -323,6 +323,25 @@ in {
     recursive = true;
   };
   xdg.configFile."xdg-terminals.list".text = "Alacritty.desktop\n";
+  home.file.".local/share/applications/Alacritty.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    TryExec=alacritty
+    Exec=alacritty
+    Icon=Alacritty
+    Terminal=false
+    Categories=System;TerminalEmulator;
+    Name=Alacritty
+    GenericName=Terminal
+    Comment=A fast, cross-platform, OpenGL terminal emulator
+    StartupNotify=true
+    StartupWMClass=Alacritty
+    X-TerminalArgExec=-e
+    X-TerminalArgAppId=--class
+    X-TerminalArgTitle=-T
+    X-TerminalArgDir=--working-directory
+    X-TerminalArgHold=--hold
+  '';
   xdg.configFile."nvim" = {
     source = ./dotfiles/nvim;
     recursive = true;
