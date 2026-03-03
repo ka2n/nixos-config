@@ -47,6 +47,7 @@ in {
     pkgs.vhs
     pkgs.git-wt
     pkgs.go-readability
+    pkgs.octorus
 
     # Docker
     pkgs.docker-credential-helpers
@@ -321,7 +322,9 @@ in {
     source = ./dotfiles/alacritty;
     recursive = true;
   };
-  xdg.configFile."xdg-terminals.list".text = "Alacritty.desktop\n";
+  xdg.configFile."xdg-terminals.list".text = ''
+    Alacritty.desktop
+  '';
   home.file.".local/share/applications/Alacritty.desktop".text = ''
     [Desktop Entry]
     Type=Application
@@ -405,8 +408,14 @@ in {
     ./dotfiles/local/share/applications/x-open-url.desktop;
 
   # Disable tray applets autostart (using TUI wrappers via waybar instead)
-  xdg.configFile."autostart/nm-applet.desktop".text = "[Desktop Entry]\nHidden=true\n";
-  xdg.configFile."autostart/blueman.desktop".text = "[Desktop Entry]\nHidden=true\n";
+  xdg.configFile."autostart/nm-applet.desktop".text = ''
+    [Desktop Entry]
+    Hidden=true
+  '';
+  xdg.configFile."autostart/blueman.desktop".text = ''
+    [Desktop Entry]
+    Hidden=true
+  '';
 
   # Darkman hooks
   home.file.".local/share/dark-mode.d/notify.sh" = {
@@ -456,12 +465,16 @@ in {
       rm -rf "$skills_dir/$skill"
     done
 
-    cp -rL ${./dotfiles/claude/skills/save-url-to-doc} "$skills_dir/save-url-to-doc"
+    cp -rL ${
+      ./dotfiles/claude/skills/save-url-to-doc
+    } "$skills_dir/save-url-to-doc"
     cp -rL ${./dotfiles/codex/skills/code-reviewer} "$skills_dir/code-reviewer"
     cp -rL ${./dotfiles/codex/skills/simplify} "$skills_dir/simplify"
     cp -rL ${./dotfiles/codex/skills/commit} "$skills_dir/commit"
     cp -rL ${./dotfiles/codex/skills/commit-push} "$skills_dir/commit-push"
-    cp -rL ${./dotfiles/codex/skills/commit-push-pr} "$skills_dir/commit-push-pr"
+    cp -rL ${
+      ./dotfiles/codex/skills/commit-push-pr
+    } "$skills_dir/commit-push-pr"
     cp -rL ${./dotfiles/codex/skills/pr-comments} "$skills_dir/pr-comments"
 
     chmod -R u+w "$skills_dir"
