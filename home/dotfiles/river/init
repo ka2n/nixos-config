@@ -54,7 +54,7 @@ pkill wlsunset 2>/dev/null
 # swayidle removed - using hypridle (systemd service) for both Hyprland and River
 
 # UI
-riverctl spawn "waybar -c ~/.config/waybar/config-river.jsonc"
+riverctl spawn waybar
 riverctl spawn "thunar --daemon"
 riverctl spawn "dex -a"
 

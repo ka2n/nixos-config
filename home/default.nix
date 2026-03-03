@@ -280,8 +280,7 @@ in {
   in pkgs.replaceVars ./dotfiles/lf/lfrc {
     previewer = "${lf-previewer-sandboxed}";
   };
-  xdg.configFile."waybar/config-river.jsonc".source =
-    ./dotfiles/waybar/config-river.jsonc;
+  xdg.configFile."waybar/config.jsonc".source = ./dotfiles/waybar/config.jsonc;
   xdg.configFile."waybar/style.css".source = ./dotfiles/waybar/style.css;
   xdg.configFile."hypr" = {
     source = ./dotfiles/hypr;
