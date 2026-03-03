@@ -42,6 +42,7 @@
     go-overlay.url = "github:purpleclay/go-overlay";
     playwright.url = "github:pietdevries94/playwright-web-flake";
     atuin.url = "github:atuinsh/atuin";
+    gazelle-tui.url = "github:Zeus-Deus/gazelle-tui";
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, ... }@inputs:

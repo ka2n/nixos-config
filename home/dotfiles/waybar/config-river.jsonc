@@ -60,7 +60,7 @@
     "tooltip-format-disconnected": "Disconnected",
     "interval": 3,
     "spacing": 1,
-    "on-click": "nm-connection-editor"
+    "on-click": "wl-gazelle"
   },
   "bluetooth": {
     "format": "",
@@ -68,7 +68,7 @@
     "format-connected": "󰂱",
     "format-no-controller": "",
     "tooltip-format": "Devices connected: {num_connections}",
-    "on-click": "alacritty --class bluetui -e bluetui"
+    "on-click": "wl-bluetui"
   },
   "battery": {
     "format": "{capacity}% {icon}",
@@ -112,7 +112,7 @@
   },
   "pulseaudio": {
     "format": "{icon}",
-    "on-click": "alacritty --class wiremix -e wiremix",
+    "on-click": "wl-wiremix",
     "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
     "tooltip-format": "Playing at {volume}%",
     "scroll-step": 5,

@@ -1,11 +1,11 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
 let
   cfg = config.programs.wayland-scripts;
 
-  # Terminal app wrapper (alacritty with specific class)
+  # Terminal app wrapper (uses xdg-terminal-exec for terminal-agnostic launching)
   mkTerminalWrapper = name: command: pkgs.writeShellScriptBin "wl-${name}" ''
-    exec ${pkgs.alacritty}/bin/alacritty --class ${name} -e ${command}
+    exec ${pkgs.xdg-terminal-exec}/bin/xdg-terminal-exec --app-id=${name} -- ${command}
   '';
 
   mkDesktopFile = { name, displayName, genericName, comment, icon ? null, categories ? [ "Utility" ] }: pkgs.makeDesktopItem {
@@ -20,6 +20,7 @@ let
   bluetuiWrapper = mkTerminalWrapper "bluetui" "${pkgs.bluetui}/bin/bluetui";
   wiremixWrapper = mkTerminalWrapper "wiremix" "${pkgs.wiremix}/bin/wiremix";
   clipseWrapper = mkTerminalWrapper "clipse" "${pkgs.clipse}/bin/clipse";
+  gazelleWrapper = mkTerminalWrapper "gazelle" "${inputs.gazelle-tui.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/gazelle";
 
   bluetuiDesktop = mkDesktopFile {
     name = "bluetui";
@@ -43,6 +44,14 @@ let
     genericName = "Clipboard Manager";
     comment = "TUI clipboard manager with history";
     categories = [ "Utility" ];
+  };
+
+  gazelleDesktop = mkDesktopFile {
+    name = "gazelle";
+    displayName = "Gazelle";
+    genericName = "Network Manager";
+    comment = "Minimal NetworkManager TUI with 802.1X enterprise WiFi support";
+    categories = [ "Network" "Settings" ];
   };
 
   # Rofi power menu
@@ -127,9 +136,10 @@ in
     enable = lib.mkEnableOption "Wayland utility scripts";
 
     # Terminal app wrappers
-    bluetui.enable = lib.mkEnableOption "bluetui with alacritty wrapper" // { default = true; };
-    wiremix.enable = lib.mkEnableOption "wiremix with alacritty wrapper" // { default = true; };
-    clipse.enable = lib.mkEnableOption "clipse with alacritty wrapper" // { default = true; };
+    bluetui.enable = lib.mkEnableOption "bluetui with terminal wrapper" // { default = true; };
+    wiremix.enable = lib.mkEnableOption "wiremix with terminal wrapper" // { default = true; };
+    clipse.enable = lib.mkEnableOption "clipse with terminal wrapper" // { default = true; };
+    gazelle.enable = lib.mkEnableOption "gazelle-tui with terminal wrapper" // { default = true; };
 
     # Rofi scripts
     rofi-powermenu.enable = lib.mkEnableOption "rofi power menu (wlogout replacement)" // { default = true; };
@@ -141,6 +151,7 @@ in
       (lib.optional cfg.bluetui.enable [ bluetuiWrapper bluetuiDesktop ])
       (lib.optional cfg.wiremix.enable [ wiremixWrapper wiremixDesktop ])
       (lib.optional cfg.clipse.enable [ clipseWrapper clipseDesktop ])
+      (lib.optional cfg.gazelle.enable [ gazelleWrapper gazelleDesktop ])
       # Rofi scripts
       (lib.optional cfg.rofi-powermenu.enable rofiPowermenu)
     ];
