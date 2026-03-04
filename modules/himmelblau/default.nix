@@ -5,7 +5,7 @@ let
   privateConfig = import ../../private/laptop.nix;
   # Use upstream package from flake (cached on Cachix)
   # Add passthru attributes for compatibility with home-manager
-  upstreamPkg = inputs.himmelblau.packages.${pkgs.system}.himmelblau;
+  upstreamPkg = inputs.himmelblau.packages.${pkgs.stdenv.hostPlatform.system}.himmelblau;
   himmelblauPkg = upstreamPkg.overrideAttrs (oldAttrs: {
     passthru = (oldAttrs.passthru or { }) // {
       # Native messaging host packages for home-manager compatibility
