@@ -81,26 +81,26 @@
       };
 
       nixosConfigurations.nixos-vm = nixpkgs.lib.nixosSystem {
-        inherit system;
         specialArgs = { inherit inputs pkgs-unstable configRevision; };
         modules = commonModules ++ [
+          { nixpkgs.hostPlatform = system; }
           ./hosts/nixos-vm/configuration.nix
         ];
       };
 
       nixosConfigurations.wk2511058 = nixpkgs.lib.nixosSystem {
-        inherit system;
         specialArgs = { inherit inputs pkgs-unstable configRevision; };
         modules = commonModules ++ [
+          { nixpkgs.hostPlatform = system; }
           ./hosts/wk2511058/configuration.nix
           nixos-hardware.nixosModules.lenovo-thinkpad-x1-13th-gen
         ];
       };
 
       nixosConfigurations.junior = nixpkgs.lib.nixosSystem {
-        inherit system;
         specialArgs = { inherit inputs pkgs-unstable configRevision; };
         modules = commonModules ++ [
+          { nixpkgs.hostPlatform = system; }
           inputs.disko.nixosModules.disko
           ./hosts/junior/configuration.nix
         ];
