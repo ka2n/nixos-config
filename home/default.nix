@@ -86,6 +86,14 @@ in {
     (pkgs.writeShellScriptBin "claude-notify-complete"
       (builtins.readFile ./dotfiles/local/bin/claude-notify-complete.sh))
 
+    (pkgs.writeShellScriptBin "chrome-debug" ''
+      exec google-chrome-stable \
+        --remote-debugging-port=''${1:-9222} \
+        --user-data-dir="$HOME/chrome-agent-browser" \
+        --no-first-run \
+        --no-default-browser-check
+    '')
+
     (pkgs.writeShellScriptBin "ndev" ''
       exec nix develop "$HOME/nixos-config" --command "$SHELL"
     '')
