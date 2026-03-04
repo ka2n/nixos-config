@@ -213,7 +213,7 @@ in {
     playwright-mcp
     alma
     codex
-    gemini-cli-bin
+    pkgs-unstable.gemini-cli
     delta
     jujutsu
 
