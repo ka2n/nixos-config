@@ -188,6 +188,19 @@ in {
         ++ lib.optional config.services.openssh.enable "sshd";
     in lib.genAttrs services genServiceCfg;
 
+    # Systemd user service for identity broker (D-Bus activated)
+    systemd.user.services.himmelblau-broker = {
+      description = "Himmelblau Authentication Broker";
+      serviceConfig = {
+        Type = "dbus";
+        BusName = "com.microsoft.identity.broker1";
+        ExecStart = "${cfg.package}/bin/himmelblau_broker";
+        Slice = "background.slice";
+        TimeoutStopSec = 5;
+        Restart = "on-failure";
+      };
+    };
+
     # Systemd services
     systemd.services = let
       commonServiceConfig = {
