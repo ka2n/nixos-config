@@ -86,6 +86,9 @@ in {
     (pkgs.writeShellScriptBin "claude-notify-complete"
       (builtins.readFile ./dotfiles/local/bin/claude-notify-complete.sh))
 
+    (pkgs.writeShellScriptBin "claude-statusline"
+      (builtins.readFile ./dotfiles/local/bin/claude-statusline.sh))
+
     (pkgs.writeShellScriptBin "chrome-debug" ''
       exec google-chrome-stable \
         --remote-debugging-port=''${1:-9222} \
