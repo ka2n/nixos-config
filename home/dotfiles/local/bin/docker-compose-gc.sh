@@ -71,9 +71,9 @@ for project in "${orphans[@]}"; do
   volumes=$($docker volume ls --filter "label=com.docker.compose.project=$project" -q)
   networks=$($docker network ls --filter "label=com.docker.compose.project=$project" -q)
 
-  nc=$(echo "$containers" | grep -c . 2>/dev/null || echo 0)
-  nv=$(echo "$volumes" | grep -c . 2>/dev/null || echo 0)
-  nn=$(echo "$networks" | grep -c . 2>/dev/null || echo 0)
+  if [[ -n "$containers" ]]; then nc=$(echo "$containers" | wc -l); else nc=0; fi
+  if [[ -n "$volumes" ]]; then nv=$(echo "$volumes" | wc -l); else nv=0; fi
+  if [[ -n "$networks" ]]; then nn=$(echo "$networks" | wc -l); else nn=0; fi
 
   total_containers=$((total_containers + nc))
   total_volumes=$((total_volumes + nv))
