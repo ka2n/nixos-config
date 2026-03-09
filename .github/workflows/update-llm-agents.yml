@@ -1,10 +1,9 @@
-name: Update Claude Code and Codex CLI
+name: Update llm-agents.nix
 
 on:
   schedule:
-    # Run twice daily: 9:00 AM and 9:00 PM JST (00:00 and 12:00 UTC)
-    - cron: '0 0 * * *'  # 9:00 AM JST
-    - cron: '0 12 * * *' # 9:00 PM JST
+    # Run after llm-agents.nix daily rebuild (2:00/14:00 UTC) + 30min for cache
+    - cron: '30 2,14 * * *'
   workflow_dispatch: # Allow manual trigger
 
 permissions:
@@ -23,8 +22,8 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
-      - name: Update claude-code-overlay and codex-cli-nix
-        run: nix flake update claude-code-overlay codex-cli-nix
+      - name: Update llm-agents.nix
+        run: nix flake update llm-agents
 
       - name: Check for changes
         id: check_changes
@@ -41,7 +40,5 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add flake.lock
-          git commit -m "chore: update claude-code-overlay and codex-cli-nix
-
-          Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+          git commit -m "chore: update llm-agents.nix"
           git push
