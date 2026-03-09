@@ -154,7 +154,6 @@ in {
   environment.systemPackages = (with pkgs; [
     # Editors
     neovim
-    code-cursor-fhs
 
     # CLI tools
     coreutils
