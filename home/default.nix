@@ -426,15 +426,8 @@ in {
   };
 
   # Desktop files
-  xdg.desktopEntries.x-open-url = {
-    name = "Web Browser Chooser";
-    comment = "Browse the web";
-    exec = "x-open-url %u";
-    mimeType = [ "x-scheme-handler/http" "x-scheme-handler/https" ];
-    categories = [ "Network" "WebBrowser" ];
-    terminal = false;
-    startupNotify = false;
-  };
+  home.file.".local/share/applications/x-open-url.desktop".source =
+    ./dotfiles/local/share/applications/x-open-url.desktop;
 
   # Disable tray applets autostart (using TUI wrappers via waybar instead)
   xdg.configFile."autostart/nm-applet.desktop".text = ''
