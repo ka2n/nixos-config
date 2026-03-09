@@ -37,8 +37,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     river-classic.url = "git+https://codeberg.org/ka2n/river-classic";
-    claude-code-overlay.url = "github:ryoppippi/claude-code-overlay";
-    codex-cli-nix.url = "github:sadjow/codex-cli-nix";
+    llm-agents.url = "github:numtide/llm-agents.nix";
     go-overlay.url = "github:purpleclay/go-overlay";
     playwright.url = "github:pietdevries94/playwright-web-flake";
     atuin.url = "github:atuinsh/atuin";
@@ -58,12 +57,8 @@
       commonModules = [
         {
           nixpkgs.overlays = [
-            inputs.claude-code-overlay.overlays.default
+            inputs.llm-agents.overlays.default
             inputs.go-overlay.overlays.default
-            # Override nixpkgs codex with codex-cli-nix
-            (final: prev: {
-              codex = inputs.codex-cli-nix.packages.${system}.default;
-            })
             (import ./pkgs pkgs-unstable)
           ];
         }

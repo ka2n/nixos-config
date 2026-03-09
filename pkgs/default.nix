@@ -1,14 +1,10 @@
 pkgs-unstable: final: prev: {
-  # claude-code: override to remove CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC
-  claude-code = prev.claude-code.overrideAttrs (oldAttrs: {
-    postFixup = ''
-      wrapProgram $out/bin/claude \
-        --prefix PATH : ${final.gh}/bin \
-        --set DISABLE_AUTOUPDATER 1 \
-        --set DISABLE_NON_ESSENTIAL_MODEL_CALLS 1 \
-        --set DISABLE_TELEMETRY 1 \
-        --set DISABLE_INSTALLATION_CHECKS 1
-    '';
+  # claude-code: add gh to PATH (single wrapProgram, no double-wrapping)
+  claude-code = final.llm-agents.claude-code.overrideAttrs (oldAttrs: {
+    postFixup = builtins.replaceStrings
+      [ "--argv0 claude" ]
+      [ "--prefix PATH : ${final.gh}/bin --argv0 claude" ]
+      oldAttrs.postFixup;
   });
 
   libcskk = final.callPackage ./libcskk { };

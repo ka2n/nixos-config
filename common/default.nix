@@ -42,12 +42,12 @@ in {
   nix.settings.substituters = [
     "https://cache.nixos.org"
     "https://himmelblau.cachix.org"
-    "https://ryoppippi.cachix.org"
+    "https://cache.numtide.com"
   ];
   nix.settings.trusted-public-keys = [
     "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     "himmelblau.cachix.org-1:yu8mq/NIBYsZHWzo4SOge97gpf02qugdZFT/JdRkswc="
-    "ryoppippi.cachix.org-1:b2LbtWNvJeL/qb1B6TYOMK+apaCps4SCbzlPRfSQIms="
+    "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
   ];
   nixpkgs.config.allowUnfree = true;
 
@@ -211,8 +211,14 @@ in {
     pkgs.claude-code
     playwright-mcp
     alma
-    codex
-    pkgs-unstable.gemini-cli
+    pkgs.llm-agents.codex
+    pkgs.llm-agents.gemini-cli
+    pkgs.llm-agents.ccusage
+    pkgs.llm-agents.openspec
+    pkgs.llm-agents.ralph-tui
+    pkgs.llm-agents.agent-browser
+    pkgs.llm-agents.entire
+    pkgs.llm-agents.rtk
     delta
     jujutsu
 

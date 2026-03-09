@@ -58,7 +58,7 @@ in {
     '')
 
     # GitHub
-    pkgs.github-copilot-cli
+    pkgs.llm-agents.copilot-cli
 
     # Docker
     pkgs.docker-credential-helpers
