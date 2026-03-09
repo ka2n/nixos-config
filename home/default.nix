@@ -131,6 +131,17 @@ in {
     (pkgs.writeShellScriptBin "caffeine-status"
       (builtins.readFile ./dotfiles/local/bin/caffeine-status.sh))
 
+    (pkgs.writeShellScriptBin "screenrec-toggle"
+      (builtins.readFile (pkgs.replaceVars ./dotfiles/local/bin/screenrec-toggle.sh {
+        notify_send = lib.getExe' pkgs.libnotify "notify-send";
+        slurp = lib.getExe pkgs.slurp;
+        wl_screenrec = lib.getExe pkgs.wl-screenrec;
+        gdbus = lib.getExe' pkgs.glib "gdbus";
+      })))
+
+    (pkgs.writeShellScriptBin "screenrec-status"
+      (builtins.readFile ./dotfiles/local/bin/screenrec-status.sh))
+
     (pkgs.writeShellScriptBin "ralph"
       (builtins.readFile ./dotfiles/local/bin/ralph.sh))
 
@@ -427,6 +438,14 @@ in {
   };
 
   # Desktop files
+  xdg.desktopEntries.screenrec-toggle = {
+    name = "Toggle Screen Recording";
+    comment = "Start or stop screen recording with wl-screenrec";
+    exec = "screenrec-toggle";
+    terminal = false;
+    categories = [ "AudioVideo" "Utility" ];
+  };
+
   xdg.desktopEntries.x-open-url = {
     name = "Web Browser Chooser";
     comment = "Browse the web";

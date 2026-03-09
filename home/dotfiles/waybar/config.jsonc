@@ -9,6 +9,7 @@
     "river/mode"
   ],
   "modules-center": [
+    "custom/screenrec",
     "clock"
   ],
   "modules-right": [
@@ -124,6 +125,12 @@
         "󰕾"
       ]
     }
+  },
+  "custom/screenrec": {
+    "exec": "screenrec-status",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "screenrec-toggle"
   },
   "custom/caffeine": {
     "exec": "caffeine-status",
