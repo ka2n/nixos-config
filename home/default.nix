@@ -52,6 +52,9 @@ in {
       exec ${pkgs.octorus}/bin/or "$@"
     '')
 
+    # GitHub
+    pkgs.github-copilot-cli
+
     # Docker
     pkgs.docker-credential-helpers
 
@@ -231,6 +234,10 @@ in {
       {
         name = "z";
         src = pkgs.fishPlugins.z.src;
+      }
+      {
+        name = "github-copilot-cli-fish";
+        src = pkgs.fishPlugins.github-copilot-cli-fish.src;
       }
     ];
   };
