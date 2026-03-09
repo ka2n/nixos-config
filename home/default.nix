@@ -5,6 +5,10 @@ let
   hasHimmelblau = osConfig.services.azure-entra.enable or false;
   himmelblauPkg =
     if hasHimmelblau then osConfig.services.azure-entra.package else null;
+  x-open-url = pkgs.writeScriptBin "x-open-url" ''
+    #!${lib.getExe' pkgs.nodejs "node"}
+    ${builtins.readFile ./dotfiles/local/bin/x-open-url.js}
+  '';
   zenBrowser = pkgs.wrapFirefox
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped {
       pname = "zen-browser";
@@ -79,10 +83,7 @@ in {
       (builtins.replaceStrings [ "@git@" ] [ "${lib.getExe pkgs.git}" ]
         (builtins.readFile ./dotfiles/local/bin/find-parent-package-dir.sh)))
 
-    (pkgs.writeScriptBin "x-open-url" ''
-      #!${lib.getExe' pkgs.nodejs "node"}
-      ${builtins.readFile ./dotfiles/local/bin/x-open-url.js}
-    '')
+    x-open-url
 
     (pkgs.writeShellScriptBin "claude-notify-waiting"
       (builtins.readFile ./dotfiles/local/bin/claude-notify-waiting.sh))
@@ -429,11 +430,45 @@ in {
   xdg.desktopEntries.x-open-url = {
     name = "Web Browser Chooser";
     comment = "Browse the web";
-    exec = "x-open-url %u";
+    exec = "${lib.getExe x-open-url} %u";
     mimeType = [ "x-scheme-handler/http" "x-scheme-handler/https" ];
     categories = [ "Network" "WebBrowser" ];
     terminal = false;
     startupNotify = false;
+  };
+
+  # Override Zen Browser desktop file with full path (for xdg-desktop-portal)
+  xdg.desktopEntries.zen = {
+    name = "Zen Browser";
+    genericName = "Web Browser";
+    exec = "${lib.getExe zenBrowser} --name zen %U";
+    icon = "zen";
+    mimeType = [
+      "text/html"
+      "text/xml"
+      "application/xhtml+xml"
+      "application/vnd.mozilla.xul+xml"
+      "x-scheme-handler/http"
+      "x-scheme-handler/https"
+    ];
+    categories = [ "Network" "WebBrowser" ];
+    terminal = false;
+    startupNotify = true;
+    settings.StartupWMClass = "zen";
+    actions = {
+      new-private-window = {
+        name = "New Private Window";
+        exec = "${lib.getExe zenBrowser} --private-window %U";
+      };
+      new-window = {
+        name = "New Window";
+        exec = "${lib.getExe zenBrowser} --new-window %U";
+      };
+      profile-manager-window = {
+        name = "Profile Manager";
+        exec = "${lib.getExe zenBrowser} --ProfileManager";
+      };
+    };
   };
 
   # Disable tray applets autostart (using TUI wrappers via waybar instead)
