@@ -219,6 +219,7 @@ in {
     pkgs.llm-agents.agent-browser
     pkgs.llm-agents.entire
     pkgs.llm-agents.rtk
+    pkgs.llm-agents.gno
     delta
     jujutsu
 

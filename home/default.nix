@@ -658,6 +658,28 @@ in {
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
+  # GNO knowledge index - periodic re-index
+  systemd.user.services.gno-index = {
+    Unit = {
+      Description = "GNO knowledge index update";
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "/run/current-system/sw/bin/gno index";
+    };
+  };
+
+  systemd.user.timers.gno-index = {
+    Unit = {
+      Description = "GNO knowledge index update timer";
+    };
+    Timer = {
+      OnCalendar = "hourly";
+      Persistent = true;
+    };
+    Install = { WantedBy = [ "timers.target" ]; };
+  };
+
   # InputActions client (for River - window info provider)
   # Note: inputactionsd runs as system service (requires root)
   systemd.user.services.inputactions-client = {
