@@ -7,3 +7,4 @@ StartupNotify=false
 Terminal=false
 Name=Web Browser Chooser
 Comment=Browse the web
+Categories=Network;WebBrowser;
