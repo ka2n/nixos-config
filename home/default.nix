@@ -545,25 +545,23 @@ in {
     mkdir -p "$skills_dir"
 
     # Managed skills: remove and re-copy each individually to preserve unmanaged skills
-    managed_skills="save-url-to-doc code-reviewer simplify commit commit-push commit-push-pr pr-comments organize-commits"
+    managed_skills="save-url-to-doc code-reviewer simplify commit commit-push commit-push-pr pr-comments organize-commits opsx-run"
     for s in $managed_skills; do
       rm -rf "$skills_dir/$s"
     done
 
-    cp -rL ${
-      ./dotfiles/claude/skills/save-url-to-doc
-    } "$skills_dir/save-url-to-doc"
+    # Shared skills (from agents/skills)
+    cp -rL ${./dotfiles/agents/skills/save-url-to-doc} "$skills_dir/save-url-to-doc"
+    cp -rL ${./dotfiles/agents/skills/opsx-run} "$skills_dir/opsx-run"
+    cp -rL ${./dotfiles/agents/skills/commit} "$skills_dir/commit"
+    cp -rL ${./dotfiles/agents/skills/commit-push} "$skills_dir/commit-push"
+    cp -rL ${./dotfiles/agents/skills/commit-push-pr} "$skills_dir/commit-push-pr"
+    cp -rL ${./dotfiles/agents/skills/organize-commits} "$skills_dir/organize-commits"
+
+    # Codex-only skills
     cp -rL ${./dotfiles/codex/skills/code-reviewer} "$skills_dir/code-reviewer"
     cp -rL ${./dotfiles/codex/skills/simplify} "$skills_dir/simplify"
-    cp -rL ${./dotfiles/codex/skills/commit} "$skills_dir/commit"
-    cp -rL ${./dotfiles/codex/skills/commit-push} "$skills_dir/commit-push"
-    cp -rL ${
-      ./dotfiles/codex/skills/commit-push-pr
-    } "$skills_dir/commit-push-pr"
     cp -rL ${./dotfiles/codex/skills/pr-comments} "$skills_dir/pr-comments"
-    cp -rL ${
-      ./dotfiles/codex/skills/organize-commits
-    } "$skills_dir/organize-commits"
 
     chmod -R u+w "$skills_dir"
   '';
