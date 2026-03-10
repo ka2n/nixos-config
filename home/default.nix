@@ -565,6 +565,7 @@ in {
 
   # Phase 0: Claude settings.local.json (inline management with stop hook)
   home.file.".claude/settings.local.json".text = builtins.toJSON {
+    autoUpdaterStatus = "disabled";
     outputStyle = "default";
     hooks = {
       Stop = [{
