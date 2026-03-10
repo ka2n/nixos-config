@@ -87,7 +87,7 @@
   copyignored = true
   hook = git-wt-hook
   deletehook = git-wt-deletehook
-  nocopy = **/.old_modules-*
+  nocopy = **/node_modules
 
 [credential]
   helper = !gh auth git-credential
