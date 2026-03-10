@@ -45,4 +45,8 @@ When a command is not found, try these approaches:
   2. Continue with other work (no report needed on CI success)
   3. On failure only: Check logs → Fix issue → Commit & push → Return to step 1 (max 3 attempts)
 
+## Browser
+
+- agent-browser: always use system google-chrome-stable
+
 @RTK.md
