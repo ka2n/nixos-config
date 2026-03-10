@@ -131,8 +131,8 @@ in {
     (pkgs.writeShellScriptBin "caffeine-status"
       (builtins.readFile ./dotfiles/local/bin/caffeine-status.sh))
 
-    (pkgs.writeShellScriptBin "screenrec-toggle"
-      (builtins.readFile (pkgs.replaceVars ./dotfiles/local/bin/screenrec-toggle.sh {
+    (pkgs.writeShellScriptBin "screenrec-toggle" (builtins.readFile
+      (pkgs.replaceVars ./dotfiles/local/bin/screenrec-toggle.sh {
         notify_send = lib.getExe' pkgs.libnotify "notify-send";
         slurp = lib.getExe pkgs.slurp;
         wl_screenrec = lib.getExe pkgs.wl-screenrec;
@@ -567,6 +567,7 @@ in {
   home.file.".claude/settings.local.json".text = builtins.toJSON {
     autoUpdaterStatus = "disabled";
     outputStyle = "default";
+    env = { "ENABLE_TOOL_SEARCH" = "true"; };
     hooks = {
       Stop = [{
         matcher = "";
@@ -661,9 +662,7 @@ in {
 
   # GNO knowledge index - periodic re-index
   systemd.user.services.gno-index = {
-    Unit = {
-      Description = "GNO knowledge index update";
-    };
+    Unit = { Description = "GNO knowledge index update"; };
     Service = {
       Type = "oneshot";
       ExecStart = "/run/current-system/sw/bin/gno index";
@@ -671,9 +670,7 @@ in {
   };
 
   systemd.user.timers.gno-index = {
-    Unit = {
-      Description = "GNO knowledge index update timer";
-    };
+    Unit = { Description = "GNO knowledge index update timer"; };
     Timer = {
       OnCalendar = "hourly";
       Persistent = true;
