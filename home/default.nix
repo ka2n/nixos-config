@@ -544,8 +544,11 @@ in {
     skills_dir="$HOME/.agents/skills"
     mkdir -p "$skills_dir"
 
-    rm -rf "$skills_dir"
-    mkdir -p "$skills_dir"
+    # Managed skills: remove and re-copy each individually to preserve unmanaged skills
+    managed_skills="save-url-to-doc code-reviewer simplify commit commit-push commit-push-pr pr-comments organize-commits"
+    for s in $managed_skills; do
+      rm -rf "$skills_dir/$s"
+    done
 
     cp -rL ${
       ./dotfiles/claude/skills/save-url-to-doc
