@@ -544,9 +544,8 @@ in {
     skills_dir="$HOME/.agents/skills"
     mkdir -p "$skills_dir"
 
-    for skill in save-url-to-doc code-reviewer simplify commit commit-push commit-push-pr pr-comments; do
-      rm -rf "$skills_dir/$skill"
-    done
+    rm -rf "$skills_dir"
+    mkdir -p "$skills_dir"
 
     cp -rL ${
       ./dotfiles/claude/skills/save-url-to-doc
@@ -559,6 +558,9 @@ in {
       ./dotfiles/codex/skills/commit-push-pr
     } "$skills_dir/commit-push-pr"
     cp -rL ${./dotfiles/codex/skills/pr-comments} "$skills_dir/pr-comments"
+    cp -rL ${
+      ./dotfiles/codex/skills/organize-commits
+    } "$skills_dir/organize-commits"
 
     chmod -R u+w "$skills_dir"
   '';
