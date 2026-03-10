@@ -2,7 +2,11 @@
 { config, pkgs, pkgs-unstable, lib, inputs, ... }:
 
 let
-  privateConfig = import ../../private/laptop.nix;
+  privateConfigPath = ../../private/laptop.nix;
+  privateConfig =
+    if builtins.pathExists privateConfigPath
+    then import privateConfigPath
+    else { };
 in {
   # Use latest stable kernel instead of zen for better thermal management
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -64,7 +68,9 @@ in {
     debugFlag = false;
     browserSso.chrome = true;
     pamServices = [ "passwd" "login" "systemd-user" "hyprlock" "greetd" ];
-    userMap.katsuma = privateConfig.username;
+    userMap = lib.optionalAttrs (privateConfig ? username) {
+      katsuma = privateConfig.username;
+    };
   };
 
   services.mdatp.enable = true;

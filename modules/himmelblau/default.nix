@@ -2,7 +2,11 @@
 
 let
   cfg = config.services.azure-entra;
-  privateConfig = import ../../private/laptop.nix;
+  privateConfigPath = ../../private/laptop.nix;
+  privateConfig =
+    if builtins.pathExists privateConfigPath
+    then import privateConfigPath
+    else { };
   # Use upstream package from flake (cached on Cachix)
   # Add passthru attributes for compatibility with home-manager
   upstreamPkg = inputs.himmelblau.packages.${pkgs.stdenv.hostPlatform.system}.himmelblau;
@@ -101,7 +105,7 @@ in {
         connection_timeout = 30
         db_path = /var/cache/himmelblaud/himmelblau.cache.db
         debug = ${lib.boolToString cfg.debugFlag}
-        domain = ${builtins.head privateConfig.domains}
+        domain = ${builtins.head (privateConfig.domains or ["example.onmicrosoft.com"])}
         enable_experimental_mfa = true
         enable_hello = true
         enable_sfa_fallback = true

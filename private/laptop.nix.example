@@ -1,7 +1,6 @@
 # Copy to laptop.nix and fill in your values
+# Then: git add -f -N private/laptop.nix && git update-index --assume-unchanged private/laptop.nix
 {
   domains = ["your-tenant.onmicrosoft.com"];
-
-  # home-manager user settings
   username = "user@example.com";
 }
