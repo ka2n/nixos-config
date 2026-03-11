@@ -232,6 +232,8 @@ in {
             + lib.optionalString cfg.debugFlag " -d";
           Restart = "on-failure";
           DynamicUser = true;
+          # Allow PRT preservation across service restarts
+          FileDescriptorStoreMax = 10;
           # Add tss group for TPM access via tpm2-abrmd
           SupplementaryGroups = [ "tss" ];
           CacheDirectory = "himmelblaud";

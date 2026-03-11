@@ -1,4 +1,3 @@
 result
 !flake.nix
 !flake.lock
-private/laptop.nix
