@@ -179,6 +179,8 @@ in {
     yazi
     pulsemixer
     wiremix # PipeWire TUI mixer
+    alsa-utils # arecord, aplay
+    sox # rec, play, sox
     hyprlock # Screen locker (works with both Hyprland and River)
     libsecret
     gcr
