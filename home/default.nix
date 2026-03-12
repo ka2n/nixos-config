@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-unstable, inputs, lib, osConfig ? null, variant ? "desktop"
+{ config, pkgs, pkgs-unstable, inputs, lib, llm-agents, osConfig ? null, variant ? "desktop"
 , riverBackgroundColor ? null, ... }:
 let
   # Check if himmelblau is enabled via NixOS module and get package from there
@@ -58,7 +58,7 @@ in {
     '')
 
     # GitHub
-    pkgs.llm-agents.copilot-cli
+    llm-agents.copilot-cli
 
     # Docker
     pkgs.docker-credential-helpers

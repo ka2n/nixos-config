@@ -1,5 +1,5 @@
 # Laptop-specific configuration
-{ config, pkgs, pkgs-unstable, lib, inputs, ... }:
+{ config, pkgs, pkgs-unstable, lib, inputs, llm-agents, ... }:
 
 let
   privateConfigPath = ../../private/laptop.nix;
@@ -34,7 +34,7 @@ in {
     useUserPackages = false;
     backupFileExtension = "backup";
     extraSpecialArgs = {
-      inherit inputs pkgs-unstable;
+      inherit inputs pkgs-unstable llm-agents;
       variant = "laptop";
       riverBackgroundColor = null;
     };

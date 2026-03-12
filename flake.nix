@@ -53,13 +53,14 @@
       };
       configRevision = self.rev or self.dirtyRev or "dirty";
 
+      llm-agents = inputs.llm-agents.packages.${system};
+
       # Common modules for all hosts
       commonModules = [
         {
           nixpkgs.overlays = [
-            inputs.llm-agents.overlays.default
             inputs.go-overlay.overlays.default
-            (import ./pkgs pkgs-unstable)
+            (import ./pkgs pkgs-unstable llm-agents)
           ];
         }
         inputs.sops-nix.nixosModules.sops
@@ -76,7 +77,7 @@
       };
 
       nixosConfigurations.nixos-vm = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs pkgs-unstable configRevision; };
+        specialArgs = { inherit inputs pkgs-unstable configRevision llm-agents; };
         modules = commonModules ++ [
           { nixpkgs.hostPlatform = system; }
           ./hosts/nixos-vm/configuration.nix
@@ -84,7 +85,7 @@
       };
 
       nixosConfigurations.wk2511058 = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs pkgs-unstable configRevision; };
+        specialArgs = { inherit inputs pkgs-unstable configRevision llm-agents; };
         modules = commonModules ++ [
           { nixpkgs.hostPlatform = system; }
           ./hosts/wk2511058/configuration.nix
@@ -93,7 +94,7 @@
       };
 
       nixosConfigurations.junior = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs pkgs-unstable configRevision; };
+        specialArgs = { inherit inputs pkgs-unstable configRevision llm-agents; };
         modules = commonModules ++ [
           { nixpkgs.hostPlatform = system; }
           inputs.disko.nixosModules.disko

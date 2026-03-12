@@ -1,5 +1,5 @@
 # Common configuration shared across all hosts
-{ config, pkgs, lib, inputs, pkgs-unstable, configRevision, ... }:
+{ config, pkgs, lib, inputs, pkgs-unstable, configRevision, llm-agents, ... }:
 
 let
   cica = pkgs.stdenvNoCC.mkDerivation rec {
@@ -213,15 +213,15 @@ in {
     pkgs.claude-code
     playwright-mcp
     alma
-    pkgs.llm-agents.codex
-    pkgs.llm-agents.gemini-cli
-    pkgs.llm-agents.ccusage
-    pkgs.llm-agents.openspec
-    pkgs.llm-agents.ralph-tui
-    pkgs.llm-agents.agent-browser
-    pkgs.llm-agents.entire
-    pkgs.llm-agents.rtk
-    pkgs.llm-agents.gno
+    llm-agents.codex
+    llm-agents.gemini-cli
+    llm-agents.ccusage
+    llm-agents.openspec
+    llm-agents.ralph-tui
+    llm-agents.agent-browser
+    llm-agents.entire
+    llm-agents.rtk
+    llm-agents.gno
     delta
     jujutsu
 

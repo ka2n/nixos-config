@@ -1,5 +1,5 @@
 # Desktop-specific configuration
-{ config, pkgs, pkgs-unstable, lib, inputs, ... }:
+{ config, pkgs, pkgs-unstable, lib, inputs, llm-agents, ... }:
 
 {
   imports = [
@@ -19,7 +19,7 @@
     useUserPackages = true;
     backupFileExtension = "backup";
     extraSpecialArgs = {
-      inherit inputs pkgs-unstable;
+      inherit inputs pkgs-unstable llm-agents;
       variant = "desktop";
       riverBackgroundColor = "#c79081";
     };
