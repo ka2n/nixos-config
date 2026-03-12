@@ -539,7 +539,7 @@ in {
   # Codex CLI: AGENTS.md (share same source as CLAUDE.md)
   home.file.".codex/AGENTS.md".source = ./dotfiles/claude/CLAUDE.md;
 
-  # Codex CLI: Skills (copy as real files, not symlinks)
+  # Agents/Codex Skills (copy as real files, not symlinks)
   home.activation.agentsSkills = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     skills_dir="$HOME/.agents/skills"
     mkdir -p "$skills_dir"
@@ -564,6 +564,15 @@ in {
     cp -rL ${./dotfiles/codex/skills/pr-comments} "$skills_dir/pr-comments"
 
     chmod -R u+w "$skills_dir"
+
+    # Claude Code: symlink ~/.claude/skills/<name> -> ~/.agents/skills/<name>
+    claude_skills_dir="$HOME/.claude/skills"
+    mkdir -p "$claude_skills_dir"
+    claude_managed_skills="save-url-to-doc commit commit-push commit-push-pr organize-commits opsx-run"
+    for s in $claude_managed_skills; do
+      rm -rf "$claude_skills_dir/$s"
+      ln -s "$skills_dir/$s" "$claude_skills_dir/$s"
+    done
   '';
 
   # Phase 0: Claude settings.local.json (inline management with stop hook)
