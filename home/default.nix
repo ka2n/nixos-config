@@ -1,5 +1,5 @@
-{ config, pkgs, pkgs-unstable, inputs, lib, llm-agents, osConfig ? null, variant ? "desktop"
-, riverBackgroundColor ? null, ... }:
+{ config, pkgs, pkgs-unstable, inputs, lib, llm-agents, osConfig ? null
+, variant ? "desktop", riverBackgroundColor ? null, ... }:
 let
   # Check if himmelblau is enabled via NixOS module and get package from there
   hasHimmelblau = osConfig.services.azure-entra.enable or false;
@@ -271,15 +271,14 @@ in {
   xdg.configFile."aquaproj-aqua/aqua-policy.yaml".source =
     ./dotfiles/aquaproj-aqua/aqua-policy.yaml;
 
-  # Phase 3: fcitx5-cskk辞書設定
-  xdg.configFile."fcitx5/cskk/dictionary_list".text =
+  # Phase 3: fcitx5-cskk辞書設定 (XDG_DATA_HOME, key=value format)
+  home.file.".local/share/fcitx5/cskk/dictionary_list".text =
     let inherit (pkgs) skkDictionaries;
     in ''
-      type,file,mode,encoding,complete
-      file,$FCITX_CONFIG_DIR/cskk/user.dict,readwrite,utf-8,
-      file,${skkDictionaries.l}/share/skk/SKK-JISYO.L,readonly,euc-jp,
-      file,${skkDictionaries.emoji}/share/skk/SKK-JISYO.emoji,readonly,utf-8,
-      file,${skkDictionaries.zipcode}/share/skk/SKK-JISYO.zipcode,readonly,euc-jp,
+      type=file,file=$FCITX_CONFIG_DIR/cskk/user.dict,mode=readwrite,encoding=utf-8,complete=true
+      type=file,file=${skkDictionaries.l}/share/skk/SKK-JISYO.L,mode=readonly,encoding=euc-jp,complete=false
+      type=file,file=${skkDictionaries.emoji}/share/skk/SKK-JISYO.emoji,mode=readonly,encoding=utf-8,complete=true
+      type=file,file=${skkDictionaries.zipcode}/share/skk/SKK-JISYO.zipcode,mode=readonly,encoding=euc-jp,complete=false
     '';
 
   # Multi-file configs
@@ -551,12 +550,18 @@ in {
     done
 
     # Shared skills (from agents/skills)
-    cp -rL ${./dotfiles/agents/skills/save-url-to-doc} "$skills_dir/save-url-to-doc"
+    cp -rL ${
+      ./dotfiles/agents/skills/save-url-to-doc
+    } "$skills_dir/save-url-to-doc"
     cp -rL ${./dotfiles/agents/skills/opsx-run} "$skills_dir/opsx-run"
     cp -rL ${./dotfiles/agents/skills/commit} "$skills_dir/commit"
     cp -rL ${./dotfiles/agents/skills/commit-push} "$skills_dir/commit-push"
-    cp -rL ${./dotfiles/agents/skills/commit-push-pr} "$skills_dir/commit-push-pr"
-    cp -rL ${./dotfiles/agents/skills/organize-commits} "$skills_dir/organize-commits"
+    cp -rL ${
+      ./dotfiles/agents/skills/commit-push-pr
+    } "$skills_dir/commit-push-pr"
+    cp -rL ${
+      ./dotfiles/agents/skills/organize-commits
+    } "$skills_dir/organize-commits"
 
     # Codex-only skills
     cp -rL ${./dotfiles/codex/skills/code-reviewer} "$skills_dir/code-reviewer"
