@@ -259,7 +259,7 @@ in {
     slack
 
     # Note-taking
-    obsidian
+    pkgs-unstable.obsidian
 
     # Office
     libreoffice
