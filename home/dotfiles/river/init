@@ -273,6 +273,8 @@ riverctl rule-add -app-id "Around" float
 riverctl rule-add -title "Picture-in-Picture" float
 riverctl rule-add -title "About" float
 riverctl rule-add -title "Organizer" float
+riverctl rule-add -title "gijilo - サマリー" float
+riverctl rule-add -title "gijilo - Summary" float
 
 ###################
 ### CSD (Client Side Decoration) ###
