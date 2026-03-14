@@ -1,6 +1,7 @@
 [user]
   name = Katsuma Ito
   email = katsumai@gmail.com
+  signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIRkGwniJUeDbYVmNimgBfto1vdvLxsY8PT5DnHa+JzB
 
 [gpg]
   format = ssh
