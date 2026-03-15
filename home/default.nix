@@ -326,9 +326,9 @@ in {
       suspendTimeout = if variant == "laptop" then 1800 else 48 * 60 * 60;
     in {
       general = {
-        lock_cmd = "pidof hyprlock || hyprlock --grace 10";
+        lock_cmd = "${pkgs.procps}/bin/pidof hyprlock || ${pkgs.hyprlock}/bin/hyprlock --grace 10";
         before_sleep_cmd = "loginctl lock-session";
-        after_sleep_cmd = "wlopm --on '*'";
+        after_sleep_cmd = "${pkgs.wlopm}/bin/wlopm --on '*'";
       };
       listener = [
         {
@@ -337,8 +337,8 @@ in {
         }
         {
           timeout = screenOffTimeout;
-          on-timeout = "wlopm --off '*'";
-          on-resume = "wlopm --on '*'";
+          on-timeout = "${pkgs.wlopm}/bin/wlopm --off '*'";
+          on-resume = "${pkgs.wlopm}/bin/wlopm --on '*'";
         }
         {
           timeout = suspendTimeout;
