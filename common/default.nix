@@ -28,6 +28,7 @@ in {
     ../modules/local-ca
     ../modules/display/dell-s2722qc-edid.nix
     ../modules/display/aquamarine-broadcast-rgb.nix
+    ../modules/tsshd
   ];
   # System revision tracking
   system.configurationRevision = configRevision;
@@ -191,7 +192,6 @@ in {
     # From aqua migration (system-level tools)
     yq-go
     cloudflared
-    tsshd
 
     # Terminal
     kitty
@@ -407,6 +407,7 @@ in {
   services.openssh.enable = true;
   services.tailscale.enable = true;
   programs.mosh.enable = true;
+  programs.tsshd.enable = true;
 
   # Bluetooth
   hardware.bluetooth.enable = true;
