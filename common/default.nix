@@ -191,6 +191,7 @@ in {
     # From aqua migration (system-level tools)
     yq-go
     cloudflared
+    tsshd
 
     # Terminal
     kitty
