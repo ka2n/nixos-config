@@ -316,6 +316,7 @@ in {
   };
   xdg.configFile."waybar/config.jsonc".source = ./dotfiles/waybar/config.jsonc;
   xdg.configFile."waybar/style.css".source = ./dotfiles/waybar/style.css;
+  xdg.configFile."hypr/hyprlock.conf".source = ./dotfiles/hypr/hyprlock.conf;
   # hypridle - idle management (works with both Hyprland and River)
   services.hypridle = {
     enable = true;
