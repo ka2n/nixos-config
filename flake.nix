@@ -88,6 +88,7 @@
         specialArgs = { inherit inputs pkgs-unstable configRevision llm-agents; };
         modules = commonModules ++ [
           { nixpkgs.hostPlatform = system; }
+          inputs.himmelblau.nixosModules.himmelblau
           ./hosts/wk2511058/configuration.nix
           nixos-hardware.nixosModules.lenovo-thinkpad-x1-13th-gen
         ];

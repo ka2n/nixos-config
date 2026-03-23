@@ -2,9 +2,9 @@
 , variant ? "desktop", riverBackgroundColor ? null, ... }:
 let
   # Check if himmelblau is enabled via NixOS module and get package from there
-  hasHimmelblau = osConfig.services.azure-entra.enable or false;
+  hasHimmelblau = osConfig.services.himmelblau.enable or false;
   himmelblauPkg =
-    if hasHimmelblau then osConfig.services.azure-entra.package else null;
+    if hasHimmelblau then osConfig.services.himmelblau.package else null;
   x-open-url = pkgs.writeScriptBin "x-open-url" ''
     #!${lib.getExe' pkgs.nodejs "node"}
     ${builtins.readFile ./dotfiles/local/bin/x-open-url.js}
@@ -741,7 +741,7 @@ in {
   programs.firefox = {
     enable = true;
     nativeMessagingHosts = [ pkgs.tridactyl-native ]
-      ++ lib.optional hasHimmelblau himmelblauPkg.firefoxNativeMessagingHost;
+      ++ lib.optional hasHimmelblau himmelblauPkg;
     package = zenBrowser;
     configPath = ".zen";
 

@@ -63,13 +63,33 @@ in {
   };
   security.pam.services.greetd.enableGnomeKeyring = true;
 
-  services.azure-entra = {
+  services.himmelblau = {
     enable = true;
     debugFlag = false;
-    browserSso.chrome = true;
     pamServices = [ "passwd" "login" "systemd-user" "swaylock" "greetd" ];
     userMap = lib.optionalAttrs (privateConfig ? username) {
       katsuma = privateConfig.username;
+    };
+    settings = {
+      domain = [ (builtins.head (privateConfig.domains or [ "example.onmicrosoft.com" ])) ];
+      apply_policy = true;
+      cn_name_mapping = true;
+      enable_hello = true;
+      enable_sfa_fallback = true;
+      enable_experimental_mfa = true;
+      hello_pin_min_length = 6;
+      home_alias = "cn";
+      home_attr = "cn";
+      idmap_range = "5000000-5999999";
+      local_groups = [ "users" "networkmanager" "wheel" "docker" "uinput" ];
+      selinux = false;
+      shell = "/run/current-system/sw/bin/bash";
+      use_etc_skel = false;
+      user_map_file = "/etc/himmelblau/user-map";
+      offline_breakglass = {
+        enabled = true;
+        ttl = "7d";
+      };
     };
   };
 
