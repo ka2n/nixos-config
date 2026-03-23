@@ -736,7 +736,7 @@ in {
   };
 
   # Kanshi - auto display configuration for River
-  xdg.configFile."kanshi/config".source = ./dotfiles/kanshi/config;
+  xdg.configFile."kanshi/config".source = ./dotfiles/kanshi/config-${variant};
 
   programs.firefox = {
     enable = true;

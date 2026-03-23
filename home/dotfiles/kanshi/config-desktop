@@ -1,0 +1,7 @@
+# Kanshi - auto display configuration for wlroots compositors
+# https://sr.ht/~emersion/kanshi/
+
+# DELL S2722QC (4K) via HDMI
+profile desktop {
+    output HDMI-A-1 mode 3840x2160 position 0,0 scale 1.5
+}
