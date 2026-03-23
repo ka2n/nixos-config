@@ -182,7 +182,7 @@ in {
     wiremix # PipeWire TUI mixer
     alsa-utils # arecord, aplay
     sox # rec, play, sox
-    hyprlock # Screen locker (works with both Hyprland and River)
+    swaylock-effects # Screen locker (wlroots-compatible)
     libsecret
     gcr
     playerctl
@@ -192,6 +192,7 @@ in {
     # From aqua migration (system-level tools)
     yq-go
     cloudflared
+    pkgs-unstable.trzsz-ssh # tssh
 
     # Terminal
     kitty
@@ -354,7 +355,7 @@ in {
   programs.river-with-fallback.enable = true;
 
   # Screen locker (PAM authentication)
-  security.pam.services.hyprlock = { };
+  security.pam.services.swaylock = { };
 
   # Polkit
   security.polkit.enable = true;

@@ -1,0 +1,44 @@
+# Warm brown theme (matching previous hyprlock design)
+color=c79081
+
+# Clock
+clock
+timestr=%H:%M
+datestr=
+
+# Indicator
+indicator
+indicator-radius=120
+indicator-thickness=8
+indicator-caps-lock
+
+# Colors (indicator ring & text)
+inside-color=00000033
+ring-color=00000000
+key-hl-color=ffffff
+bs-hl-color=ffffff80
+text-color=ffffff
+line-color=00000000
+
+# Wrong password
+inside-wrong-color=cc000040
+ring-wrong-color=cc000080
+text-wrong-color=ffffff
+
+# Verifying
+inside-ver-color=00000040
+ring-ver-color=ffffff40
+text-ver-color=ffffff
+
+# Cleared
+inside-clear-color=00000040
+ring-clear-color=ffffff20
+text-clear-color=ffffff
+
+# Font
+font=monospace
+font-size=72
+
+# Misc
+ignore-empty-password
+show-failed-attempts

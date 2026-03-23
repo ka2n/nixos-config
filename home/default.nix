@@ -316,7 +316,7 @@ in {
   };
   xdg.configFile."waybar/config.jsonc".source = ./dotfiles/waybar/config.jsonc;
   xdg.configFile."waybar/style.css".source = ./dotfiles/waybar/style.css;
-  xdg.configFile."hypr/hyprlock.conf".source = ./dotfiles/hypr/hyprlock.conf;
+  xdg.configFile."swaylock/config".source = ./dotfiles/swaylock/config;
   # hypridle - idle management (works with both Hyprland and River)
   services.hypridle = {
     enable = true;
@@ -327,7 +327,7 @@ in {
       suspendTimeout = if variant == "laptop" then 1800 else 48 * 60 * 60;
     in {
       general = {
-        lock_cmd = "${pkgs.procps}/bin/pidof hyprlock || ${pkgs.hyprlock}/bin/hyprlock --grace 10";
+        lock_cmd = "${pkgs.procps}/bin/pidof swaylock || ${pkgs.swaylock-effects}/bin/swaylock -f --grace 10";
         before_sleep_cmd = "loginctl lock-session";
         after_sleep_cmd = "${pkgs.wlopm}/bin/wlopm --on '*'";
       };
