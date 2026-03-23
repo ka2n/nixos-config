@@ -431,6 +431,12 @@ in {
     };
   };
 
+  # Ollama (Vulkan)
+  services.ollama = {
+    enable = true;
+    acceleration = "vulkan";
+  };
+
   # Audio (PipeWire)
   services.pipewire = {
     enable = true;
