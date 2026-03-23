@@ -39,6 +39,25 @@ pkgs-unstable: llm-agents: final: prev: {
     };
   };
 
+  # tsshd: build from source (7918c43) for XDG_CONFIG_HOME/tsshd/sshd_config support
+  tsshd = final.buildGoModule {
+    pname = "tsshd";
+    version = "0.1.6-unstable-2026-03-22";
+    src = final.fetchFromGitHub {
+      owner = "trzsz";
+      repo = "tsshd";
+      rev = "7918c43b00253873523707c5011a625117c994d6";
+      hash = "sha256-6F7nCAHq9vR0L/RnEHNK2TPi5SbYdr8IjZiwBwdghY8=";
+    };
+    vendorHash = "sha256-c/6jBMrCPYfdWAefN/FQi+gCjejAvNJY/7aI+un6HxE=";
+    meta = {
+      description = "trzsz SSH daemon over UDP";
+      homepage = "https://github.com/trzsz/tsshd";
+      license = final.lib.licenses.mit;
+      mainProgram = "tsshd";
+    };
+  };
+
   keeper-desktop = final.callPackage ./keeper-desktop { };
   display-switch = final.callPackage ./display-switch { };
   alma = final.callPackage ./alma { };
