@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, pkgs-unstable, ... }:
 
 let
   cfg = config.programs.tsshd;
@@ -9,8 +9,8 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.tsshd;
-      defaultText = lib.literalExpression "pkgs.tsshd";
+      default = pkgs-unstable.tsshd;
+      defaultText = lib.literalExpression "pkgs-unstable.tsshd";
       description = "The tsshd package to install.";
     };
 
