@@ -43,49 +43,22 @@ if [ -n "$CWD" ] && [ -d "$CWD" ]; then
   fi
 fi
 
-# --- Rate limit usage (cached) ---
-CACHE_FILE="/tmp/claude-usage-cache.json"
-CACHE_TTL=360
-
-fetch_usage() {
-  local CREDS_FILE="$HOME/.claude/.credentials.json"
-  if [ ! -f "$CREDS_FILE" ]; then echo '{}' > "$CACHE_FILE"; return; fi
-  local TOKEN
-  TOKEN=$(jq -r '.claudeAiOauth.accessToken // empty' "$CREDS_FILE" 2>/dev/null)
-  if [ -z "$TOKEN" ]; then echo '{}' > "$CACHE_FILE"; return; fi
-  local RESULT
-  RESULT=$(curl -s --max-time 5 \
-    -H "Authorization: Bearer $TOKEN" \
-    -H "anthropic-beta: oauth-2025-04-20" \
-    "https://api.anthropic.com/api/oauth/usage" 2>/dev/null || echo '{}')
-  if echo "$RESULT" | jq -e '.five_hour' >/dev/null 2>&1; then
-    echo "$RESULT" > "$CACHE_FILE"
-  fi
-}
-
-if [ -f "$CACHE_FILE" ]; then
-  CACHE_AGE=$(( $(date +%s) - $(stat -c %Y "$CACHE_FILE" 2>/dev/null || echo 0) ))
-  if [ "$CACHE_AGE" -gt "$CACHE_TTL" ]; then fetch_usage; fi
-else
-  fetch_usage
-fi
-
-USAGE=$(cat "$CACHE_FILE" 2>/dev/null || echo '{}')
-FIVE_HOUR_PCT=$(echo "$USAGE" | jq -r '.five_hour.utilization // 0' | cut -d. -f1)
-FIVE_HOUR_RESET=$(echo "$USAGE" | jq -r '.five_hour.resets_at // empty')
-SEVEN_DAY_PCT=$(echo "$USAGE" | jq -r '.seven_day.utilization // 0' | cut -d. -f1)
-SEVEN_DAY_RESET=$(echo "$USAGE" | jq -r '.seven_day.resets_at // empty')
+# --- Rate limit usage (from stdin JSON) ---
+FIVE_HOUR_PCT=$(echo "$INPUT" | jq -r '.rate_limits.five_hour.used_percentage // 0' | cut -d. -f1)
+FIVE_HOUR_RESET=$(echo "$INPUT" | jq -r '.rate_limits.five_hour.resets_at // empty')
+SEVEN_DAY_PCT=$(echo "$INPUT" | jq -r '.rate_limits.seven_day.used_percentage // 0' | cut -d. -f1)
+SEVEN_DAY_RESET=$(echo "$INPUT" | jq -r '.rate_limits.seven_day.resets_at // empty')
 
 format_reset() {
-  local iso=$1
-  if [ -z "$iso" ] || [ "$iso" = "null" ]; then return; fi
+  local ts=$1
+  if [ -z "$ts" ] || [ "$ts" = "null" ] || [ "$ts" = "0" ]; then return; fi
   local today reset_date
   today=$(TZ=Asia/Tokyo date +%Y-%m-%d)
-  reset_date=$(TZ=Asia/Tokyo date -d "$iso" +%Y-%m-%d 2>/dev/null || return)
+  reset_date=$(TZ=Asia/Tokyo date -d "@$ts" +%Y-%m-%d 2>/dev/null || return)
   if [ "$today" = "$reset_date" ]; then
-    TZ=Asia/Tokyo date -d "$iso" "+%-l%P" 2>/dev/null
+    TZ=Asia/Tokyo date -d "@$ts" "+%-l%P" 2>/dev/null
   else
-    TZ=Asia/Tokyo date -d "$iso" "+%-m/%-d %-l%P" 2>/dev/null
+    TZ=Asia/Tokyo date -d "@$ts" "+%-m/%-d %-l%P" 2>/dev/null
   fi
 }
 
