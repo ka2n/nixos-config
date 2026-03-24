@@ -94,13 +94,17 @@ in {
     (pkgs.writeShellScriptBin "claude-statusline"
       (builtins.readFile ./dotfiles/local/bin/claude-statusline.sh))
 
-    (pkgs.writeShellScriptBin "chrome-debug" ''
-      exec google-chrome-stable \
-        --remote-debugging-port=''${1:-9222} \
-        --user-data-dir="$HOME/chrome-agent-browser" \
-        --no-first-run \
-        --no-default-browser-check
-    '')
+    (pkgs.writeShellScriptBin "chrome-debug"
+      (pkgs.replaceVars ./dotfiles/local/bin/chrome-debug.sh {
+        google_chrome = lib.getExe pkgs.google-chrome;
+      }))
+
+    (pkgs.writeShellScriptBin "chrome-debug-select-profile"
+      (pkgs.replaceVars ./dotfiles/local/bin/chrome-debug-select-profile.sh {
+        jq = lib.getExe pkgs.jq;
+        fzf = lib.getExe pkgs.fzf;
+        google_chrome = lib.getExe pkgs.google-chrome;
+      }))
 
     (pkgs.writeShellScriptBin "ndev" ''
       exec nix develop "$HOME/nixos-config" --command "$SHELL"
