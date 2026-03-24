@@ -109,13 +109,10 @@ in {
         for card in /sys/class/drm/card*/device; do
           [ -d "$card" ] || continue
           # Set DPM state to performance
-          if [ -w "$card/power_dpm_state" ]; then
-            echo "performance" > "$card/power_dpm_state"
-          fi
+          # Set DPM state to performance (may fail if GPU is in reset)
+          echo "performance" > "$card/power_dpm_state" 2>/dev/null || true
           # Lock GPU and memory clocks to highest level
-          if [ -w "$card/power_dpm_force_performance_level" ]; then
-            echo "high" > "$card/power_dpm_force_performance_level"
-          fi
+          echo "high" > "$card/power_dpm_force_performance_level" 2>/dev/null || true
         done
       '';
     };
