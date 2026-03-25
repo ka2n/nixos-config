@@ -2,10 +2,12 @@
 # The upstream module (inputs.himmelblau.nixosModules.himmelblau) provides:
 #   - himmelblau.conf generation, NSS, PAM, systemd services, D-Bus, krb5, tmpfiles
 # This module adds settings the upstream doesn't cover.
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
 let
   cfg = config.services.himmelblau;
+  system = pkgs.stdenv.hostPlatform.system;
+  upstreamPackage = inputs.himmelblau.packages.${system}.himmelblau;
 in {
   options.services.himmelblau = {
     userMap = lib.mkOption {
@@ -18,6 +20,14 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    # Enable hardware TPM support (cargo feature "tpm" in himmelblau_unix_common)
+    services.himmelblau.package = lib.mkForce (upstreamPackage.overrideAttrs (old: {
+      buildInputs = (old.buildInputs or []) ++ [ pkgs.tpm2-tss ];
+      # overrideAttrs cannot re-derive cargoBuildFeatures from buildFeatures,
+      # so set the env var that the cargo build hook actually reads.
+      cargoBuildFeatures = "himmelblau_unix_common/tpm";
+    }));
+
     # TPM2 support for HSM binding (abrmd NOT needed - direct /dev/tpmrm0 access)
     security.tpm2 = {
       enable = true;
