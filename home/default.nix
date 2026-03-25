@@ -499,6 +499,13 @@ in {
     [Desktop Entry]
     Hidden=true
   '';
+  xdg.configFile."autostart/1password.desktop".text = ''
+    [Desktop Entry]
+    Name=1Password
+    Exec=1password --silent
+    Terminal=false
+    Type=Application
+  '';
 
   # Darkman hooks
   home.file.".local/share/dark-mode.d/notify.sh" = {
