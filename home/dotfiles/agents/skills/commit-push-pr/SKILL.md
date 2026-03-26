@@ -3,6 +3,14 @@ name: commit-push-pr
 description: Create a branch, commit changes, push to remote, and create a pull request. Use when asked to create a PR or pull request.
 ---
 
+## Context
+
+- Status: !`git status`
+- Recent commits: !`git log --oneline -5`
+- Diff: !`git diff`
+
+## Task
+
 Creates a branch, commits changes, pushes to remote, and creates a pull request.
 
 ## 1. Create a branch

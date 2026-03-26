@@ -3,6 +3,14 @@ name: commit-push
 description: Split current changes into meaningful Git commits with Japanese commit messages, then push to remote. Use when asked to commit and push.
 ---
 
+## Context
+
+- Status: !`git status`
+- Recent commits: !`git log --oneline -5`
+- Diff: !`git diff`
+
+## Task
+
 Please split the following changes into meaningful Git commits.
 For each commit:
 - Include only logically related changes
