@@ -434,6 +434,7 @@ in {
   # Ollama (Vulkan)
   services.ollama = {
     enable = true;
+    package = pkgs-unstable.ollama-vulkan;
     acceleration = "vulkan";
   };
 
