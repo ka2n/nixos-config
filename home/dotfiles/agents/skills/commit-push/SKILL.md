@@ -1,6 +1,6 @@
 ---
 name: commit-push
-description: Split current changes into meaningful Git commits with Japanese commit messages, then push to remote. Use when asked to commit and push.
+description: Split current changes into meaningful Git commits, then push to remote. Use when asked to commit and push.
 ---
 
 ## Context
@@ -13,7 +13,8 @@ description: Split current changes into meaningful Git commits with Japanese com
 
 Please split the following changes into meaningful Git commits.
 For each commit:
-- Include only logically related changes
-- Write a concise and descriptive commit message with Japanese
+- Include only logically related changes.
+- Write a concise and descriptive commit message.
+- Use same language/format as previous commits.
 
 And push.

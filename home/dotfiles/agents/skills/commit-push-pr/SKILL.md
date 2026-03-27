@@ -18,12 +18,13 @@ Creates a branch, commits changes, pushes to remote, and creates a pull request.
 
 Please split the following changes into meaningful Git commits.
 For each commit:
-- Include only logically related changes
-- Write a concise and descriptive commit message with Japanese
+- Include only logically related changes.
+- Write a concise and descriptive commit message.
+- Use same language/format as previous commits.
 
 ## 3. Push
 ## 4. Create a pull request
 
-- Use gh command
-- Write a concise message with Japanese
+- Use gh command.
+- Write a concise message.
 - If user passed some URL during this session, please refer the URLs in PR message.
