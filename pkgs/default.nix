@@ -66,4 +66,5 @@ pkgs-unstable: llm-agents: final: prev: {
   mo = final.callPackage ./mo { };
   inputactions-standalone = final.callPackage ./inputactions-standalone { };
   pencil = final.callPackage ./pencil { };
+  jai = final.callPackage ./jai { };
 }

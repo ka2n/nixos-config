@@ -29,6 +29,7 @@ in {
     ../modules/display/dell-s2722qc-edid.nix
     ../modules/display/aquamarine-broadcast-rgb.nix
     ../modules/tsshd
+    ../modules/jai
   ];
   # System revision tracking
   system.configurationRevision = configRevision;
@@ -409,6 +410,7 @@ in {
   services.tailscale.enable = true;
   programs.mosh.enable = true;
   programs.tsshd.enable = true;
+  programs.jai.enable = true;
 
   # Bluetooth
   hardware.bluetooth.enable = true;
