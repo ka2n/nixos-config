@@ -143,6 +143,8 @@ in {
     variant = "";
   };
 
+  services.eternal-terminal.enable = true;
+
   # xremap
   programs.xremap.enable = true;
 
