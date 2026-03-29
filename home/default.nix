@@ -546,6 +546,10 @@ in {
   # Codex CLI: AGENTS.md (share same source as CLAUDE.md)
   home.file.".codex/AGENTS.md".source = ./dotfiles/claude/CLAUDE.md;
 
+  # jai (Jail for AI) config files
+  home.file.".jai/claude.conf".source = ./dotfiles/jai/claude.conf;
+  home.file.".jai/codex.conf".source = ./dotfiles/jai/codex.conf;
+
   # Agents/Codex Skills (copy as real files, not symlinks)
   home.activation.agentsSkills = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     skills_dir="$HOME/.agents/skills"

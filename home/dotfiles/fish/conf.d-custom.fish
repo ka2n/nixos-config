@@ -309,13 +309,11 @@ if type -q hgrep
     end
 end
 
-if type -q claude
-    abbr --add claudex "claude --dangerously-skip-permissions"
-    abbr --add vclaude "vt claude --dangerously-skip-permissions"
-end
-
-if type -q codex
-    abbr --add codexbest "codex --yolo --search"
+if type -q jai
+    abbr --add claude "jai claude"
+    abbr --add claudex "jai claude --dangerously-skip-permissions"
+    abbr --add codex "jai codex"
+    abbr --add codexbest "jai codex --yolo --search"
 end
 
 if type -q rg
