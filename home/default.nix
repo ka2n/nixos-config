@@ -764,7 +764,13 @@ in {
   };
 
   # Kanshi - auto display configuration for River
-  xdg.configFile."kanshi/config".source = ./dotfiles/kanshi/config-${variant};
+  xdg.configFile."kanshi/config".source =
+    if variant == "laptop" then
+      pkgs.replaceVars ./dotfiles/kanshi/config-laptop {
+        makoctl = "${pkgs.mako}/bin/makoctl";
+      }
+    else
+      ./dotfiles/kanshi/config-${variant};
 
   programs.firefox = {
     enable = true;

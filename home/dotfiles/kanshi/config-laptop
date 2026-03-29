@@ -13,11 +13,11 @@ profile external {
 profile dual {
     output eDP-1 enable position 0,0 scale 1.5
     output HDMI-A-1 enable position 1920,0 scale 1.5
-    exec makoctl mode -s dual
+    exec @makoctl@ mode -s dual
 }
 
 # Laptop only
 profile laptop {
     output eDP-1 position 0,0 scale 1.5
-    exec makoctl mode -s default
+    exec @makoctl@ mode -s default
 }

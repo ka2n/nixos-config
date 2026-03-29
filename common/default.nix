@@ -132,6 +132,7 @@ in {
       Type = "simple";
       ExecStart = "${pkgs.kanshi}/bin/kanshi";
       Restart = "on-failure";
+      RestartSec = 2;
     };
     wantedBy = [ "river-session.target" ];
   };
