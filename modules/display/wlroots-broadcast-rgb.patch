@@ -1,0 +1,40 @@
+diff --git a/include/backend/drm/properties.h b/include/backend/drm/properties.h
+--- a/include/backend/drm/properties.h
++++ b/include/backend/drm/properties.h
+@@ -21,6 +21,7 @@ struct wlr_drm_connector_props {
+ 	uint32_t panel_orientation; // not guaranteed to exist
+ 	uint32_t content_type; // not guaranteed to exist
+ 	uint32_t max_bpc; // not guaranteed to exist
++	uint32_t broadcast_rgb; // not guaranteed to exist (Intel/AMD only)
+
+ 	// atomic-modesetting only
+
+diff --git a/backend/drm/properties.c b/backend/drm/properties.c
+--- a/backend/drm/properties.c
++++ b/backend/drm/properties.c
+@@ -22,6 +22,7 @@ struct prop_info {
+ static const struct prop_info connector_info[] = {
+ #define INDEX(name) (offsetof(struct wlr_drm_connector_props, name) / sizeof(uint32_t))
++	{ "Broadcast RGB", INDEX(broadcast_rgb) },
+ 	{ "CRTC_ID", INDEX(crtc_id) },
+ 	{ "DPMS", INDEX(dpms) },
+ 	{ "EDID", INDEX(edid) },
+ 	{ "PATH", INDEX(path) },
+diff --git a/backend/drm/atomic.c b/backend/drm/atomic.c
+--- a/backend/drm/atomic.c
++++ b/backend/drm/atomic.c
+@@ -424,6 +424,13 @@ static void atomic_connector_add(struct atomic *atom,
+ 	if (active && conn->props.content_type != 0) {
+ 		atomic_add(atom, conn->id, conn->props.content_type,
+ 			DRM_MODE_CONTENT_TYPE_GRAPHICS);
+ 	}
++	// Force Broadcast RGB to Full (1) for proper color output
++	// See: https://gitlab.freedesktop.org/wlroots/wlroots/-/merge_requests/2310
++	//      https://gitlab.freedesktop.org/wlroots/wlroots/-/merge_requests/4509
++	//      https://github.com/swaywm/sway/issues/3173
++	if (active && conn->props.broadcast_rgb != 0) {
++		atomic_add(atom, conn->id, conn->props.broadcast_rgb, 1);
++	}
+ 	if (modeset && active && conn->props.max_bpc != 0 && conn->max_bpc_bounds[1] != 0) {
+ 		atomic_add(atom, conn->id, conn->props.max_bpc, pick_max_bpc(conn, state->primary_fb));
+ 	}

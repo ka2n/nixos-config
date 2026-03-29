@@ -27,7 +27,7 @@ in {
     ../modules/webcam-flicker.nix
     ../modules/local-ca
     ../modules/display/dell-s2722qc-edid.nix
-    ../modules/display/aquamarine-broadcast-rgb.nix
+    ../modules/display/wlroots-broadcast-rgb.nix
     ../modules/tsshd
     ../modules/jai
   ];
