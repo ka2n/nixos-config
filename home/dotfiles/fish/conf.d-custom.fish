@@ -259,16 +259,6 @@ if type -q atuin
     atuin init --disable-up-arrow fish | source
 end
 
-if type -q bitly
-    function bitly
-      command bitly -l $BITLY_LOGIN -k $BITLY_APIKEY $argv
-    end
-
-    function bitlyit
-      command bitly -l $BITLY_LOGIN -k $BITLY_APIKEY $argv | xclip -i -sel clipboard > /dev/null
-    end
-end
-
 if type -q peco
     function peco
       command peco --layout=top-down $argv
@@ -289,16 +279,8 @@ if type -q colordiff
     abbr --add diff "colordiff"
 end
 
-if type -q neovide
-    abbr --add gvim "neovide"
-end
-
 if type -q nvim
     abbr --add vim "nvim"
-end
-
-if type -q ag
-    alias ag='ag --hidden'
 end
 
 if type -q hgrep
@@ -310,10 +292,12 @@ if type -q hgrep
 end
 
 if type -q jai
-    abbr --add claude "jai claude"
-    abbr --add claudex "jai claude --dangerously-skip-permissions"
-    abbr --add codex "jai codex"
-    abbr --add codexbest "jai codex --yolo --search"
+    abbr --add xcl "claude"
+    abbr --add cl "jai claude"
+    abbr --add clx "jai claude --dangerously-skip-permissions"
+    abbr --add xco "codex"
+    abbr --add co "jai codex"
+    abbr --add cox "jai codex --yolo --search"
 end
 
 if type -q rg
