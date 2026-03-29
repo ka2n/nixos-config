@@ -144,6 +144,7 @@ in {
   };
 
   services.eternal-terminal.enable = true;
+  networking.firewall.allowedTCPPorts = [ 2022 ];
 
   # xremap
   programs.xremap.enable = true;
