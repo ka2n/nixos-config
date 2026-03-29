@@ -596,10 +596,23 @@ in {
     hooks = {
       Stop = [{
         matcher = "";
+        hooks = [
+          {
+            type = "command";
+            command =
+              "paplay /run/current-system/sw/share/sounds/freedesktop/stereo/bell.oga";
+          }
+          {
+            type = "command";
+            command = "claude-notify-complete";
+          }
+        ];
+      }];
+      Notification = [{
+        matcher = "";
         hooks = [{
           type = "command";
-          command =
-            "paplay /run/current-system/sw/share/sounds/freedesktop/stereo/bell.oga";
+          command = "claude-notify-waiting";
         }];
       }];
     };
