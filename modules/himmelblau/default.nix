@@ -167,15 +167,20 @@ in {
     };
 
     # HSM PIN initialization — encrypts hsm-pin with TPM via systemd-creds
+    # Only runs if the encrypted credential does not yet exist (matching upstream).
     systemd.services.himmelblau-hsm-pin-init = {
       description = "Himmelblau HSM PIN Initialization";
       wantedBy = [ "multi-user.target" ];
       before = [ "himmelblaud.service" ];
       after = [ "systemd-tpm2-setup.service" ];
+      unitConfig = {
+        ConditionPathExists = "!/var/lib/private/himmelblaud/hsm-pin.enc";
+        DefaultDependencies = false;
+      };
       serviceConfig = {
         Type = "oneshot";
         ExecStart = initHsmPinScript;
-        RemainAfterExit = false;
+        RemainAfterExit = true;
       };
     };
 
@@ -190,6 +195,18 @@ in {
         SupplementaryGroups = [ "tss" ];
         CacheDirectoryMode = "0700";
         StateDirectoryMode = "0700";
+        # Pass the encrypted HSM PIN to himmelblaud via systemd credentials.
+        # systemd decrypts it (using TPM if bound) and exposes at
+        # /run/credentials/himmelblaud.service/hsm-pin.
+        # %d specifier doesn't expand in Environment=, so we use
+        # ExecStartPre to set it via the CREDENTIALS_DIRECTORY env var
+        # that systemd provides automatically.
+        LoadCredentialEncrypted = "hsm-pin:/var/lib/private/himmelblaud/hsm-pin.enc";
+      };
+      # Tell himmelblaud to read the HSM PIN from systemd's credential store.
+      # CREDENTIALS_DIRECTORY is set by systemd when LoadCredential* is used.
+      environment = {
+        HIMMELBLAU_HSM_PIN_PATH = "/run/credentials/himmelblaud.service/hsm-pin";
       };
     };
 
