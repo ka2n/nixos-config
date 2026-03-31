@@ -1,5 +1,5 @@
-# Warm brown theme (matching previous hyprlock design)
-color=c79081
+# Background color (per-host, replaced by Nix)
+color=@lock_color@
 
 # Clock
 clock

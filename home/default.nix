@@ -320,7 +320,13 @@ in {
   };
   xdg.configFile."waybar/config.jsonc".source = ./dotfiles/waybar/config.jsonc;
   xdg.configFile."waybar/style.css".source = ./dotfiles/waybar/style.css;
-  xdg.configFile."swaylock/config".source = ./dotfiles/swaylock/config;
+  xdg.configFile."swaylock/config".source = let
+    lockColor = if riverBackgroundColor != null
+      then builtins.replaceStrings ["#"] [""] riverBackgroundColor
+      else "232136";
+    configContent = builtins.replaceStrings ["@lock_color@"] [lockColor]
+      (builtins.readFile ./dotfiles/swaylock/config);
+  in pkgs.writeText "swaylock-config" configContent;
   # hypridle - idle management (works with both Hyprland and River)
   services.hypridle = {
     enable = true;
