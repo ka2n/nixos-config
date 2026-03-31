@@ -228,7 +228,7 @@ in {
     llm-agents.agent-browser
     llm-agents.entire
     llm-agents.rtk
-    llm-agents.gno
+
     delta
     jujutsu
 
