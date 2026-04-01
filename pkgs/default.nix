@@ -5,7 +5,7 @@ pkgs-unstable: llm-agents: final: prev: {
     src = final.fetchurl {
       url =
         "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/${version}/linux-x64/claude";
-      hash = "sha256-saW4lGmGKt7g5NwoyrWoMUvE0BF+Gasmp7f/fOm1m9U=";
+      hash = "sha256-kDyzyWsxTYaFZjLIcC9c35cbgE0LGe+HRGVzvNHX3xw=";
     };
     postFixup = builtins.replaceStrings [ "--argv0 claude" ]
       [ "--prefix PATH : ${final.gh}/bin --argv0 claude" ] oldAttrs.postFixup;
