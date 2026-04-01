@@ -1,15 +1,14 @@
 pkgs-unstable: llm-agents: final: prev: {
-  # claude-code: pin to 2.1.87 (2.1.88 binary was deleted upstream) + add gh to PATH
+  # claude-code: pin to 2.1.89 (2.1.88 binary was deleted upstream) + add gh to PATH
   claude-code = llm-agents.claude-code.overrideAttrs (oldAttrs: rec {
-    version = "2.1.87";
+    version = "2.1.89";
     src = final.fetchurl {
-      url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/${version}/linux-x64/claude";
+      url =
+        "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/${version}/linux-x64/claude";
       hash = "sha256-saW4lGmGKt7g5NwoyrWoMUvE0BF+Gasmp7f/fOm1m9U=";
     };
-    postFixup = builtins.replaceStrings
-      [ "--argv0 claude" ]
-      [ "--prefix PATH : ${final.gh}/bin --argv0 claude" ]
-      oldAttrs.postFixup;
+    postFixup = builtins.replaceStrings [ "--argv0 claude" ]
+      [ "--prefix PATH : ${final.gh}/bin --argv0 claude" ] oldAttrs.postFixup;
   });
 
   libcskk = final.callPackage ./libcskk { };
