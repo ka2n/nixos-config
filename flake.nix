@@ -16,9 +16,9 @@
       url = "github:NitorCreations/nix-mdatp";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Pinned to v3.1.0 release
+    # Pinned to v3.1.1 release
     # Don't follow nixpkgs to use Cachix cache (built against nixpkgs-25.05)
-    himmelblau.url = "github:himmelblau-idm/himmelblau/3.1.0";
+    himmelblau.url = "github:himmelblau-idm/himmelblau/3.1.1";
     inputactions = {
       # Pinned to Dec 2025 revision compatible with nixos-25.11's Hyprland
       url = "github:taj-ny/InputActions/2eb2a2450ddc85befb770c60d5baf9ced7d1197d";
