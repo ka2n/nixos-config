@@ -1,12 +1,6 @@
 pkgs-unstable: llm-agents: final: prev: {
-  # claude-code: pin to 2.1.89 (2.1.88 binary was deleted upstream) + add gh to PATH
-  claude-code = llm-agents.claude-code.overrideAttrs (oldAttrs: rec {
-    version = "2.1.89";
-    src = final.fetchurl {
-      url =
-        "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/${version}/linux-x64/claude";
-      hash = "sha256-kDyzyWsxTYaFZjLIcC9c35cbgE0LGe+HRGVzvNHX3xw=";
-    };
+  # claude-code: add gh to PATH (single wrapProgram, no double-wrapping)
+  claude-code = llm-agents.claude-code.overrideAttrs (oldAttrs: {
     postFixup = builtins.replaceStrings [ "--argv0 claude" ]
       [ "--prefix PATH : ${final.gh}/bin --argv0 claude" ] oldAttrs.postFixup;
   });
