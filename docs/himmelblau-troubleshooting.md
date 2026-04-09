@@ -241,6 +241,96 @@ journalctl -u systemd-logind --since "10 min ago"
 journalctl -u himmelblaud --since "10 min ago" -p err
 ```
 
+## 問題6: Chrome で "No connection to the host tooling"
+
+### 症状
+
+Linux Entra SSO Chrome 拡張機能 (v1.8.0) のポップアップに以下が表示される。
+
+```
+No connection to the host tooling. Please read the installation guide to learn how to install it.
+```
+
+### 根本原因
+
+2つの問題が連鎖している。
+
+**① linux-entra-sso バイナリのバグ (himmelblau 3.1.1)**
+
+`acquirePrtSsoCookie` リクエストに対して himmelblaud が `NotFound` を返したとき、
+バイナリがエラーレスポンスを Chrome に送信せずにクラッシュして終了する。
+
+```
+run_as_native_messaging failed: Failure("EOF while parsing a value at line 1 column 0")
+```
+
+Chrome は Native Messaging ポートの切断 (`onDisconnect`) を検知し、
+`nm_connected = false` → "No connection to the host tooling" を表示する。
+
+**② PRT が refresh_cache に存在しない**
+
+himmelblaud のログ:
+
+```
+unix_user_prt_cookie [ 5.62µs ]
+🚨 [error]: Failed to fetch prt sso cookie: NotFound { what: "account_id", where_: "refresh_cache" }
+```
+
+`getAccounts` はアカウントを返す (account cache には存在する) が、
+PRT (Primary Refresh Token) が refresh_cache にないため SSO cookie を発行できない。
+
+### 診断手順
+
+```bash
+# アカウントが存在することを確認
+linux-entra-sso -i getAccounts
+
+# PRT 取得を試して失敗するか確認（プロセスが終了する）
+python3 -c "
+import subprocess, struct, json, select
+proc = subprocess.Popen(['linux-entra-sso'],
+    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+send = lambda cmd: proc.stdin.write(struct.pack('<I', len(msg := json.dumps(cmd).encode())) + msg) or proc.stdin.flush()
+recv = lambda: json.loads(proc.stdout.read(struct.unpack('<I', proc.stdout.read(4))[0]))
+print(recv())   # brokerStateChanged: online のはず
+send({'command': 'acquirePrtSsoCookie', 'account': {...}, 'ssoUrl': 'https://login.microsoftonline.com/'})
+print(recv())   # EOF → バイナリ終了 = PRT なし
+"
+
+# himmelblaud ログで確認
+journalctl -u himmelblaud --since "5 min ago" | grep -E "prt|refresh_cache"
+```
+
+### 対処
+
+**PRT を取得する（Entra ID で再認証）**
+
+PRT は Entra ID 認証時に取得・キャッシュされる。以下のコマンドで再認証をトリガーする。
+
+```bash
+sudo aad-tool status
+```
+
+Hello PIN の入力を求められるので入力する。
+himmelblaud が PRT を取得・キャッシュした後、Chrome の拡張機能ポップアップで接続が確立される。
+
+### Native Messaging の動作確認
+
+```bash
+# マニフェストの存在確認
+cat /etc/opt/chrome/native-messaging-hosts/linux_entra_sso.json
+
+# バイナリが正常動作するか確認
+linux-entra-sso -i getAccounts
+linux-entra-sso -i getVersion
+```
+
+### 関連
+
+- Native Messaging マニフェスト: `/etc/opt/chrome/native-messaging-hosts/linux_entra_sso.json`
+- Chrome 拡張機能 ID: `jlnfnnolkbjieggibinobhkjdfbpcohn`
+- himmelblau_broker (user service): `systemctl --user status himmelblau-broker`
+
 ## 関連 upstream issues
 
 | Issue | 状態 | 概要 |
