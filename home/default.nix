@@ -97,6 +97,7 @@ in {
     (pkgs.writeShellScriptBin "chrome-debug" (builtins.readFile
       (pkgs.replaceVars ./dotfiles/local/bin/chrome-debug.sh {
         google_chrome = lib.getExe pkgs.google-chrome;
+        wl_copy = "${pkgs.wl-clipboard}/bin/wl-copy";
       })))
 
     (pkgs.writeShellScriptBin "chrome-debug-select-profile" (builtins.readFile
@@ -104,6 +105,7 @@ in {
         jq = lib.getExe pkgs.jq;
         fzf = lib.getExe pkgs.fzf;
         google_chrome = lib.getExe pkgs.google-chrome;
+        wl_copy = "${pkgs.wl-clipboard}/bin/wl-copy";
       })))
 
     (pkgs.writeShellScriptBin "ndev" ''

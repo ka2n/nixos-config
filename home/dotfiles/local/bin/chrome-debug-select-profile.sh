@@ -5,6 +5,7 @@ set -euo pipefail
 jq=@jq@
 fzf=@fzf@
 google_chrome=@google_chrome@
+wl_copy=@wl_copy@
 
 CHROME_DATA_DIR="$HOME/.config/google-chrome"
 AGENT_BROWSER_DIR="$HOME/chrome-agent-browser"
@@ -41,9 +42,25 @@ fi
 ln -s "$CHROME_DATA_DIR/$profile_dir" "$AGENT_BROWSER_DIR/$profile_dir"
 
 echo "Launching Chrome on port $PORT ..."
+
+_fifo=$(mktemp -u)
+mkfifo "$_fifo"
+
+# Monitor Chrome's stderr: print to terminal and copy DevTools URL to clipboard
+{
+  while IFS= read -r _line; do
+    printf '%s\n' "$_line" >&2
+    if [[ "$_line" =~ (ws://[^[:space:]]+) ]]; then
+      printf '%s' "${BASH_REMATCH[1]}" | $wl_copy
+    fi
+  done < "$_fifo"
+  rm -f "$_fifo"
+} &
+
 exec $google_chrome \
   --remote-debugging-port="$PORT" \
   --user-data-dir="$AGENT_BROWSER_DIR" \
   --profile-directory="$profile_dir" \
   --no-first-run \
-  --no-default-browser-check
+  --no-default-browser-check \
+  2>"$_fifo"
