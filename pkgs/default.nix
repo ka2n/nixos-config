@@ -1,8 +1,8 @@
 pkgs-unstable: llm-agents: final: prev: {
-  # claude-code: add gh to PATH (single wrapProgram, no double-wrapping)
+  # claude-code: add gh to PATH, set env vars (single wrapProgram, no double-wrapping)
   claude-code = llm-agents.claude-code.overrideAttrs (oldAttrs: {
     postFixup = builtins.replaceStrings [ "--argv0 claude" ]
-      [ "--prefix PATH : ${final.gh}/bin --argv0 claude" ] oldAttrs.postFixup;
+      [ "--prefix PATH : ${final.gh}/bin --set CLAUDE_CODE_NO_FLICKER 1 --argv0 claude" ] oldAttrs.postFixup;
   });
 
   libcskk = final.callPackage ./libcskk { };
