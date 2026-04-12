@@ -50,7 +50,7 @@ in {
 
         # Use dynamic user with i2c group access
         DynamicUser = true;
-        SupplementaryGroups = "i2c";
+        SupplementaryGroups = [ "i2c" "uinput" ];
 
         LogsDirectory = "display-switch";
         StateDirectory = "display-switch";
