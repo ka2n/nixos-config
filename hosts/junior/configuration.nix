@@ -33,6 +33,7 @@
   environment.systemPackages = with pkgs; [
     foot
     ntfs3g
+    darktable
   ];
 
   # Display manager (greetd+tuigreet - Wayland native, lightweight TUI)
