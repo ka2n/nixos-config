@@ -34,6 +34,7 @@
     foot
     ntfs3g
     darktable
+    shotwell
   ];
 
   # Display manager (greetd+tuigreet - Wayland native, lightweight TUI)
