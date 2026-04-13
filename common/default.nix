@@ -276,6 +276,8 @@ in {
 
     # File manager
     xfce.thunar
+    xfce.thunar-volman
+    gvfs
 
     # Media
     vlc
