@@ -325,6 +325,25 @@ linux-entra-sso -i getAccounts
 linux-entra-sso -i getVersion
 ```
 
+### upstream の状況
+
+**linux-entra-sso が NotFound でクラッシュ（EOF）する問題**は、明示的に報告された issue がない。
+PRT が refresh_cache にない根本原因は [#1107](https://github.com/himmelblau-idm/himmelblau/issues/1107) (Open) で追跡されている。
+メンテナーのコメント:「パスワード認証でのオフライン SSO は未実装。Hello PIN でのみ動作する。」
+
+**PRT のサービス再起動時の消失**は [PR #1214](https://github.com/himmelblau-idm/himmelblau/pull/1214) (Merged to main) で修正された。
+systemd の FD Store を使って PRT をデーモン再起動間で保持する。
+ただし 3.1.1 にはバックポートされていない（Rust コード側の変更が必要で、systemd 設定だけでは対応不可）。
+
+#### 3.1.1 に含まれている関連修正
+
+| PR | 内容 | 含まれている? |
+|----|------|:---:|
+| [#1154](https://github.com/himmelblau-idm/himmelblau/pull/1154) | broker: getAccounts に passwordExpiry を追加 | ✅ Yes |
+| [#1201](https://github.com/himmelblau-idm/himmelblau/pull/1201) | PRT nonce 修正 (早期失効防止) | ✅ Yes |
+| [#1159 関連](https://github.com/himmelblau-idm/himmelblau/issues/1159) | NixOS 向け himmelblau-broker service 追加 | ✅ Yes |
+| [#1214](https://github.com/himmelblau-idm/himmelblau/pull/1214) | PRT を systemd FD Store に保持 | ❌ No (main のみ) |
+
 ### 関連
 
 - Native Messaging マニフェスト: `/etc/opt/chrome/native-messaging-hosts/linux_entra_sso.json`
@@ -335,9 +354,13 @@ linux-entra-sso -i getVersion
 
 | Issue | 状態 | 概要 |
 |-------|------|------|
+| [#1107](https://github.com/himmelblau-idm/himmelblau/issues/1107) | Open | オフラインパスワード認証後に SSO 不可 (PRT が refresh_cache にない) |
 | [#1206](https://github.com/himmelblau-idm/himmelblau/issues/1206) | Open | Suspend 復帰後のロックアウト (3.0.0 regression) |
 | [#1228](https://github.com/himmelblau-idm/himmelblau/pull/1228) | Open PR | #1206 の修正 (未マージ) |
 | [#895](https://github.com/himmelblau-idm/himmelblau/issues/895) | Open | NixOS: Intune policy 検証失敗 |
+| [#1214](https://github.com/himmelblau-idm/himmelblau/pull/1214) | Merged (main) | PRT を systemd FD Store に保持 (3.1.1 未含) |
+| [#1154](https://github.com/himmelblau-idm/himmelblau/pull/1154) | Merged | broker: passwordExpiry 修正 (3.1.1 含) |
+| [#1201](https://github.com/himmelblau-idm/himmelblau/pull/1201) | Merged | PRT nonce 修正 (3.1.1 含) |
 | [#987](https://github.com/himmelblau-idm/himmelblau/issues/987) | Closed | アップグレード後にキャッシュ削除が必要 |
 | [#1132](https://github.com/himmelblau-idm/himmelblau/issues/1132) | Closed | Conditional Access が enrollment をブロック |
 | [#155](https://github.com/himmelblau-idm/himmelblau/issues/155) | Closed | Suspend 後に himmelblaud が停止 (0.x 時代、修正済み) |
