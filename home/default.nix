@@ -54,6 +54,7 @@ in {
     pkgs.git-wt
     pkgs.go-readability
     pkgs.mo
+    pkgs.n
     pkgs.octorus
     (pkgs.writeShellScriptBin "octorus" ''
       exec ${pkgs.octorus}/bin/or "$@"
