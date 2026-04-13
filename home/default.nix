@@ -9,6 +9,10 @@ let
     #!${lib.getExe' pkgs.nodejs "node"}
     ${builtins.readFile ./dotfiles/local/bin/x-open-url.js}
   '';
+  claude-notify-waiting = pkgs.writeShellScriptBin "claude-notify-waiting"
+    (builtins.readFile ./dotfiles/local/bin/claude-notify-waiting.sh);
+  claude-notify-complete = pkgs.writeShellScriptBin "claude-notify-complete"
+    (builtins.readFile ./dotfiles/local/bin/claude-notify-complete.sh);
   zenBrowser = pkgs.wrapFirefox
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped {
       pname = "zen-browser";
@@ -85,11 +89,8 @@ in {
 
     x-open-url
 
-    (pkgs.writeShellScriptBin "claude-notify-waiting"
-      (builtins.readFile ./dotfiles/local/bin/claude-notify-waiting.sh))
-
-    (pkgs.writeShellScriptBin "claude-notify-complete"
-      (builtins.readFile ./dotfiles/local/bin/claude-notify-complete.sh))
+    claude-notify-waiting
+    claude-notify-complete
 
     (pkgs.writeShellScriptBin "claude-statusline"
       (builtins.readFile ./dotfiles/local/bin/claude-statusline.sh))
@@ -616,7 +617,7 @@ in {
           }
           {
             type = "command";
-            command = "claude-notify-complete";
+            command = lib.getExe claude-notify-complete;
           }
         ];
       }];
@@ -624,7 +625,7 @@ in {
         matcher = "";
         hooks = [{
           type = "command";
-          command = "claude-notify-waiting";
+          command = lib.getExe claude-notify-waiting;
         }];
       }];
     };
