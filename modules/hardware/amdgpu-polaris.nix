@@ -29,6 +29,19 @@ in {
       '';
     };
 
+    enableVendorReset = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Load the vendor-reset kernel module to fix GPU resets on Polaris.
+        The mainline kernel falls back to PCI CONFIG reset for Polaris (GFX8)
+        because BACO is not supported; this reset method is unreliable and
+        often hangs the entire system. vendor-reset implements the device-specific
+        POLARIS10 reset sequence that actually works.
+        Must be loaded in initrd so it is available before amdgpu attempts a reset.
+      '';
+    };
+
     suspendStabilizationDelay = mkOption {
       type = types.int;
       default = 3;
@@ -85,6 +98,15 @@ in {
       "amdgpu.sg_display=0"      # Disable scatter/gather display (prevents display-related VM faults)
       "amdgpu.dcdebugmask=0x10"  # Workaround for flip_done timeout
     ];
+
+    # vendor-reset: device-specific GPU reset for Polaris (GFX8)
+    # Replaces the broken PCI CONFIG reset fallback with the proper POLARIS10 reset sequence.
+    # Must be in initrd so it intercepts amdgpu resets as early as possible.
+    # Source: https://github.com/gnif/vendor-reset
+    boot.extraModulePackages = mkIf cfg.enableVendorReset [
+      config.boot.kernelPackages.vendor-reset
+    ];
+    boot.initrd.kernelModules = mkIf cfg.enableVendorReset [ "vendor-reset" ];
 
     # Wayland environment variables for AMD GPU stability
     environment.sessionVariables = {
