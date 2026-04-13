@@ -99,8 +99,8 @@ in {
 
       # --- Reset / recovery ---
       "amdgpu.gpu_recovery=1"
-      # Force mode0 reset (simplest method) - prevents reset hang in amdgpu_device_asic_reset
-      "amdgpu.reset_method=1"
+      # reset_method=1 is not supported on Polaris (GFX8); kernel falls back to AUTO (PCI CONFIG).
+      # Removed to eliminate log noise: "Specified reset method:1 isn't supported, using AUTO instead"
 
       # --- Power management ---
       "amdgpu.runpm=0"   # Disable runtime PM - fixes BACO suspend/resume crashes
@@ -147,13 +147,16 @@ in {
       };
       script = ''
         sleep ${toString cfg.memoryClockInitDelay}
-        for card in /sys/class/drm/card*/device; do
+        for card_node in /sys/class/drm/card[0-9]*; do
+          # Skip connector entries like card1-DP-1 (only process cardN bare devices)
+          case "$(basename "$card_node")" in card*[!0-9]*) continue ;; esac
+          card="$card_node/device"
           [ -d "$card" ] || continue
-          # Set DPM state to performance
           # Set DPM state to performance (may fail if GPU is in reset)
-          echo "performance" > "$card/power_dpm_state" 2>/dev/null || true
+          # Use subshell so bash's own redirection errors are suppressed, not just echo's stderr
+          ( echo "performance" > "$card/power_dpm_state" ) 2>/dev/null || true
           # Lock GPU and memory clocks to highest level
-          echo "high" > "$card/power_dpm_force_performance_level" 2>/dev/null || true
+          ( echo "high" > "$card/power_dpm_force_performance_level" ) 2>/dev/null || true
         done
       '';
     };
