@@ -281,8 +281,6 @@ in {
 
     # File manager
     xfce.thunar
-    xfce.thunar-volman
-    gvfs
 
     # Media
     vlc
@@ -359,6 +357,16 @@ in {
   programs.neovim.defaultEditor = true;
   programs.neovim.viAlias = true;
   programs.neovim.vimAlias = true;
+
+  # File manager
+  programs.thunar.enable = true;
+  programs.xfconf.enable = true;
+  programs.thunar.plugins = with pkgs.xfce; [
+    thunar-archive-plugin
+    thunar-volman
+  ];
+  services.gvfs.enable = true;
+  services.tumbler.enable = true;
 
   # Zen Browser
   programs.zen-browser.enable = true;
