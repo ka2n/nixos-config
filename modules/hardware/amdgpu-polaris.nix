@@ -56,8 +56,18 @@ in {
   };
 
   config = mkIf cfg.enable {
-    # Enable kernel debugfs for amdgpu_evict_vram access
-    boot.kernel.sysctl."kernel.sysrq" = 1;  # Enable SysRq for emergency recovery
+    # Kernel watchdog / panic settings for auto-reboot on hard freeze
+    # Polaris GPU hangs leave D-state tasks blocked on GPU fences (not CPU interrupt stall),
+    # so hung_task_panic is the critical setting for this failure mode.
+    boot.kernel.sysctl = {
+      "kernel.sysrq" = 1;              # Enable SysRq for emergency recovery
+      "kernel.hardlockup_panic" = 1;   # Panic on CPU hard lockup (NMI watchdog)
+      "kernel.softlockup_panic" = 1;   # Panic on CPU soft lockup
+      "kernel.hung_task_panic" = 1;    # Panic on D-state task hang (GPU fence wait)
+      "kernel.panic_on_oops" = 1;      # Turn kernel oops into panic (enables auto-reboot)
+      "kernel.nmi_watchdog" = 1;       # Enable NMI watchdog for hard lockup detection
+      # hung_task_timeout_secs kept at default (120s) to avoid false positives during NixOS builds
+    };
 
     # AMD GPU kernel parameters for Polaris (RX 480/570/580)
     # Sources:
@@ -67,6 +77,10 @@ in {
     # - https://gitlab.freedesktop.org/drm/amd/-/issues/226 (gmc_v8_0 hung / VM fault)
     # - external-docs/consolidated/amd-polaris-rx480-gpu-crash-fixes.md
     boot.kernelParams = [
+      # --- Auto-reboot after panic ---
+      # Reboot 10 seconds after kernel panic (gives time to see the message)
+      "panic=10"
+
       # --- Power feature mask ---
       # Disable: PP_GFXOFF_MASK (bit 15), PP_STUTTER_MODE (bit 17), PP_OVERDRIVE_MASK (bit 14)
       # GFXOFF causes artifacts/crashes; STUTTER_MODE causes display issues;
@@ -107,6 +121,11 @@ in {
       config.boot.kernelPackages.vendor-reset
     ];
     boot.initrd.kernelModules = mkIf cfg.enableVendorReset [ "vendor-reset" ];
+
+    # Hardware watchdog integration via sp5100-tco (AMD TCO watchdog, present on this system)
+    # systemd kicks the watchdog every runtimeTime; if it stops (frozen), hardware reboots at rebootTime.
+    systemd.watchdog.runtimeTime = "60s";
+    systemd.watchdog.rebootTime = "3min";
 
     # Wayland environment variables for AMD GPU stability
     environment.sessionVariables = {
