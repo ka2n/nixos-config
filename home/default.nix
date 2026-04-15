@@ -152,6 +152,9 @@ in {
     (pkgs.writeShellScriptBin "ralph"
       (builtins.readFile ./dotfiles/local/bin/ralph.sh))
 
+    (pkgs.writeShellScriptBin "himmelblau-status"
+      (builtins.readFile ./dotfiles/local/bin/himmelblau-status.sh))
+
     (pkgs.writeShellScriptBin "git-delete-merged"
       (builtins.replaceStrings [ "@git@" "@git_wt@" ] [
         (lib.getExe pkgs.git)
