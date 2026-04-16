@@ -1,6 +1,11 @@
 pkgs-unstable: llm-agents: final: prev: {
-  # claude-code: add gh to PATH, set env vars (single wrapProgram, no double-wrapping)
+  # claude-code: pin version + add gh to PATH, set env vars (single wrapProgram, no double-wrapping)
   claude-code = llm-agents.claude-code.overrideAttrs (oldAttrs: {
+    version = "2.1.112";
+    src = final.fetchurl {
+      url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.112/linux-x64/claude";
+      hash = "sha256-V76UBtPlyuJZVSeQv3KI3WSWZ1Qw7JPb7XajOldYDT0=";
+    };
     postFixup = builtins.replaceStrings [ "--argv0 claude" ]
       [ "--prefix PATH : ${final.gh}/bin --set CLAUDE_CODE_NO_FLICKER 1 --argv0 claude" ] oldAttrs.postFixup;
   });
