@@ -327,10 +327,11 @@ in {
   xdg.configFile."waybar/config.jsonc".source = ./dotfiles/waybar/config.jsonc;
   xdg.configFile."waybar/style.css".source = ./dotfiles/waybar/style.css;
   xdg.configFile."swaylock/config".source = let
-    lockColor = if riverBackgroundColor != null
-      then builtins.replaceStrings ["#"] [""] riverBackgroundColor
-      else "232136";
-    configContent = builtins.replaceStrings ["@lock_color@"] [lockColor]
+    lockColor = if riverBackgroundColor != null then
+      builtins.replaceStrings [ "#" ] [ "" ] riverBackgroundColor
+    else
+      "232136";
+    configContent = builtins.replaceStrings [ "@lock_color@" ] [ lockColor ]
       (builtins.readFile ./dotfiles/swaylock/config);
   in pkgs.writeText "swaylock-config" configContent;
   # hypridle - idle management (works with both Hyprland and River)
@@ -343,7 +344,8 @@ in {
       suspendTimeout = if variant == "laptop" then 1800 else 48 * 60 * 60;
     in {
       general = {
-        lock_cmd = "${pkgs.procps}/bin/pidof swaylock || ${pkgs.swaylock-effects}/bin/swaylock -f --grace 10";
+        lock_cmd =
+          "${pkgs.procps}/bin/pidof swaylock || ${pkgs.swaylock-effects}/bin/swaylock -f --grace 10";
         before_sleep_cmd = "loginctl lock-session";
         after_sleep_cmd = "${pkgs.wlopm}/bin/wlopm --on '*'";
       };
@@ -559,8 +561,7 @@ in {
   home.file.".codex/AGENTS.md".source = ./dotfiles/claude/CLAUDE.md;
 
   # jai (Jail for AI) config files
-  home.file.".jai/claude.conf".source = ./dotfiles/jai/claude.conf;
-  home.file.".jai/codex.conf".source = ./dotfiles/jai/codex.conf;
+  home.file.".jai/default.conf".source = ./dotfiles/jai/default.conf;
 
   # Agents/Codex Skills (copy as real files, not symlinks)
   home.activation.agentsSkills = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -714,7 +715,6 @@ in {
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
-
   # InputActions client (for River - window info provider)
   # Note: inputactionsd runs as system service (requires root)
   systemd.user.services.inputactions-client = {
@@ -759,13 +759,12 @@ in {
   };
 
   # Kanshi - auto display configuration for River
-  xdg.configFile."kanshi/config".source =
-    if variant == "laptop" then
-      pkgs.replaceVars ./dotfiles/kanshi/config-laptop {
-        makoctl = "${pkgs.mako}/bin/makoctl";
-      }
-    else
-      ./dotfiles/kanshi/config-${variant};
+  xdg.configFile."kanshi/config".source = if variant == "laptop" then
+    pkgs.replaceVars ./dotfiles/kanshi/config-laptop {
+      makoctl = "${pkgs.mako}/bin/makoctl";
+    }
+  else
+    ./dotfiles/kanshi/config-${variant};
 
   programs.firefox = {
     enable = true;
