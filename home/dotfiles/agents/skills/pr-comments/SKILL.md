@@ -1,6 +1,7 @@
 ---
 name: pr-comments
 description: Fetch and display comments from the current GitHub pull request. Use when asked to show PR comments, review comments, or check PR feedback.
+url: claude code
 ---
 
 Fetch and display comments from a GitHub pull request.
