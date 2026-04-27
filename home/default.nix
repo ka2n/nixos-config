@@ -47,12 +47,10 @@ in {
     pkgs.git-who
     pkgs.kubectx
     pkgs.stern
-    pkgs.snyk
     pkgs.just
     pkgs.jnv
     pkgs.lsd
     pkgs.curlie
-    pkgs.vhs
     pkgs.git-wt
     pkgs.go-readability
     pkgs.mo
@@ -187,7 +185,9 @@ in {
   };
 
   xdg.configFile."git/config".source = pkgs.replaceVars ./dotfiles/git/config {
-    op_ssh_sign = lib.getExe' pkgs._1password-gui "op-ssh-sign";
+    op_ssh_sign = lib.getExe'
+      (osConfig.programs._1password-gui.package or pkgs._1password-gui)
+      "op-ssh-sign";
   };
   xdg.configFile."git/ignore".source = ./dotfiles/git/ignore;
 

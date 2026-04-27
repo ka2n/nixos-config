@@ -15,10 +15,8 @@
 
 { config, lib, pkgs, ... }:
 
-let
-  cfg = config.programs.mise;
-in
-{
+let cfg = config.programs.mise;
+in {
   options.programs.mise = {
     enable = lib.mkEnableOption "mise - polyglot runtime manager";
 
@@ -66,11 +64,10 @@ in
       type = lib.types.listOf lib.types.package;
       default = with pkgs; [
         # lolcommits dependencies
-        imagemagick      # Image manipulation (runtime)
-        imagemagick.dev  # ImageMagick headers and pkg-config for native gem builds
-        ffmpeg           # Webcam capture
-        mplayer          # Alternative webcam capture
-        v4l-utils        # Video4Linux utilities
+        imagemagick # Image manipulation (runtime)
+        imagemagick.dev # ImageMagick headers and pkg-config for native gem builds
+        ffmpeg # Webcam capture
+        v4l-utils # Video4Linux utilities
       ];
       description = ''
         Extra packages needed by mise-installed tools at runtime.
@@ -89,8 +86,8 @@ in
     programs.nix-ld.libraries = cfg.nixLdLibraries;
 
     # Expose pkg-config paths for native gem compilation (e.g., rmagick)
-    environment.variables.PKG_CONFIG_PATH = lib.mkDefault
-      "${pkgs.imagemagick.dev}/lib/pkgconfig";
+    environment.variables.PKG_CONFIG_PATH =
+      lib.mkDefault "${pkgs.imagemagick.dev}/lib/pkgconfig";
 
     # FHS compatibility symlinks for native gem builds
     # Ruby's extconf.rb generates Makefiles that hardcode /usr/bin paths

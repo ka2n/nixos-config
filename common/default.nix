@@ -91,6 +91,11 @@ in {
   time.timeZone = "Asia/Tokyo";
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = { LC_CTYPE = "ja_JP.UTF-8"; };
+  i18n.supportedLocales = [
+    "en_US.UTF-8/UTF-8"
+    "ja_JP.UTF-8/UTF-8"
+    "C.UTF-8/UTF-8"
+  ];
   i18n.inputMethod.enable = true;
   i18n.inputMethod.type = "fcitx5";
   i18n.inputMethod.fcitx5.waylandFrontend = true;
@@ -155,6 +160,10 @@ in {
     description = "k2";
     extraGroups = [ "networkmanager" "wheel" "docker" "uinput" "libvirtd" ];
   };
+
+  # Disable speech-dispatcher (pulls in espeak-ng + mbrola voice data ~1.3GB).
+  # Not used; re-enable if accessibility/TTS becomes needed.
+  services.speechd.enable = false;
 
   # Common packages
   environment.systemPackages = (with pkgs; [
@@ -260,7 +269,6 @@ in {
     # Browsers
     google-chrome
     firefox
-    microsoft-edge
 
     # Communication
     slack
