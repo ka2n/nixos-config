@@ -201,7 +201,6 @@ in {
     gcr
     playerctl
     bluetui
-    zoom-us
 
     # From aqua migration (system-level tools)
     yq-go
@@ -227,8 +226,6 @@ in {
     python3
     nodejs
     pkgs.claude-code
-    playwright-mcp
-    alma
     llm-agents.codex
     llm-agents.gemini-cli
     llm-agents.ccusage

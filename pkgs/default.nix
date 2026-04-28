@@ -58,7 +58,6 @@ pkgs-unstable: llm-agents: final: prev: {
 
   keeper-desktop = final.callPackage ./keeper-desktop { };
   display-switch = final.callPackage ./display-switch { };
-  alma = final.callPackage ./alma { };
   git-wt = final.callPackage ./git-wt { go = final.go-bin.versions."1.25.7"; };
   go-readability = final.callPackage ./go-readability { };
   mo = final.callPackage ./mo { };
