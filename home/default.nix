@@ -460,6 +460,17 @@ in {
     categories = [ "AudioVideo" "Utility" ];
   };
 
+  # Override figma-linux desktop file to declare the figma:// URI scheme
+  # (upstream package omits MimeType, so xdg-desktop-portal cannot resolve callbacks)
+  xdg.desktopEntries.figma-linux = {
+    name = "Figma Linux";
+    comment = "Unofficial Figma desktop application for Linux";
+    exec = "figma-linux %U";
+    icon = "figma-linux";
+    mimeType = [ "x-scheme-handler/figma" ];
+    terminal = false;
+  };
+
   xdg.desktopEntries.x-open-url = {
     name = "Web Browser Chooser";
     comment = "Browse the web";
