@@ -36,12 +36,24 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    river-classic.url = "git+https://codeberg.org/ka2n/river-classic";
+    # Don't follow nixpkgs: llm-agents pins specific nixpkgs for package compat.
     llm-agents.url = "github:numtide/llm-agents.nix";
-    go-overlay.url = "github:purpleclay/go-overlay";
-    playwright.url = "github:pietdevries94/playwright-web-flake";
-    atuin.url = "github:atuinsh/atuin";
-    gazelle-tui.url = "github:Zeus-Deus/gazelle-tui";
+    go-overlay = {
+      url = "github:purpleclay/go-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    playwright = {
+      url = "github:pietdevries94/playwright-web-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    atuin = {
+      url = "github:atuinsh/atuin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    gazelle-tui = {
+      url = "github:Zeus-Deus/gazelle-tui";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, ... }@inputs:
