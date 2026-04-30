@@ -2,6 +2,18 @@
 { config, pkgs, lib, inputs, pkgs-unstable, configRevision, llm-agents, ... }:
 
 let
+  roots = pkgs.buildGoModule {
+    pname = "roots";
+    version = "0.4.1";
+    src = pkgs.fetchFromGitHub {
+      owner = "k1LoW";
+      repo = "roots";
+      rev = "v0.4.1";
+      hash = "sha256-ACMRfWY/lhc3C/KVhuUyS1rgkSHGWPxZrmYt+pXupJI=";
+    };
+    vendorHash = "sha256-uxcT5VzlTCxxnx09p13mot0wVbbas/otoHdg7QSDt4E=";
+  };
+
   cica = pkgs.stdenvNoCC.mkDerivation rec {
     pname = "cica";
     version = "5.0.3";
@@ -191,6 +203,7 @@ in {
     jq
     fzf
     fd
+    roots
     bat
     colordiff
     peco

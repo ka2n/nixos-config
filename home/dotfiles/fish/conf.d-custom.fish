@@ -59,11 +59,12 @@ if type -q fzf
         end
 
         set -a fzf_flags --preview "bat --color=always --style=header,grid --line-range :80 (ghq root)/{}/README.*"
+        set -a roots_flags --ignore-dir "node_modules,vendor,testdata,external-docs,examples"
 
-        ghq list | fzf $fzf_flags | read line
+        ghq list --full-path | roots $roots_flags | fzf $fzf_flags | read line
 
         if [ $line ]
-            cd (ghq list --full-path --exact $line)
+            cd "$line"
             commandline -f repaint
         end
     end
