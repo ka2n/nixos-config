@@ -54,6 +54,10 @@
       url = "github:Zeus-Deus/gazelle-tui";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    claude-desktop = {
+      url = "github:aaddrick/claude-desktop-debian";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, ... }@inputs:
@@ -73,6 +77,7 @@
           nixpkgs.overlays = [
             inputs.go-overlay.overlays.default
             (import ./pkgs pkgs-unstable llm-agents)
+            inputs.claude-desktop.overlays.default
           ];
         }
         inputs.sops-nix.nixosModules.sops

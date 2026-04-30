@@ -165,6 +165,8 @@ in {
         (lib.getExe pkgs.git)
         (lib.getExe pkgs.jq)
       ] (builtins.readFile ./dotfiles/local/bin/tf-pr.sh)))
+
+    pkgs.claude-desktop
   ];
 
   home.sessionPath = [
