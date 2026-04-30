@@ -52,7 +52,7 @@
     enable = true;
     config = ''
       ## USB device to watch for to trigger screen change
-      usb_device = "05e3:0626"
+      usb_device = "05e3:0610"
 
       ## Specify which input to switch for _all_ DDC monitors.
       on_usb_connect = "Hdmi1"
