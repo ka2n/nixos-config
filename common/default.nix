@@ -73,6 +73,9 @@ in {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Firmware updates (EC firmware is managed by hardware, fwupd for BIOS/UEFI updates)
+  services.fwupd.enable = true;
+
   # Use Zen kernel for desktop-optimized performance (low latency, interactive)
   boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_zen;
   boot.kernelParams = [ "mitigations=off" ];
