@@ -21,6 +21,14 @@ in {
 
   networking.hostName = "wk2511058";
 
+  # Suppress "Last MLO scan was too long ago" iwlmld WARNINGs that delay
+  # screen restore after swaylock unlock on Lunar Lake / Wi-Fi 7 (BE-series).
+  # See docs/himmelblau-troubleshooting.md (問題7).
+  networking.networkmanager.wifi.powersave = false;
+  boot.extraModprobeConfig = ''
+    options iwlwifi disable_11be=1 power_save=0
+  '';
+
   environment.systemPackages = [
     pkgs.foot
     pkgs.brightnessctl

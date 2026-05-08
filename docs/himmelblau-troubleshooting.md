@@ -350,6 +350,74 @@ systemd の FD Store を使って PRT をデーモン再起動間で保持する
 - Chrome 拡張機能 ID: `jlnfnnolkbjieggibinobhkjdfbpcohn`
 - himmelblau_broker (user service): `systemctl --user status himmelblau-broker`
 
+## 問題7: ロック解除後に画面復帰が遅い (iwlmld MLO scan WARNING)
+
+### 症状
+
+swaylock で PIN を入力 → himmelblau の認証は瞬殺で完了するが、デスクトップが再表示されるまで体感数秒〜十数秒のラグがある。画面オフではなくロック画面は出ている状態。
+
+### ログ
+
+```
+kernel: ------------[ cut here ]------------
+kernel: Last MLO scan was too long ago, can't select links
+kernel: WARNING: drivers/net/wireless/intel/iwlwifi/mld/mlo.c:948
+        at _iwl_mld_select_links+0x291/0x870 [iwlmld]
+kernel: Workqueue: events_unbound cfg80211_wiphy_work [cfg80211]
+kernel: Call Trace:
+kernel:  iwl_mld_handle_scan_complete_notif+0x2db/0x300 [iwlmld]
+kernel:  iwl_mld_async_handlers_wk+0xe7/0x160 [iwlmld]
+```
+
+himmelblaud 側のタイミングは正常 (`pam authenticate step` 200ms 程度で成功) なのに体感が遅いのが目印。
+
+### 原因
+
+Intel Wi-Fi 7 (BE 系: BE200/BE201/BE202) ドライバ `iwlmld` の MLO (Multi-Link Operations) スキャン管理バグ。
+
+- `_iwl_mld_select_links()` が「直前の MLO スキャンが 5 秒以上前」だと WARN を投げる
+- ロック中に Wi-Fi がアイドルになるとこの条件を踏み、解除直後の再アソシエーションが遅延
+- 解除後に動く NetworkManager / waybar / mako 等が Wi-Fi 復帰待ちで一時固まる
+- カーネル v7.0 commit [`ec66ec6a5a8f`](https://github.com/torvalds/linux/commit/ec66ec6a5a8f) "wifi: iwlwifi: mld: Fix MLO scan timing" で根本修正は入っているが、**長時間アイドル後の復帰では依然 5s 経過条件に引っかかる**
+
+ハードウェア確定例: ThinkPad 21NS (Lunar Lake / Core Ultra 200V 系)。
+
+### 関連リンク
+
+- [Patchwork: wifi: iwlwifi: mld: always do MLO scan before link selection](https://patchwork.kernel.org/project/linux-wireless/patch/20250308235203.a4c96e5c49d4.Ie55697af49435c2c45dccf7c607de5857b370f7a@changeid/)
+- [Linux commit ec66ec6a5a8f — Fix MLO scan timing (v7.0 含)](https://github.com/torvalds/linux/commit/ec66ec6a5a8f)
+- [Intel Community: BE200 kernel warning and system freeze](https://community.intel.com/t5/Wireless/Intel-Wi-Fi-7-BE200-320MHz-kernel-warning-and-system-freeze/td-p/1703035)
+- [Intel Community: Does Linux kernel 6.11 support MLO with BE200?](https://community.intel.com/t5/Wireless/Does-Linux-kernel-6-11-support-MLO-with-be200/td-p/1636306)
+- [Manjaro: 6.15-rc7 not loading iwlwifi for BE200](https://forum.manjaro.org/t/6-15-rc7-not-loading-iwlwifi-for-be200-320mhz-anymore/178376)
+- [Void Linux: Intel BE200 wifi not detected (iwlmld 移行問題) #56644](https://github.com/void-linux/void-packages/issues/56644)
+- [NixOS: iwlwifi firmware load issues #454246](https://github.com/NixOS/nixpkgs/issues/454246)
+
+### 対処
+
+`iwlwifi` の `disable_11be=1` で Wi-Fi 7 / 802.11be (EHT) 自体を無効化し、MLO リンク選択ロジックを通さない。`mlo_capable` のような modparam は **存在しない** ので注意。
+
+```nix
+# hosts/wk2511058/configuration.nix
+boot.extraModprobeConfig = ''
+  options iwlwifi disable_11be=1
+'';
+```
+
+副作用: 物理レイヤは Wi-Fi 6E/6 にフォールバック。MLO の同時複数リンクは使えなくなるが、シングルリンク BE 速度は維持されるケースがほとんど。
+
+### 確認
+
+```bash
+# 再ビルド・再起動後
+sudo dmesg | grep -i "Last MLO scan"   # 出ないこと
+sudo iw dev | grep -E "type|channel"    # ssid 接続を確認
+journalctl -k --since "1 hour ago" | grep -iE "iwlwifi|iwlmld" | head
+```
+
+### 関連 himmelblau ログとの切り分け
+
+himmelblaud の `pam authenticate step` が 200ms 程度で成功しているのに体感が遅い場合は本問題。`Aes256GcmDecrypt` や `Hello key missing` が出ている場合は問題1/2 を参照。
+
 ## 関連 upstream issues
 
 | Issue | 状態 | 概要 |
