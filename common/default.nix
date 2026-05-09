@@ -250,6 +250,7 @@ in {
     llm-agents.agent-browser
     llm-agents.entire
     llm-agents.rtk
+    llm-agents.pi
 
     delta
     jujutsu
