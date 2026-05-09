@@ -416,7 +416,82 @@ journalctl -k --since "1 hour ago" | grep -iE "iwlwifi|iwlmld" | head
 
 ### 関連 himmelblau ログとの切り分け
 
-himmelblaud の `pam authenticate step` が 200ms 程度で成功しているのに体感が遅い場合は本問題。`Aes256GcmDecrypt` や `Hello key missing` が出ている場合は問題1/2 を参照。
+himmelblaud の `pam authenticate step` が 200ms 程度で成功しているのに体感が遅い場合は本問題。`Aes256GcmDecrypt` や `Hello key missing` が出ている場合は問題1/2/6 を参照。
+
+## 問題6: バージョンアップ直後の Aes256GcmDecrypt (libhimmelblau bump 起因)
+
+### 症状
+
+himmelblau パッケージのバージョンアップ後、しばらく(数時間〜)正常に動作した後に突然 `Aes256GcmDecrypt` が出始める。問題2 と同じエラー名だが、**前置きの `Unable to load machine root key` / `To proceed you must remove the content of the cache db` が出ない**点で区別できる。
+
+`pam authenticate` がリトライバックオフで 2s → 4s → 6s → 8s と伸びる挙動も同じだが、引き金がパッケージバージョンアップにある。
+
+### ログ (問題2 との違い)
+
+```
+himmelblaud: pam authenticate step [ 2.05s ] service: "swaylock"
+himmelblaud:   └━ 🚨 [error]: Aes256GcmDecrypt
+```
+
+問題2 のような次の前置きが**出ない**:
+- `Unable to load machine root key - This can occur if you have changed your HSM pin`
+- `To proceed you must remove the content of the cache db ... to reset all keys`
+- `Generated new HSM pin`
+
+これは `Aes256GcmDecrypt` が HSM key 読み込み経路ではなく、**libhimmelblau 内部の AEAD 復号経路から**発火しているため。
+
+### 原因
+
+`libhimmelblau` (内部 crypto/auth library) の minor version bump で AEAD キャッシュフォーマット/key derivation が破壊的に変わることがある。旧 lib で書かれた cache を新 lib が復号できず、AES-GCM タグ検証で失敗する。
+
+実例: 2026-05-07 の `himmelblau 3.1.1 → 3.1.3` bump で `Cargo.toml` の `libhimmelblau` が `0.8.13 → 0.8.18` に jump。切替後 boot 内で発症(数時間後、token refresh で初めて cache 本格利用したタイミング)。
+
+### 問題2 との切り分け
+
+| | 問題2 (HSM PIN drift) | 問題6 (lib bump cache incompat) |
+|---|---|---|
+| `Unable to load machine root key` | あり | **なし** |
+| `Generated new HSM pin` | あり | なし |
+| 直前のトリガー | suspend / PIN 再生成 | パッケージバージョンアップ |
+| 修復方法 | cache 削除(HSM PIN 再生成も可) | **cache 削除のみ** |
+
+### 対処
+
+**HSM PIN は触らない。**消すと device 新規 join が走り、Entra/Intune 側で古い device record と衝突する事故が起きる:
+
+```bash
+sudo systemctl stop himmelblaud himmelblaud-tasks
+sudo rm -f /var/cache/private/himmelblaud/himmelblau.cache.db \
+           /var/cache/private/himmelblaud/himmelblau.cache.db-wal \
+           /var/cache/private/himmelblaud/himmelblau.cache.db-shm
+sudo systemctl start himmelblaud himmelblaud-tasks
+# 次の sudo / 画面ロック解除でオンライン認証 → cache 自動再構築
+```
+
+cache 削除によるリセット範囲:
+- オフライン認証キャッシュ
+- デバイス登録情報 (domain join が再実行される)
+- Intune enrollment (再 enrollment が必要)
+- Hello PIN (再設定が必要)
+
+### upstream 状況 (2026-05-09 時点)
+
+- 該当する upstream issue は**未登録**。`Aes256GcmDecrypt` / `cache decrypt` / `0.8.18` で横断検索しても hit せず
+- 関連 issue:
+  - [#987](https://github.com/himmelblau-idm/himmelblau/issues/987) — 1.x → 2.x で類似事象。原因は旧 systemd unit の残存(本問題と別系統)。`src/daemon/scripts/postinst` で対処済み
+- distro パッケージも lib bump 時に cache wipe しない構造:
+  - `platform/debian/scripts/postinst` — AppArmor patch + krb5 + pam-auth-update のみ
+  - `platform/el/`, `platform/opensuse/` — postinst 自体なし
+  - `src/daemon/scripts/postinst` (共通) — HSM PIN migration と旧 unit 削除のみで cache に触れない
+- 内部 DB 側 schema は `db_version_t` で migration するが、AES envelope の**内側**にあるため AEAD 段で詰むと到達しない
+- NixOS module 側で `package.version` を stamp した自動 wipe を入れる選択は妥当(本リポジトリでは未実装)
+
+### 予防と再発時の手順
+
+1. バージョンアップ commit 時に `flake.lock` 内の libhimmelblau 関連変更を確認
+2. 問題発生時は **まず問題2との切り分け**(HSM root key load エラーの有無)を行う
+3. HSM PIN まで消す前に、本問題6 のパターン(エラー前置きなし、直近に bump)に該当しないか確認
+4. cache 削除のみで治った場合、Entra/Intune 側で stale device の確認(古い device id が残っていれば削除)
 
 ## 関連 upstream issues
 
