@@ -7,7 +7,6 @@ shape = "Block"
 command = { program = "paplay", args = ["/run/current-system/sw/share/sounds/freedesktop/stereo/bell.oga"] }
 
 [env]
-TERM = "tmux-256color"
 GLFW_IM_MODULE = "ibus"
 
 [font]
@@ -36,3 +35,14 @@ multiplier = 3
 [general]
 live_config_reload = true
 import = ["./nord.toml"]
+
+# Alacritty does not implement modifyOtherKeys (#3101) and only enables KKP
+# on application request, so Shift/Ctrl+Enter etc. fall through as bare CR.
+# Send CSI-u sequences explicitly so tmux extended-keys can carry them.
+[keyboard]
+bindings = [
+  { key = "Return",    mods = "Shift",   chars = "\u001b[13;2u" },
+  { key = "Return",    mods = "Control", chars = "\u001b[13;5u" },
+  { key = "Backspace", mods = "Control", chars = "\u001b[127;5u" },
+  { key = "Space",     mods = "Control", chars = "\u001b[32;5u"  },
+]

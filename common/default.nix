@@ -224,7 +224,6 @@ in {
     pkgs-unstable.trzsz-ssh # tssh
 
     # Terminal
-    kitty
     alacritty-graphics
     (tmux.override { withSixel = true; })
 

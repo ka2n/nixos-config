@@ -183,8 +183,10 @@ in {
     AQUA_GLOBAL_CONFIG = "$HOME/.config/aquaproj-aqua/aqua.yaml";
     AQUA_POLICY_CONFIG = "$HOME/.config/aquaproj-aqua/aqua-policy.yaml";
 
-    # GTK IM module (for all GTK versions)
-    GTK_IM_MODULE = "fcitx";
+    # GTK_IM_MODULE is intentionally NOT set: with fcitx5 waylandFrontend=true,
+    # GTK4 + Wayland uses text-input-v3 directly. Forcing GTK_IM_MODULE=fcitx
+    # routes through the GTK IM module path instead, which breaks key events
+    # for Ghostty and other GTK4 apps. See ghostty-org/ghostty#3628.
   };
 
   xdg.configFile."git/config".source = pkgs.replaceVars ./dotfiles/git/config {
@@ -372,6 +374,59 @@ in {
   xdg.configFile."alacritty" = {
     source = ./dotfiles/alacritty;
     recursive = true;
+  };
+  # foot.service (home-manager's foot --server unit) inherits a minimal PATH
+  # that lacks the user profile, so `footclient <cmd>` fails to exec for
+  # commands installed via home.packages (e.g. clipse). Pipe PATH through.
+  systemd.user.services.foot.Service.PassEnvironment = "PATH";
+
+  programs.foot = {
+    enable = true;
+    server.enable = true;
+    settings = {
+      main = {
+        font = "Cica:size=12";
+        pad = "3x3";
+      };
+      cursor = {
+        style = "block";
+        blink = "yes";
+      };
+      mouse.hide-when-typing = "yes";
+      scrollback = {
+        lines = 10000;
+        multiplier = "3.0";
+      };
+      bell = {
+        urgent = "no";
+        notify = "no";
+        command = "paplay /run/current-system/sw/share/sounds/freedesktop/stereo/bell.oga";
+        command-focused = "yes";
+      };
+      colors = {
+        alpha = "0.98";
+        foreground = "d8dee9";
+        background = "2e3440";
+        selection-foreground = "d8dee9";
+        selection-background = "4c566a";
+        regular0 = "3b4252";
+        regular1 = "bf616a";
+        regular2 = "a3be8c";
+        regular3 = "ebcb8b";
+        regular4 = "81a1c1";
+        regular5 = "b48ead";
+        regular6 = "88c0d0";
+        regular7 = "e5e9f0";
+        bright0 = "4c566a";
+        bright1 = "bf616a";
+        bright2 = "a3be8c";
+        bright3 = "ebcb8b";
+        bright4 = "81a1c1";
+        bright5 = "b48ead";
+        bright6 = "8fbcbb";
+        bright7 = "eceff4";
+      };
+    };
   };
   xdg.configFile."xdg-terminals.list".text = ''
     Alacritty.desktop

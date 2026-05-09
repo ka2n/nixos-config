@@ -20,11 +20,11 @@ let
     # Session setup
     export XDG_CURRENT_DESKTOP=river
     export XDG_SESSION_TYPE=wayland
-    dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
+    dbus-update-activation-environment --systemd PATH WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
     systemctl --user start river-session.target
 
     # Keybindings
-    riverctl map normal Super Return spawn ${pkgs.alacritty}/bin/alacritty
+    riverctl map normal Super Return spawn ${pkgs.foot}/bin/footclient
     riverctl map normal Super D spawn "${pkgs.rofi}/bin/rofi -show drun"
     riverctl map normal Super+Shift Q close
     riverctl map normal Super+Shift E exit

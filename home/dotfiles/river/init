@@ -29,7 +29,7 @@ export GLFW_IM_MODULE=ibus
 ###################
 
 mod="Super"
-terminal="alacritty"
+terminal="footclient"
 menu="rofi -show drun"
 browser="zen"
 fileManager="thunar"
@@ -220,7 +220,7 @@ riverctl map normal $mod+Control Comma spawn "makoctl restore"
 riverctl map normal $mod+Control C spawn "makoctl dismiss -a"
 
 # Clipboard history
-riverctl map normal Control semicolon spawn "alacritty --class clipse -e clipse"
+riverctl map normal Control semicolon spawn "footclient --app-id=clipse -- clipse"
 
 # Reload config
 riverctl map normal $mod+Shift R spawn "$HOME/.config/river/init"
