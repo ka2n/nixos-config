@@ -8,6 +8,10 @@ let
   cfg = config.services.himmelblau;
   system = pkgs.stdenv.hostPlatform.system;
   upstreamPackage = inputs.himmelblau.packages.${system}.himmelblau;
+  # Upstream nix/packages/himmelblau.nix hardcodes version = "3.0.0" across all
+  # 3.x releases; read the real version from the workspace Cargo.toml instead.
+  upstreamVersion =
+    (builtins.fromTOML (builtins.readFile "${inputs.himmelblau}/Cargo.toml")).workspace.package.version;
 
   # HSM PIN initialization script — encrypts the HSM PIN with systemd-creds
   # using TPM2 binding (host+tpm2) so that key material is bound to this machine's TPM.
@@ -147,6 +151,11 @@ in {
       # overrideAttrs cannot re-derive cargoBuildFeatures from buildFeatures,
       # so set the env var that the cargo build hook actually reads.
       cargoBuildFeatures = "himmelblau_unix_common/tpm";
+      # Override the hardcoded "3.0.0" upstream sets in nix/packages/himmelblau.nix
+      # so the store path reflects the actual release.
+      version = upstreamVersion;
+      name = "${old.pname}-${upstreamVersion}";
+      __intentionallyOverridingVersion = true;
     }));
 
     # TPM2 support for HSM binding (abrmd NOT needed - direct /dev/tpmrm0 access)
