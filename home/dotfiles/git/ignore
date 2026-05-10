@@ -19,3 +19,4 @@ flake.lock
 
 external-docs
 .ralph-tui
+.claude/*.lock
