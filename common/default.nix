@@ -365,6 +365,8 @@ in {
   environment.sessionVariables.GTK_KEY_THEME = "Emacs";
 
   documentation.man.generateCaches = false;
+  documentation.info.enable = false;
+  documentation.nixos.enable = false;
 
   # nix-ld is configured by programs.mise module
   # Fish is configured in home-manager (for plugin support)
