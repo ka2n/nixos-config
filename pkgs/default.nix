@@ -1,23 +1,7 @@
 pkgs-unstable: llm-agents: final: prev: {
-  # mise: use upstream default.nix from jdx/mise
-  mise = let
-    src = final.fetchFromGitHub {
-      owner = "jdx";
-      repo = "mise";
-      rev = "v2026.5.4";
-      hash = "sha256-LjAeIu8zQeAqqZwJo/VMTidiG7H1F9TKE8Y6+r1j0vA=";
-    };
-  in import "${src}/default.nix" {
-    pkgs = final;
-    lib = final.lib;
-    fetchFromGitHub = final.fetchFromGitHub;
-    rustPlatform = final.rustPlatform;
-    coreutils = final.coreutils;
-    bash = final.bash;
-    direnv = final.direnv;
-    openssl = final.openssl;
-    git = final.git;
-  };
+  # mise: use nixpkgs-unstable's prebuilt package so cache.nixos.org hits and
+  # `nh os build` doesn't recompile every time.
+  mise = pkgs-unstable.mise;
 
   # claude-code: add gh to PATH, set env vars (single wrapProgram, no double-wrapping)
   claude-code = llm-agents.claude-code.overrideAttrs (oldAttrs: {
