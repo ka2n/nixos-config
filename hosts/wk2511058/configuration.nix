@@ -70,7 +70,7 @@ in {
 
   services.himmelblau = {
     enable = true;
-    debugFlag = false;
+    debugFlag = true;
     pamServices = [ "passwd" "login" "systemd-user" "swaylock" "greetd" ];
     userMap = lib.optionalAttrs (privateConfig ? username) {
       katsuma = privateConfig.username;
