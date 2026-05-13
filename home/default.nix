@@ -403,6 +403,15 @@ in {
         command = "paplay /run/current-system/sw/share/sounds/freedesktop/stereo/bell.oga";
         command-focused = "yes";
       };
+      url = {
+        launch = "${lib.getExe x-open-url} \${url}";
+        label-letters = "sadfjklewcmpgh";
+        osc8-underline = "url-mode";
+      };
+      key-bindings = {
+        show-urls-launch = "Control+Shift+u";
+        show-urls-copy = "Control+Shift+y";
+      };
       colors = {
         alpha = "0.98";
         foreground = "d8dee9";
