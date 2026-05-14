@@ -9,6 +9,21 @@ let
     #!${lib.getExe' pkgs.nodejs "node"}
     ${builtins.readFile ./dotfiles/local/bin/x-open-url.js}
   '';
+  # Expand foot regex matches like "org/repo#123" into a GitHub issue URL
+  # and hand off to x-open-url (so the usual browser rules still apply).
+  foot-open-github-ref = pkgs.writeShellScript "foot-open-github-ref" ''
+    ref="$1"
+    case "$ref" in
+      */*#*)
+        repo="''${ref%#*}"
+        num="''${ref##*#}"
+        exec ${lib.getExe x-open-url} "https://github.com/$repo/issues/$num"
+        ;;
+      *)
+        exec ${lib.getExe x-open-url} "$ref"
+        ;;
+    esac
+  '';
   claude-notify-waiting = pkgs.writeShellScriptBin "claude-notify-waiting"
     (builtins.readFile ./dotfiles/local/bin/claude-notify-waiting.sh);
   claude-notify-complete = pkgs.writeShellScriptBin "claude-notify-complete"
@@ -400,7 +415,8 @@ in {
       bell = {
         urgent = "no";
         notify = "no";
-        command = "paplay /run/current-system/sw/share/sounds/freedesktop/stereo/bell.oga";
+        command =
+          "paplay /run/current-system/sw/share/sounds/freedesktop/stereo/bell.oga";
         command-focused = "yes";
       };
       url = {
@@ -408,9 +424,15 @@ in {
         label-letters = "sadfjklewcmpgh";
         osc8-underline = "url-mode";
       };
+      "regex:github-ref" = {
+        regex = "([A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+#[0-9]+)";
+        launch = "${foot-open-github-ref} \${match}";
+      };
       key-bindings = {
+        unicode-input = "none";
         show-urls-launch = "Control+Shift+u";
         show-urls-copy = "Control+Shift+y";
+        regex-launch = "[github-ref] Control+Shift+o";
       };
       colors = {
         alpha = "0.98";
