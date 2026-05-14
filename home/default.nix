@@ -429,6 +429,8 @@ in {
         launch = "${foot-open-github-ref} \${match}";
       };
       key-bindings = {
+        # Disable foot's default Ctrl+Shift+u (unicode-input) so it doesn't
+        # conflict with show-urls-launch below; foot refuses to start on conflict.
         unicode-input = "none";
         show-urls-launch = "Control+Shift+u";
         show-urls-copy = "Control+Shift+y";

@@ -128,6 +128,12 @@ in {
       "Groups/0/Items/1".Name = "keyboard-us";
       GroupOrder."0" = "Default";
     };
+    # Disable the Unicode addon's GTK-compatible Ctrl+Shift+U hex-input
+    # mode so it doesn't shadow foot's show-urls-launch binding.
+    addons.unicode = {
+      globalSection = { };
+      sections.Unicode.DirectUnicodeMode = "";
+    };
   };
 
   # River session target (for River compositor)
