@@ -40,5 +40,11 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add flake.lock
-          git commit -m "chore: update llm-agents.nix"
-          git push
+          if [ "$(git log -1 --pretty=%s)" = "chore: update llm-agents.nix" ] \
+             && [ "$(git log -1 --pretty=%an)" = "github-actions[bot]" ]; then
+            git commit --amend --no-edit
+            git push --force-with-lease
+          else
+            git commit -m "chore: update llm-agents.nix"
+            git push
+          fi
