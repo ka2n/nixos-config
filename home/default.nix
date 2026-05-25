@@ -9,21 +9,24 @@ let
     #!${lib.getExe' pkgs.nodejs "node"}
     ${builtins.readFile ./dotfiles/local/bin/x-open-url.js}
   '';
-  # Expand foot regex matches like "org/repo#123" into a GitHub issue URL
-  # and hand off to x-open-url (so the usual browser rules still apply).
-  foot-open-github-ref = pkgs.writeShellScript "foot-open-github-ref" ''
-    ref="$1"
-    case "$ref" in
-      */*#*)
-        repo="''${ref%#*}"
-        num="''${ref##*#}"
-        exec ${lib.getExe x-open-url} "https://github.com/$repo/issues/$num"
-        ;;
-      *)
-        exec ${lib.getExe x-open-url} "$ref"
-        ;;
-    esac
-  '';
+  # Expand foot regex matches into a GitHub-ish URL and hand off to x-open-url.
+  # Handles: host/org/repo[#num], org/repo#num, repo#num, and #num. For the
+  # last two the host/org/repo is inferred from $PWD = .../src/<host>/<org>/<repo>/...
+  foot-open-github-ref = pkgs.writeShellScript "foot-open-github-ref"
+    (builtins.readFile (pkgs.replaceVars ./dotfiles/local/bin/foot-open-github-ref.sh {
+      x_open_url = lib.getExe x-open-url;
+      git = lib.getExe pkgs.git;
+    }));
+  # Single POSIX-ERE regex used by foot for Ctrl+Shift+o. Capture group 1
+  # carries the match (foot uses `matches[1]`); it includes at most one
+  # leading boundary character which the script strips.
+  footGhContent =
+    "[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}/[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9._-]+(#[0-9]+)?"
+    + "|[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+#[0-9]+"
+    + "|[A-Za-z0-9][A-Za-z0-9._-]*#[0-9]+"
+    + "|#[0-9]+";
+  footGhRegex =
+    "([^A-Za-z0-9_./#-](${footGhContent})|^(${footGhContent}))([^A-Za-z0-9_-]|$)";
   claude-notify-waiting = pkgs.writeShellScriptBin "claude-notify-waiting"
     (builtins.readFile ./dotfiles/local/bin/claude-notify-waiting.sh);
   claude-notify-complete = pkgs.writeShellScriptBin "claude-notify-complete"
@@ -425,7 +428,7 @@ in {
         osc8-underline = "url-mode";
       };
       "regex:github-ref" = {
-        regex = "([A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+#[0-9]+)";
+        regex = footGhRegex;
         launch = "${foot-open-github-ref} \${match}";
       };
       key-bindings = {
