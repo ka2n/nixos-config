@@ -169,6 +169,27 @@ in {
       "d /var/cache/himmelblau-policies 0600 root root -"
     ];
 
+    # Upstream nixosModules.himmelblau only wires pam_himmelblau into
+    # account/auth/session — the password stack is missing, so `passwd`
+    # cannot update the Hello PIN. Add it for every configured pamService
+    # (matches upstream pam_himmelblau.8 recommendation:
+    # `password sufficient pam_himmelblau.so ignore_unknown_user`).
+    security.pam.services = let
+      pamServiceNames = cfg.pamServices
+        ++ lib.optional config.security.sudo.enable "sudo"
+        ++ lib.optional config.security.doas.enable "doas"
+        ++ lib.optional config.services.sshd.enable "sshd";
+      passwordRule = service: {
+        rules.password.himmelblau = {
+          order = config.security.pam.services.${service}.rules.password.unix.order - 10;
+          control = "sufficient";
+          modulePath = "${cfg.package}/lib/libpam_himmelblau.so";
+          settings.ignore_unknown_user = true;
+          settings.debug = cfg.debugFlag;
+        };
+      };
+    in lib.genAttrs pamServiceNames passwordRule;
+
     # User map file generation
     environment.etc = lib.mkIf (cfg.userMap != { }) {
       "himmelblau/user-map".text = lib.concatStringsSep "\n"
