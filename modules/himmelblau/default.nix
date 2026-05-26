@@ -8,10 +8,6 @@ let
   cfg = config.services.himmelblau;
   system = pkgs.stdenv.hostPlatform.system;
   upstreamPackage = inputs.himmelblau.packages.${system}.himmelblau;
-  # Upstream nix/packages/himmelblau.nix hardcodes version = "3.0.0" across all
-  # 3.x releases; read the real version from the workspace Cargo.toml instead.
-  upstreamVersion =
-    (builtins.fromTOML (builtins.readFile "${inputs.himmelblau}/Cargo.toml")).workspace.package.version;
 
   # HSM PIN initialization script — encrypts the HSM PIN with systemd-creds
   # using TPM2 binding (host+tpm2) so that key material is bound to this machine's TPM.
@@ -151,11 +147,6 @@ in {
       # overrideAttrs cannot re-derive cargoBuildFeatures from buildFeatures,
       # so set the env var that the cargo build hook actually reads.
       cargoBuildFeatures = "himmelblau_unix_common/tpm";
-      # Override the hardcoded "3.0.0" upstream sets in nix/packages/himmelblau.nix
-      # so the store path reflects the actual release.
-      version = upstreamVersion;
-      name = "${old.pname}-${upstreamVersion}";
-      __intentionallyOverridingVersion = true;
     }));
 
     # TPM2 support for HSM binding (abrmd NOT needed - direct /dev/tpmrm0 access)
@@ -190,8 +181,14 @@ in {
       };
     in lib.genAttrs pamServiceNames passwordRule;
 
-    # User map file generation
-    environment.etc = lib.mkIf (cfg.userMap != { }) {
+    environment.etc = {
+      # Upstream 2.3.11 flake.nix references ./src/config/krb5_himmelblau.conf,
+      # but that file was removed from the tree in 2.3.6 (and never restored
+      # through 2.3.11). Override the source with a local copy of the 2.3.5
+      # content so the etc tarball can realize.
+      "krb5.conf.d/krb5_himmelblau.conf".source =
+        lib.mkForce ./files/krb5_himmelblau.conf;
+    } // lib.optionalAttrs (cfg.userMap != { }) {
       "himmelblau/user-map".text = lib.concatStringsSep "\n"
         (lib.mapAttrsToList (local: upn: "${local}:${upn}") cfg.userMap);
     };
