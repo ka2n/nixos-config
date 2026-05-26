@@ -138,6 +138,19 @@ in {
         "Mapping of local usernames to UPNs for Local User Mapping feature";
       example = { katsuma = "katsuma@example.onmicrosoft.com"; };
     };
+
+    # Implemented in 2.3.11 Rust code (src/common/src/idprovider/himmelblau.rs)
+    # but not exposed by the upstream NixOS module schema.
+    settings.allow_console_password_only = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Whether to allow password-only (SFA) authentication for local console
+        logins. Set to false to require MFA on console as well; this is
+        necessary for Intune enrollment to receive an MFA-attested refresh
+        token (otherwise AAD returns AADSTS70000 on the Intune scope grant).
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
