@@ -8,10 +8,6 @@ let
   cfg = config.services.himmelblau;
   system = pkgs.stdenv.hostPlatform.system;
   upstreamPackage = inputs.himmelblau.packages.${system}.himmelblau;
-  # Upstream nix/packages/himmelblau.nix hardcodes version = "3.0.0" across all
-  # 3.x releases; read the real version from the workspace Cargo.toml instead.
-  upstreamVersion =
-    (builtins.fromTOML (builtins.readFile "${inputs.himmelblau}/Cargo.toml")).workspace.package.version;
 
   # HSM PIN initialization script — encrypts the HSM PIN with systemd-creds
   # using TPM2 binding (host+tpm2) so that key material is bound to this machine's TPM.
@@ -146,16 +142,46 @@ in {
 
   config = lib.mkIf cfg.enable {
     # Enable hardware TPM support (cargo feature "tpm" in himmelblau_unix_common)
+    # and bundle the linux-entra-sso Native Messaging manifests + D-Bus broker
+    # activation file that the 3.x package shipped but 2.x does not.
     services.himmelblau.package = lib.mkForce (upstreamPackage.overrideAttrs (old: {
       buildInputs = (old.buildInputs or []) ++ [ pkgs.tpm2-tss ];
       # overrideAttrs cannot re-derive cargoBuildFeatures from buildFeatures,
       # so set the env var that the cargo build hook actually reads.
       cargoBuildFeatures = "himmelblau_unix_common/tpm";
-      # Override the hardcoded "3.0.0" upstream sets in nix/packages/himmelblau.nix
-      # so the store path reflects the actual release.
-      version = upstreamVersion;
-      name = "${old.pname}-${upstreamVersion}";
-      __intentionallyOverridingVersion = true;
+      postInstall = (old.postInstall or "") + ''
+        nm_firefox_dir=$out/lib/mozilla/native-messaging-hosts
+        nm_chromium_dir=$out/lib/chromium/native-messaging-hosts
+        dbus_dir=$out/share/dbus-1/services
+        mkdir -p "$nm_firefox_dir" "$nm_chromium_dir" "$dbus_dir"
+
+        cat > "$nm_firefox_dir/linux_entra_sso.json" <<EOF
+        {
+          "name": "linux_entra_sso",
+          "description": "Entra ID SSO via Himmelblau Identity Broker",
+          "path": "$out/bin/linux-entra-sso",
+          "type": "stdio",
+          "allowed_extensions": ["linux-entra-sso@example.com"]
+        }
+        EOF
+
+        cat > "$nm_chromium_dir/linux_entra_sso.json" <<EOF
+        {
+          "name": "linux_entra_sso",
+          "description": "Entra ID SSO via Himmelblau Identity Broker",
+          "path": "$out/bin/linux-entra-sso",
+          "type": "stdio",
+          "allowed_origins": ["chrome-extension://jlnfnnolkbjieggibinobhkjdfbpcohn/"]
+        }
+        EOF
+
+        cat > "$dbus_dir/com.microsoft.identity.broker1.service" <<EOF
+        [D-BUS Service]
+        Name=com.microsoft.identity.broker1
+        Exec=$out/bin/broker
+        SystemdService=himmelblau-broker.service
+        EOF
+      '';
     }));
 
     # TPM2 support for HSM binding (abrmd NOT needed - direct /dev/tpmrm0 access)
@@ -190,10 +216,47 @@ in {
       };
     in lib.genAttrs pamServiceNames passwordRule;
 
-    # User map file generation
-    environment.etc = lib.mkIf (cfg.userMap != { }) {
+    environment.etc = {
+      # Upstream 2.3.11 flake.nix references ./src/config/krb5_himmelblau.conf,
+      # but that file was removed from the tree in 2.3.6 (and never restored
+      # through 2.3.11). Override the source with a local copy of the 2.3.5
+      # content so the etc tarball can realize.
+      "krb5.conf.d/krb5_himmelblau.conf".source =
+        lib.mkForce ./files/krb5_himmelblau.conf;
+
+      # Wire the Chrome / Chromium Native Messaging manifests into the
+      # locations the browsers actually read from. The 3.x upstream module
+      # does the same; 2.x's inline module does not.
+      "chromium/native-messaging-hosts/linux_entra_sso.json".source =
+        "${cfg.package}/lib/chromium/native-messaging-hosts/linux_entra_sso.json";
+      "opt/chrome/native-messaging-hosts/linux_entra_sso.json".source =
+        "${cfg.package}/lib/chromium/native-messaging-hosts/linux_entra_sso.json";
+    } // lib.optionalAttrs (cfg.userMap != { }) {
       "himmelblau/user-map".text = lib.concatStringsSep "\n"
         (lib.mapAttrsToList (local: upn: "${local}:${upn}") cfg.userMap);
+    };
+
+    # Contribute the himmelblau package as a Native Messaging host source
+    # for the system-level zen-browser wrapped by modules/zen-browser. The
+    # home-level zen built in home/default.nix is wired separately through
+    # home-manager's `programs.firefox.nativeMessagingHosts`.
+    programs.zen-browser.nativeMessagingHosts.packages = [ cfg.package ];
+
+    # Register the broker's D-Bus service activation file so apps calling
+    # `com.microsoft.identity.broker1` cause systemd to start the user-scope
+    # himmelblau-broker.service defined below.
+    services.dbus.packages = [ cfg.package ];
+
+    systemd.user.services.himmelblau-broker = {
+      description = "Himmelblau Authentication Broker";
+      serviceConfig = {
+        Type = "dbus";
+        BusName = "com.microsoft.identity.broker1";
+        ExecStart = "${cfg.package}/bin/broker";
+        Slice = "background.slice";
+        TimeoutStopSec = 5;
+        Restart = "on-failure";
+      };
     };
 
     # HSM PIN initialization — encrypts hsm-pin with TPM via systemd-creds
