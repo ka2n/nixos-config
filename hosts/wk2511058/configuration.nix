@@ -80,6 +80,7 @@ in {
       domains = [ (builtins.head (privateConfig.domains or [ "example.onmicrosoft.com" ])) ];
       apply_policy = true;
       cn_name_mapping = true;
+      connection_timeout = 30;
       enable_hello = true;
       enable_sfa_fallback = true;
       enable_experimental_mfa = true;
