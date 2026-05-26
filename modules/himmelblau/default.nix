@@ -236,6 +236,12 @@ in {
         (lib.mapAttrsToList (local: upn: "${local}:${upn}") cfg.userMap);
     };
 
+    # Contribute the himmelblau package as a Native Messaging host source
+    # for the system-level zen-browser wrapped by modules/zen-browser. The
+    # home-level zen built in home/default.nix is wired separately through
+    # home-manager's `programs.firefox.nativeMessagingHosts`.
+    programs.zen-browser.nativeMessagingHosts.packages = [ cfg.package ];
+
     # Register the broker's D-Bus service activation file so apps calling
     # `com.microsoft.identity.broker1` cause systemd to start the user-scope
     # himmelblau-broker.service defined below.
