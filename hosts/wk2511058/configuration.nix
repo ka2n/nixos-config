@@ -76,25 +76,25 @@ in {
       katsuma = privateConfig.username;
     };
     settings = {
-      domain = [ (builtins.head (privateConfig.domains or [ "example.onmicrosoft.com" ])) ];
+      # 2.x uses `domains` (list); 3.x renamed this to `domain`.
+      domains = [ (builtins.head (privateConfig.domains or [ "example.onmicrosoft.com" ])) ];
       apply_policy = true;
       cn_name_mapping = true;
       enable_hello = true;
       enable_sfa_fallback = true;
       enable_experimental_mfa = true;
       hello_pin_min_length = 6;
-      home_alias = "cn";
-      home_attr = "cn";
+      # 2.x enum uses uppercase ("UUID" | "SPN" | "CN"); 3.x accepts lowercase.
+      home_alias = "CN";
+      home_attr = "CN";
       idmap_range = "5000000-5999999";
       local_groups = [ "users" "networkmanager" "wheel" "docker" "uinput" ];
       selinux = false;
       shell = "/run/current-system/sw/bin/bash";
       use_etc_skel = false;
-      user_map_file = "/etc/himmelblau/user-map";
-      offline_breakglass = {
-        enabled = true;
-        ttl = "7d";
-      };
+      # `user_map_file` / `offline_breakglass` are 3.x-only options.
+      # cn_name_mapping + enable_sfa_fallback above cover the equivalent
+      # behaviors on 2.x.
     };
   };
 
