@@ -82,6 +82,7 @@ in {
       apply_policy = true;
       cn_name_mapping = true;
       connection_timeout = 30;
+      request_timeout = 30;
       enable_hello = true;
       enable_sfa_fallback = false;
       enable_experimental_mfa = true;

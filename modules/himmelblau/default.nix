@@ -151,6 +151,21 @@ in {
         token (otherwise AAD returns AADSTS70000 on the Intune scope grant).
       '';
     };
+
+    # Per-HTTP-request timeout (seconds) used across libhimmelblau calls.
+    # Default is 10s in the Rust code (DEFAULT_REQUEST_TIMEOUT), which can
+    # trigger "Network outage detected" and abort PIN enrollment mid-flight
+    # when AAD round-trips take longer than expected.
+    settings.request_timeout = lib.mkOption {
+      type = lib.types.int;
+      default = 10;
+      description = ''
+        Per-request HTTP timeout in seconds for libhimmelblau calls to AAD,
+        Graph, and Intune. Raising this prevents transient slow responses
+        from being interpreted as a network outage during multi-step flows
+        such as Hello PIN enrollment.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
