@@ -152,6 +152,9 @@ in {
     (pkgs.writeShellScriptBin "caffeine-toggle"
       (builtins.readFile ./dotfiles/local/bin/caffeine-toggle.sh))
 
+    (pkgs.writeShellScriptBin "toggle-internal-keyboard"
+      (builtins.readFile ./dotfiles/local/bin/toggle-internal-keyboard.sh))
+
     (pkgs.writeShellScriptBin "caffeine-status"
       (builtins.readFile ./dotfiles/local/bin/caffeine-status.sh))
 
