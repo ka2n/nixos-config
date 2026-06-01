@@ -4,10 +4,15 @@ NixOS 固有の問題と upstream の既知問題をまとめる。
 
 ## 構成概要
 
-- himmelblau 3.0.0 (upstream flake から)
-- `hsm_type=tpm_bound_soft_if_possible` (Soft HSM + TPM-bound PIN)
+- himmelblau 3.1.6 (upstream flake から / `modules/himmelblau`)
+- `hsm_type=tpm_bound_soft_if_possible` + `tpm` cargo feature 有効 → ハードウェア TPM (`/dev/tpmrm0`) を使用
 - `LoadCredentialEncrypted` で systemd が HSM PIN を復号して渡す
-- `himmelblau-hsm-pin-init.service` が初回のみ PIN を生成・暗号化
+- `himmelblau-hsm-pin-init.service` が初回のみ PIN を生成・暗号化 (`hsm-pin-nopcr.enc`, PCR 非バインド)
+
+> NixOS モジュール固有の設定根拠 (HSM PIN init / TPM アクセス(tss) / IPv4 強制 /
+> `apply_policy` 用 `/var/cache/himmelblau-policies` / Intune enrollment の `request_timeout`
+> 等) は `modules/himmelblau/default.nix` と `hosts/wk2511058/configuration.nix` の
+> コメントに集約している。本ガイドは運用時に踏むランタイム問題に絞る。
 
 ## 問題1: Suspend 復帰後にログインできない
 
@@ -105,143 +110,7 @@ himmelblaud: 🚨 [error]: Failed to migrate database
 
 問題2と同じ。キャッシュ DB を削除して再起動。
 
-## 問題4: Intune Enrollment 失敗
-
-### 症状
-
-ドメイン参加は成功するが Intune enrollment が失敗する。
-
-### ログパターン A: RequestFailed
-
-```
-himmelblaud: 🚨 [error]: Intune device enrollment failed. | e: RequestFailed("error sending request for url (https://fef.msuc06.manage.microsoft.com/.../enroll?api-version=1.0&client-version=...)")
-himmelblaud: 🚨 [error]: Failed to enroll in Intune during domain join, will retry later. | e: BadRequest
-```
-
-### ログパターン B: invalid_grant
-
-```
-himmelblaud: 🚨 [error]: Acquiring token for Intune device enrollment failed. | e: ErrorResponse { error: "invalid_grant", error_description: "AADSTS70000: Provided grant is invalid or malformed." }
-```
-
-### 原因
-
-- パターン A: ネットワーク問題、または Conditional Access ポリシーがブロック
-- パターン B: キャッシュ削除後にトークンが無効化された
-
-### 対処
-
-再度パスワード認証 (sudo 等) を行うと enrollment がリトライされる。
-enrollment は認証フロー内で自動リトライされるため、手動操作は不要。
-
-リトライ後のログ:
-```
-himmelblaud: ｉ [info]: Joined domain ms365.monicle.co.jp with device id ...
-himmelblaud: Successfully applied Intune policies
-```
-
-### Conditional Access のブートストラップデッドロック
-
-Conditional Access で「デバイスコンプライアンス必須」にしていると、
-enrollment 自体がブロックされる鶏卵問題が発生する。
-
-- [himmelblau-idm/himmelblau#1132](https://github.com/himmelblau-idm/himmelblau/issues/1132)
-- 対策: enrollment 用にコンプライアンス要件を一時的に緩和する、または grace period を設定する
-
-## 問題5: TPM not in use
-
-### 症状
-
-`sudo aad-tool tpm` が "TPM not in use" を返す。
-
-### 確認手順
-
-```bash
-# TPM デバイスの存在確認
-ls -la /dev/tpm0 /dev/tpmrm0
-
-# SRK がプロビジョニングされているか
-tpm2_getcap handles-persistent   # 0x81000001 が必要
-
-# himmelblaud が tss グループに所属しているか
-cat /proc/$(pgrep -x himmelblaud)/status | grep Groups
-getent group tss
-
-# systemd credential が正しく渡されているか
-ls /run/credentials/himmelblaud.service/
-```
-
-### 原因と対処
-
-#### systemd credential が渡されていない
-
-`/etc/systemd/system/himmelblaud.service` に以下が必要:
-
-```ini
-LoadCredentialEncrypted=hsm-pin:/var/lib/private/himmelblaud/hsm-pin.enc
-Environment="HIMMELBLAU_HSM_PIN_PATH=/run/credentials/himmelblaud.service/hsm-pin"
-```
-
-NixOS モジュール (`modules/himmelblau/default.nix`) で設定済み。
-
-注意: `Environment=` では systemd の `%d` specifier は展開されない。
-`/run/credentials/himmelblaud.service/hsm-pin` を直接指定する必要がある。
-
-#### hsm-pin.enc が TPM-bound でない
-
-```bash
-sudo rm -f /var/lib/private/himmelblaud/hsm-pin.enc
-sudo systemctl restart himmelblau-hsm-pin-init
-# ログで "HSM PIN credential created successfully" を確認
-sudo systemctl restart himmelblaud
-```
-
-## NixOS モジュール固有の注意点
-
-### himmelblau-hsm-pin-init の ConditionPathExists
-
-`ConditionPathExists=!/var/lib/private/himmelblaud/hsm-pin.enc` により、
-HSM PIN が既に存在する場合はスキップされる。これにより `nixos-rebuild switch` で
-PIN が再生成されてキャッシュ DB と不整合になる問題を防いでいる。
-
-PIN を再生成したい場合は明示的に `hsm-pin.enc` を削除する。
-
-### DynamicUser と TPM アクセス
-
-himmelblaud は `DynamicUser=yes` で動作する。`/dev/tpmrm0` (mode 0660, group tss) に
-アクセスするため `SupplementaryGroups=tss` が必要。
-
-### himmelblaud-tasks の IPv6 問題
-
-himmelblaud-tasks が IPv6 で federation provider を取得しようとして失敗する場合がある。
-`RestrictAddressFamilies = "AF_INET AF_UNIX"` で IPv4 + Unix のみに制限している。
-
-## デバッグ方法
-
-### debug ログの有効化
-
-`services.himmelblau.debugFlag = true` に設定して rebuild。
-
-### 関連サービスのログ確認
-
-```bash
-# himmelblaud 本体
-journalctl -u himmelblaud --since "10 min ago"
-
-# タスクデーモン (Intune policy 適用等)
-journalctl -u himmelblaud-tasks --since "10 min ago"
-
-# HSM PIN 初期化
-journalctl -u himmelblau-hsm-pin-init --since "10 min ago"
-
-# suspend/resume 周辺のログ
-journalctl -u systemd-logind --since "10 min ago"
-
-# エラーのみ抽出
-journalctl -u himmelblaud --since "10 min ago" -p err
-```
-
-## 問題6: Chrome で "No connection to the host tooling"
+## 問題4: Chrome で "No connection to the host tooling"
 
 ### 症状
 
@@ -332,17 +201,7 @@ PRT が refresh_cache にない根本原因は [#1107](https://github.com/himmel
 メンテナーのコメント:「パスワード認証でのオフライン SSO は未実装。Hello PIN でのみ動作する。」
 
 **PRT のサービス再起動時の消失**は [PR #1214](https://github.com/himmelblau-idm/himmelblau/pull/1214) (Merged to main) で修正された。
-systemd の FD Store を使って PRT をデーモン再起動間で保持する。
-ただし 3.1.1 にはバックポートされていない（Rust コード側の変更が必要で、systemd 設定だけでは対応不可）。
-
-#### 3.1.1 に含まれている関連修正
-
-| PR | 内容 | 含まれている? |
-|----|------|:---:|
-| [#1154](https://github.com/himmelblau-idm/himmelblau/pull/1154) | broker: getAccounts に passwordExpiry を追加 | ✅ Yes |
-| [#1201](https://github.com/himmelblau-idm/himmelblau/pull/1201) | PRT nonce 修正 (早期失効防止) | ✅ Yes |
-| [#1159 関連](https://github.com/himmelblau-idm/himmelblau/issues/1159) | NixOS 向け himmelblau-broker service 追加 | ✅ Yes |
-| [#1214](https://github.com/himmelblau-idm/himmelblau/pull/1214) | PRT を systemd FD Store に保持 | ❌ No (main のみ) |
+systemd の FD Store を使って PRT をデーモン再起動間で保持する (`modules/himmelblau` で FDStore を有効化済み)。
 
 ### 関連
 
@@ -350,7 +209,7 @@ systemd の FD Store を使って PRT をデーモン再起動間で保持する
 - Chrome 拡張機能 ID: `jlnfnnolkbjieggibinobhkjdfbpcohn`
 - himmelblau_broker (user service): `systemctl --user status himmelblau-broker`
 
-## 問題7: ロック解除後に画面復帰が遅い (iwlmld MLO scan WARNING)
+## 問題5: ロック解除後に画面復帰が遅い (iwlmld MLO scan WARNING)
 
 ### 症状
 
@@ -416,7 +275,7 @@ journalctl -k --since "1 hour ago" | grep -iE "iwlwifi|iwlmld" | head
 
 ### 関連 himmelblau ログとの切り分け
 
-himmelblaud の `pam authenticate step` が 200ms 程度で成功しているのに体感が遅い場合は本問題。`Aes256GcmDecrypt` や `Hello key missing` が出ている場合は問題1/2/6 を参照。
+himmelblaud の `pam authenticate step` が 200ms 程度で成功しているのに体感が遅い場合は本問題。`Aes256GcmDecrypt` が出ている場合は問題1/2/6、`Hello key missing` / PRT 関連が出ている場合は問題4 を参照。
 
 ## 問題6: バージョンアップ直後の Aes256GcmDecrypt (libhimmelblau bump 起因)
 
@@ -493,6 +352,31 @@ cache 削除によるリセット範囲:
 3. HSM PIN まで消す前に、本問題6 のパターン(エラー前置きなし、直近に bump)に該当しないか確認
 4. cache 削除のみで治った場合、Entra/Intune 側で stale device の確認(古い device id が残っていれば削除)
 
+## デバッグ方法
+
+### debug ログの有効化
+
+`services.himmelblau.debugFlag = true` に設定して rebuild。
+
+### 関連サービスのログ確認
+
+```bash
+# himmelblaud 本体
+journalctl -u himmelblaud --since "10 min ago"
+
+# タスクデーモン (Intune policy 適用等)
+journalctl -u himmelblaud-tasks --since "10 min ago"
+
+# HSM PIN 初期化
+journalctl -u himmelblau-hsm-pin-init --since "10 min ago"
+
+# suspend/resume 周辺のログ
+journalctl -u systemd-logind --since "10 min ago"
+
+# エラーのみ抽出
+journalctl -u himmelblaud --since "10 min ago" -p err
+```
+
 ## 関連 upstream issues
 
 | Issue | 状態 | 概要 |
@@ -501,9 +385,9 @@ cache 削除によるリセット範囲:
 | [#1206](https://github.com/himmelblau-idm/himmelblau/issues/1206) | Open | Suspend 復帰後のロックアウト (3.0.0 regression) |
 | [#1228](https://github.com/himmelblau-idm/himmelblau/pull/1228) | Open PR | #1206 の修正 (未マージ) |
 | [#895](https://github.com/himmelblau-idm/himmelblau/issues/895) | Open | NixOS: Intune policy 検証失敗 |
-| [#1214](https://github.com/himmelblau-idm/himmelblau/pull/1214) | Merged (main) | PRT を systemd FD Store に保持 (3.1.1 未含) |
-| [#1154](https://github.com/himmelblau-idm/himmelblau/pull/1154) | Merged | broker: passwordExpiry 修正 (3.1.1 含) |
-| [#1201](https://github.com/himmelblau-idm/himmelblau/pull/1201) | Merged | PRT nonce 修正 (3.1.1 含) |
+| [#1214](https://github.com/himmelblau-idm/himmelblau/pull/1214) | Merged (main) | PRT を systemd FD Store に保持 |
+| [#1154](https://github.com/himmelblau-idm/himmelblau/pull/1154) | Merged | broker: passwordExpiry 修正 |
+| [#1201](https://github.com/himmelblau-idm/himmelblau/pull/1201) | Merged | PRT nonce 修正 |
 | [#987](https://github.com/himmelblau-idm/himmelblau/issues/987) | Closed | アップグレード後にキャッシュ削除が必要 |
 | [#1132](https://github.com/himmelblau-idm/himmelblau/issues/1132) | Closed | Conditional Access が enrollment をブロック |
 | [#155](https://github.com/himmelblau-idm/himmelblau/issues/155) | Closed | Suspend 後に himmelblaud が停止 (0.x 時代、修正済み) |

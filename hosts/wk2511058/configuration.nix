@@ -23,7 +23,7 @@ in {
 
   # Suppress "Last MLO scan was too long ago" iwlmld WARNINGs that delay
   # screen restore after swaylock unlock on Lunar Lake / Wi-Fi 7 (BE-series).
-  # See docs/himmelblau-troubleshooting.md (問題7).
+  # See docs/himmelblau-troubleshooting.md (問題5).
   networking.networkmanager.wifi.powersave = false;
   boot.extraModprobeConfig = ''
     options iwlwifi disable_11be=1 power_save=0
@@ -77,13 +77,16 @@ in {
     };
     settings = {
       domain = [ (builtins.head (privateConfig.domains or [ "example.onmicrosoft.com" ])) ];
+      # Enroll the device in Intune and apply its policies so the device
+      # reports compliant in Entra. Needs /var/cache/himmelblau-policies
+      # (provided by modules/himmelblau) and request_timeout below.
       apply_policy = true;
       cn_name_mapping = true;
       connection_timeout = 30;
       # Intune LinuxEnrollmentService (fef.*.manage.microsoft.com) is slow to
       # respond; upstream default 10 times out the enrollment send operation
       # ("timed out waiting on send operation"), leaving the device joined but
-      # never MDM-enrolled. 30 lets enrollment complete. See docs 問題4.
+      # never MDM-enrolled. 30 lets enrollment complete.
       request_timeout = 30;
       enable_hello = true;
       enable_sfa_fallback = false;
