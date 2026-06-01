@@ -76,8 +76,7 @@ in {
       katsuma = privateConfig.username;
     };
     settings = {
-      # 2.x uses `domains` (list); 3.x renamed this to `domain`.
-      domains = [ (builtins.head (privateConfig.domains or [ "example.onmicrosoft.com" ])) ];
+      domain = [ (builtins.head (privateConfig.domains or [ "example.onmicrosoft.com" ])) ];
       allow_console_password_only = false;
       # Keep false while Intune backend rejects this device's CSR.
       # When apply_policy=true and is_intune_enrolled=false, the daemon
@@ -93,17 +92,18 @@ in {
       enable_sfa_fallback = false;
       enable_experimental_mfa = true;
       hello_pin_min_length = 6;
-      # 2.x enum uses uppercase ("UUID" | "SPN" | "CN"); 3.x accepts lowercase.
-      home_alias = "CN";
-      home_attr = "CN";
+      home_alias = "cn";
+      home_attr = "cn";
       idmap_range = "5000000-5999999";
       local_groups = [ "users" "networkmanager" "wheel" "docker" "uinput" ];
       selinux = false;
       shell = "/run/current-system/sw/bin/bash";
       use_etc_skel = false;
-      # `user_map_file` / `offline_breakglass` are 3.x-only options.
-      # cn_name_mapping + enable_sfa_fallback above cover the equivalent
-      # behaviors on 2.x.
+      user_map_file = "/etc/himmelblau/user-map";
+      offline_breakglass = {
+        enabled = true;
+        ttl = "7d";
+      };
     };
   };
 

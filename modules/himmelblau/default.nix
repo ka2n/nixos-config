@@ -1,17 +1,31 @@
 # Supplemental configuration for the upstream himmelblau NixOS module.
 # The upstream module (inputs.himmelblau.nixosModules.himmelblau) provides:
-#   - himmelblau.conf generation, NSS, PAM, systemd services, D-Bus, krb5, tmpfiles
-# This module adds settings the upstream doesn't cover.
+#   himmelblau.conf generation, NSS, PAM (account/auth/session), systemd
+#   services (himmelblaud + himmelblaud-tasks + user-scope broker), Chromium
+#   native-messaging-host manifests, D-Bus broker service activation, and the
+#   typed options under services.himmelblau.settings (auto-generated from
+#   docs-xml).
+# This module adds what the upstream still misses for our setup.
 { config, lib, pkgs, inputs, ... }:
 
 let
   cfg = config.services.himmelblau;
   system = pkgs.stdenv.hostPlatform.system;
   upstreamPackage = inputs.himmelblau.packages.${system}.himmelblau;
+  # Upstream nix/packages/himmelblau.nix hardcodes version = "3.0.0" across all
+  # 3.x releases; read the real version from the workspace Cargo.toml instead.
+  upstreamVersion =
+    (builtins.fromTOML
+      (builtins.readFile "${inputs.himmelblau}/Cargo.toml")).workspace.package.version;
 
-  # HSM PIN initialization script — encrypts the HSM PIN with systemd-creds
-  # using TPM2 binding (host+tpm2) so that key material is bound to this machine's TPM.
-  # Ported from upstream src/daemon/scripts/himmelblau-init-hsm-pin.
+  # HSM PIN initialization — mirrors upstream
+  # src/daemon/scripts/himmelblau-init-hsm-pin (3.1.6) which:
+  #   - uses /var/lib/private/himmelblaud/hsm-pin-nopcr.enc (no PCR binding)
+  #     so Secure Boot certificate updates do not invalidate the credential
+  #   - migrates from the legacy plaintext /var/lib/private/himmelblaud/hsm-pin
+  #     AND the legacy PCR-bound /var/lib/private/himmelblaud/hsm-pin.enc
+  #   - self-provisions the TPM2 SRK at 0x81000001 when systemd-tpm2-setup
+  #     was skipped (e.g. systems not booting via measured UKI).
   initHsmPinScript = let
     openssl = "${pkgs.openssl}/bin/openssl";
     tpm2_getcap = "${pkgs.tpm2-tools}/bin/tpm2_getcap";
@@ -23,7 +37,8 @@ let
     set -e
 
     LEGACY=/var/lib/private/himmelblaud/hsm-pin
-    CRED=/var/lib/private/himmelblaud/hsm-pin.enc
+    LEGACY1=/var/lib/private/himmelblaud/hsm-pin.enc
+    CRED=/var/lib/private/himmelblaud/hsm-pin-nopcr.enc
     SRK_HANDLE=${srkHandle}
 
     gen_pin_hex() {
@@ -66,7 +81,6 @@ let
     mkdir -p /var/lib/private/himmelblaud
     chmod 700 /var/lib/private/himmelblaud
 
-    # Provision SRK if TPM is present but SRK is missing
     if [ -e /dev/tpmrm0 ] || [ -e /dev/tpm0 ]; then
       if ! srk_is_provisioned; then
         echo "TPM present but SRK not provisioned — attempting self-provisioning..."
@@ -78,20 +92,23 @@ let
       fi
     fi
 
-    # If encrypted credential already exists, try to upgrade to TPM-bound
     if [ -f "$CRED" ]; then
       if [ -f "$LEGACY" ]; then
         echo "Encrypted credential exists, removing legacy hsm-pin file"
         rm -f "$LEGACY"
       fi
+      if [ -f "$LEGACY1" ]; then
+        echo "Encrypted credential exists, removing legacy PCR-bound hsm-pin.enc"
+        rm -f "$LEGACY1"
+      fi
       if ([ -e /dev/tpmrm0 ] || [ -e /dev/tpm0 ]) && srk_is_provisioned; then
         if HSM_PIN=$(${systemd-creds} decrypt --name=hsm-pin "$CRED" - 2>/dev/null); then
           CRED_TMP="''${CRED}.tmp"
           if printf '%s' "$HSM_PIN" | ${systemd-creds} encrypt \
-                  --name=hsm-pin --with-key=host+tpm2 --tpm2-device=auto \
-                  - "$CRED_TMP" 2>/dev/null; then
+                  --name=hsm-pin --with-key=host+tpm2 --tpm2-pcrs= \
+                  --tpm2-device=auto - "$CRED_TMP" 2>/dev/null; then
             mv -f "$CRED_TMP" "$CRED"
-            echo "HSM PIN credential upgraded to TPM-bound encryption"
+            echo "HSM PIN credential upgraded to TPM-bound encryption (no PCR)"
           else
             rm -f "$CRED_TMP" 2>/dev/null || true
             echo "WARNING: Re-encryption to TPM-bound key failed. Keeping existing credential."
@@ -102,27 +119,30 @@ let
       exit 0
     fi
 
-    # Generate new or migrate existing PIN
+    # Generate new or migrate existing PIN.
     if [ -f "$LEGACY" ]; then
-      echo "Migrating existing HSM-PIN to encrypted credential"
+      echo "Migrating existing plaintext HSM-PIN to encrypted credential"
       HSM_PIN=$(cat "$LEGACY")
+    elif [ -f "$LEGACY1" ]; then
+      echo "Migrating existing PCR-bound HSM-PIN to no-PCR encryption"
+      HSM_PIN=$(${systemd-creds} decrypt --name=hsm-pin "$LEGACY1")
     else
       echo "Generating new HSM-PIN"
       HSM_PIN=$(gen_pin_hex)
     fi
 
-    # Choose strongest key binding available
     if ([ -e /dev/tpmrm0 ] || [ -e /dev/tpm0 ]) && srk_is_provisioned; then
-      KEY_ARG="--with-key=host+tpm2"
+      KEY_ARG="--with-key=host+tpm2 --tpm2-pcrs="
     else
       echo "WARNING: TPM not available or SRK not provisioned. Using host key only."
-      KEY_ARG="--with-key=auto"
+      KEY_ARG="--with-key=auto --tpm2-pcrs="
     fi
 
     if printf '%s' "$HSM_PIN" | ${systemd-creds} encrypt --name=hsm-pin $KEY_ARG \
             --tpm2-device=auto - "$CRED"; then
       echo "HSM PIN credential created successfully"
       rm -f "$LEGACY" 2>/dev/null || true
+      rm -f "$LEGACY1" 2>/dev/null || true
       exit 0
     else
       echo "ERROR: Failed to create HSM PIN credential"
@@ -138,78 +158,20 @@ in {
         "Mapping of local usernames to UPNs for Local User Mapping feature";
       example = { katsuma = "katsuma@example.onmicrosoft.com"; };
     };
-
-    # Implemented in 2.3.11 Rust code (src/common/src/idprovider/himmelblau.rs)
-    # but not exposed by the upstream NixOS module schema.
-    settings.allow_console_password_only = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = ''
-        Whether to allow password-only (SFA) authentication for local console
-        logins. Set to false to require MFA on console as well; this is
-        necessary for Intune enrollment to receive an MFA-attested refresh
-        token (otherwise AAD returns AADSTS70000 on the Intune scope grant).
-      '';
-    };
-
-    # Per-HTTP-request timeout (seconds) used across libhimmelblau calls.
-    # Default is 10s in the Rust code (DEFAULT_REQUEST_TIMEOUT), which can
-    # trigger "Network outage detected" and abort PIN enrollment mid-flight
-    # when AAD round-trips take longer than expected.
-    settings.request_timeout = lib.mkOption {
-      type = lib.types.int;
-      default = 10;
-      description = ''
-        Per-request HTTP timeout in seconds for libhimmelblau calls to AAD,
-        Graph, and Intune. Raising this prevents transient slow responses
-        from being interpreted as a network outage during multi-step flows
-        such as Hello PIN enrollment.
-      '';
-    };
   };
 
   config = lib.mkIf cfg.enable {
-    # Enable hardware TPM support (cargo feature "tpm" in himmelblau_unix_common)
-    # and bundle the linux-entra-sso Native Messaging manifests + D-Bus broker
-    # activation file that the 3.x package shipped but 2.x does not.
+    # Upstream nix/packages/himmelblau.nix does not enable the `tpm` cargo
+    # feature for himmelblau_unix_common, so the daemon falls back to a
+    # software HSM even with TPM hardware available. Force-enable it and
+    # add tpm2-tss so the resulting binary can talk to /dev/tpmrm0.
+    # Also override the hardcoded "3.0.0" upstream sets in nix/packages.
     services.himmelblau.package = lib.mkForce (upstreamPackage.overrideAttrs (old: {
       buildInputs = (old.buildInputs or []) ++ [ pkgs.tpm2-tss ];
-      # overrideAttrs cannot re-derive cargoBuildFeatures from buildFeatures,
-      # so set the env var that the cargo build hook actually reads.
       cargoBuildFeatures = "himmelblau_unix_common/tpm";
-      postInstall = (old.postInstall or "") + ''
-        nm_firefox_dir=$out/lib/mozilla/native-messaging-hosts
-        nm_chromium_dir=$out/lib/chromium/native-messaging-hosts
-        dbus_dir=$out/share/dbus-1/services
-        mkdir -p "$nm_firefox_dir" "$nm_chromium_dir" "$dbus_dir"
-
-        cat > "$nm_firefox_dir/linux_entra_sso.json" <<EOF
-        {
-          "name": "linux_entra_sso",
-          "description": "Entra ID SSO via Himmelblau Identity Broker",
-          "path": "$out/bin/linux-entra-sso",
-          "type": "stdio",
-          "allowed_extensions": ["linux-entra-sso@example.com"]
-        }
-        EOF
-
-        cat > "$nm_chromium_dir/linux_entra_sso.json" <<EOF
-        {
-          "name": "linux_entra_sso",
-          "description": "Entra ID SSO via Himmelblau Identity Broker",
-          "path": "$out/bin/linux-entra-sso",
-          "type": "stdio",
-          "allowed_origins": ["chrome-extension://jlnfnnolkbjieggibinobhkjdfbpcohn/"]
-        }
-        EOF
-
-        cat > "$dbus_dir/com.microsoft.identity.broker1.service" <<EOF
-        [D-BUS Service]
-        Name=com.microsoft.identity.broker1
-        Exec=$out/bin/broker
-        SystemdService=himmelblau-broker.service
-        EOF
-      '';
+      version = upstreamVersion;
+      name = "${old.pname}-${upstreamVersion}";
+      __intentionallyOverridingVersion = true;
     }));
 
     # TPM2 support for HSM binding (abrmd NOT needed - direct /dev/tpmrm0 access)
@@ -244,22 +206,8 @@ in {
       };
     in lib.genAttrs pamServiceNames passwordRule;
 
-    environment.etc = {
-      # Upstream 2.3.11 flake.nix references ./src/config/krb5_himmelblau.conf,
-      # but that file was removed from the tree in 2.3.6 (and never restored
-      # through 2.3.11). Override the source with a local copy of the 2.3.5
-      # content so the etc tarball can realize.
-      "krb5.conf.d/krb5_himmelblau.conf".source =
-        lib.mkForce ./files/krb5_himmelblau.conf;
-
-      # Wire the Chrome / Chromium Native Messaging manifests into the
-      # locations the browsers actually read from. The 3.x upstream module
-      # does the same; 2.x's inline module does not.
-      "chromium/native-messaging-hosts/linux_entra_sso.json".source =
-        "${cfg.package}/lib/chromium/native-messaging-hosts/linux_entra_sso.json";
-      "opt/chrome/native-messaging-hosts/linux_entra_sso.json".source =
-        "${cfg.package}/lib/chromium/native-messaging-hosts/linux_entra_sso.json";
-    } // lib.optionalAttrs (cfg.userMap != { }) {
+    # User map file generation
+    environment.etc = lib.mkIf (cfg.userMap != { }) {
       "himmelblau/user-map".text = lib.concatStringsSep "\n"
         (lib.mapAttrsToList (local: upn: "${local}:${upn}") cfg.userMap);
     };
@@ -267,27 +215,12 @@ in {
     # Contribute the himmelblau package as a Native Messaging host source
     # for the system-level zen-browser wrapped by modules/zen-browser. The
     # home-level zen built in home/default.nix is wired separately through
-    # home-manager's `programs.firefox.nativeMessagingHosts`.
+    # home-manager's `programs.firefox.nativeMessagingHosts`. Upstream's
+    # nixosModules.himmelblau only wires `programs.firefox`, so this hook
+    # is still required.
     programs.zen-browser.nativeMessagingHosts.packages = [ cfg.package ];
 
-    # Register the broker's D-Bus service activation file so apps calling
-    # `com.microsoft.identity.broker1` cause systemd to start the user-scope
-    # himmelblau-broker.service defined below.
-    services.dbus.packages = [ cfg.package ];
-
-    systemd.user.services.himmelblau-broker = {
-      description = "Himmelblau Authentication Broker";
-      serviceConfig = {
-        Type = "dbus";
-        BusName = "com.microsoft.identity.broker1";
-        ExecStart = "${cfg.package}/bin/broker";
-        Slice = "background.slice";
-        TimeoutStopSec = 5;
-        Restart = "on-failure";
-      };
-    };
-
-    # HSM PIN initialization — encrypts hsm-pin with TPM via systemd-creds
+    # HSM PIN initialization — encrypts hsm-pin with TPM via systemd-creds.
     # Only runs if the encrypted credential does not yet exist (matching upstream).
     systemd.services.himmelblau-hsm-pin-init = {
       description = "Himmelblau HSM PIN Initialization";
@@ -295,7 +228,7 @@ in {
       before = [ "himmelblaud.service" ];
       after = [ "systemd-tpm2-setup.service" ];
       unitConfig = {
-        ConditionPathExists = "!/var/lib/private/himmelblaud/hsm-pin.enc";
+        ConditionPathExists = "!/var/lib/private/himmelblaud/hsm-pin-nopcr.enc";
         DefaultDependencies = false;
       };
       serviceConfig = {
@@ -319,13 +252,9 @@ in {
         # Pass the encrypted HSM PIN to himmelblaud via systemd credentials.
         # systemd decrypts it (using TPM if bound) and exposes at
         # /run/credentials/himmelblaud.service/hsm-pin.
-        # %d specifier doesn't expand in Environment=, so we use
-        # ExecStartPre to set it via the CREDENTIALS_DIRECTORY env var
-        # that systemd provides automatically.
-        LoadCredentialEncrypted = "hsm-pin:/var/lib/private/himmelblaud/hsm-pin.enc";
+        LoadCredentialEncrypted = "hsm-pin:/var/lib/private/himmelblaud/hsm-pin-nopcr.enc";
       };
       # Tell himmelblaud to read the HSM PIN from systemd's credential store.
-      # CREDENTIALS_DIRECTORY is set by systemd when LoadCredential* is used.
       environment = {
         HIMMELBLAU_HSM_PIN_PATH = "/run/credentials/himmelblaud.service/hsm-pin";
       };
@@ -334,10 +263,15 @@ in {
     systemd.services.himmelblaud-tasks.serviceConfig = {
       RestartSec = "1s";
       # IPv4 + Unix only — himmelblaud_tasks fails on IPv6 with
-      # "federation provider not set" errors before falling back to IPv4
+      # "federation provider not set" errors before falling back to IPv4.
       RestrictAddressFamilies = lib.mkForce "AF_INET AF_UNIX";
+      # Upstream omits /var/cache/himmelblau-policies, which is required
+      # whenever apply_policy = true.
       ReadWritePaths = lib.mkForce
         "/home /var/run/himmelblaud /tmp /etc/krb5.conf.d /etc /var/lib /var/cache/nss-himmelblau /var/cache/himmelblau-policies";
+      # Upstream nixosModule sets no CapabilityBoundingSet, whereas the
+      # cargo-deb/rpm generator drops these caps. Apply the same set so
+      # tasks can chown user dirs and switch UIDs for home creation.
       CapabilityBoundingSet =
         "CAP_CHOWN CAP_FOWNER CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH CAP_SETUID CAP_SETGID";
     };

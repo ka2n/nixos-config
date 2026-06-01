@@ -16,11 +16,12 @@
       url = "github:NitorCreations/nix-mdatp";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Pinned to 2.3.11 — downgrade from 3.x to avoid the resume/boot
-    # deadlock regression tracked in himmelblau-idm/himmelblau#1206.
-    # 2.3.11 still receives security backports (incl. GHSA-pmxh-j4r6-88mv).
-    # Don't follow nixpkgs to use Cachix cache (built against nixpkgs-25.05).
-    himmelblau.url = "github:himmelblau-idm/himmelblau/2.3.11";
+    # Pinned to 3.1.6 — ships the NetworkManager dispatcher fix for
+    # himmelblau-idm/himmelblau#1206 (resume/boot deadlock) plus the
+    # PCR7-free HSM PIN sealing (Secure Boot cert update safe) and the
+    # automatic MFA fallback.
+    # Don't follow nixpkgs to use Cachix cache (built against nixpkgs-unstable).
+    himmelblau.url = "github:himmelblau-idm/himmelblau/3.1.6";
     inputactions = {
       # Pinned to Dec 2025 revision compatible with nixos-25.11's Hyprland
       url = "github:taj-ny/InputActions/2eb2a2450ddc85befb770c60d5baf9ced7d1197d";
