@@ -77,17 +77,9 @@ in {
     };
     settings = {
       domain = [ (builtins.head (privateConfig.domains or [ "example.onmicrosoft.com" ])) ];
-      allow_console_password_only = false;
-      # Keep false while Intune backend rejects this device's CSR.
-      # When apply_policy=true and is_intune_enrolled=false, the daemon
-      # forces password+MFA on every auth and never reaches the Hello PIN
-      # branch (himmelblau.rs:1619-1628 `intune_enrollment_required`).
-      # Flip back to true after admin unblocks Intune enrollment.
-      # See docs/himmelblau-troubleshooting.md 問題8.
-      apply_policy = false;
+      apply_policy = true;
       cn_name_mapping = true;
       connection_timeout = 30;
-      request_timeout = 30;
       enable_hello = true;
       enable_sfa_fallback = false;
       enable_experimental_mfa = true;
