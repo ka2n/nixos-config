@@ -80,6 +80,11 @@ in {
       apply_policy = true;
       cn_name_mapping = true;
       connection_timeout = 30;
+      # Intune LinuxEnrollmentService (fef.*.manage.microsoft.com) is slow to
+      # respond; upstream default 10 times out the enrollment send operation
+      # ("timed out waiting on send operation"), leaving the device joined but
+      # never MDM-enrolled. 30 lets enrollment complete. See docs 問題4.
+      request_timeout = 30;
       enable_hello = true;
       enable_sfa_fallback = false;
       enable_experimental_mfa = true;
