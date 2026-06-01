@@ -260,6 +260,22 @@ in {
       };
     };
 
+    # NetworkManager dispatcher hook — workaround for himmelblau-idm/himmelblau#1206
+    # (resume/boot deadlock). Upstream ships
+    # platform/common/NetworkManager/dispatcher.d/99-himmelblau-restart-on-down
+    # which restarts himmelblaud whenever a physical interface goes down, so the
+    # daemon does not keep a stale HTTP connection pool that hangs the socket on
+    # the next auth (observed: Wi-Fi reconnect -> swaylock unlock ->
+    # login.microsoftonline.com Connect TimedOut -> socket hang). The script is
+    # only installed via the deb/rpm packaging (/usr/lib/NetworkManager/
+    # dispatcher.d/), so on NixOS it must be wired explicitly. The dispatcher
+    # PATH already provides systemctl, grep and logger. type = "basic" matches
+    # the upstream install location (receives the "down" action).
+    networking.networkmanager.dispatcherScripts = [{
+      source = "${inputs.himmelblau}/platform/common/NetworkManager/dispatcher.d/99-himmelblau-restart-on-down";
+      type = "basic";
+    }];
+
     systemd.services.himmelblaud-tasks.serviceConfig = {
       RestartSec = "1s";
       # IPv4 + Unix only — himmelblaud_tasks fails on IPv6 with
