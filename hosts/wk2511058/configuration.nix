@@ -24,6 +24,8 @@ in {
   # Suppress "Last MLO scan was too long ago" iwlmld WARNINGs that delay
   # screen restore after swaylock unlock on Lunar Lake / Wi-Fi 7 (BE-series).
   # See docs/himmelblau-troubleshooting.md (問題5).
+  # Wi-Fi 7 MLO による Zoom/Meet パケロスの調査と対処は
+  # docs/wifi7-mlo-packetloss.md（対処はルーター側で MLO のみ無効化）。
   networking.networkmanager.wifi.powersave = false;
   boot.extraModprobeConfig = ''
     options iwlwifi disable_11be=1 power_save=0
