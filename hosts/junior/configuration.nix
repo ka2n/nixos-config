@@ -80,9 +80,7 @@
   # Webcam flicker prevention (50Hz for East Japan)
   hardware.webcam.flickerPrevention = {
     enable = true;
-    devices = {
-      "Logitech StreamCam" = 50;
-    };
+    frequency = 50;
   };
 
   # Power button behavior

@@ -119,10 +119,7 @@ in {
   # Webcam flicker prevention (50Hz for East Japan)
   hardware.webcam.flickerPrevention = {
     enable = true;
-    devices = {
-      "Logitech StreamCam" = 50;
-      "Integrated Camera: Integrated C" = 50;
-    };
+    frequency = 50;
   };
 
   # Intel NPU support (from unstable until nixpkgs-25.11 includes the module)
