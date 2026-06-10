@@ -7,8 +7,12 @@ return {
 	},
 	{
 		"saghen/blink.cmp",
-		build = "cargo +nightly build --release",
+        version = "*",
+		build = function()
+            require('blink.cmp').build():pwait()
+        end,
 		dependencies = {
+            "saghen/blink.lib",
 			"Kaiser-Yang/blink-cmp-avante",
 		},
 		event = { "InsertEnter", "CmdLineEnter" },
