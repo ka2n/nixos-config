@@ -14,13 +14,19 @@
   glib,
   gtk3,
   libdrm,
+  libx11,
+  libxcomposite,
+  libxdamage,
+  libxext,
+  libxfixes,
+  libxrandr,
+  libxcb,
   libxkbcommon,
   mesa,
   nspr,
   nss,
   pango,
   systemd,
-  xorg,
   libsecret,
   pcsclite,
   vips,
@@ -62,13 +68,13 @@ stdenv.mkDerivation rec {
     nss
     pango
     systemd
-    xorg.libX11
-    xorg.libXcomposite
-    xorg.libXdamage
-    xorg.libXext
-    xorg.libXfixes
-    xorg.libXrandr
-    xorg.libxcb
+    libx11
+    libxcomposite
+    libxdamage
+    libxext
+    libxfixes
+    libxrandr
+    libxcb
     libsecret
     pcsclite
     vips

@@ -13,18 +13,18 @@ let
   # Handles: host/org/repo[#num], org/repo#num, repo#num, and #num. For the
   # last two the host/org/repo is inferred from $PWD = .../src/<host>/<org>/<repo>/...
   foot-open-github-ref = pkgs.writeShellScript "foot-open-github-ref"
-    (builtins.readFile (pkgs.replaceVars ./dotfiles/local/bin/foot-open-github-ref.sh {
-      x_open_url = lib.getExe x-open-url;
-      git = lib.getExe pkgs.git;
-    }));
+    (builtins.readFile
+      (pkgs.replaceVars ./dotfiles/local/bin/foot-open-github-ref.sh {
+        x_open_url = lib.getExe x-open-url;
+        git = lib.getExe pkgs.git;
+      }));
   # Single POSIX-ERE regex used by foot for Ctrl+Shift+o. Capture group 1
   # carries the match (foot uses `matches[1]`); it includes at most one
   # leading boundary character which the script strips.
   footGhContent =
     "[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}/[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9._-]+(#[0-9]+)?"
     + "|[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+#[0-9]+"
-    + "|[A-Za-z0-9][A-Za-z0-9._-]*#[0-9]+"
-    + "|#[0-9]+";
+    + "|[A-Za-z0-9][A-Za-z0-9._-]*#[0-9]+" + "|#[0-9]+";
   footGhRegex =
     "([^A-Za-z0-9_./#-](${footGhContent})|^(${footGhContent}))([^A-Za-z0-9_-]|$)";
   claude-notify-waiting = pkgs.writeShellScriptBin "claude-notify-waiting"
@@ -442,7 +442,7 @@ in {
         show-urls-copy = "Control+Shift+y";
         regex-launch = "[github-ref] Control+Shift+o";
       };
-      colors = {
+      colors-dark = {
         alpha = "0.98";
         foreground = "d8dee9";
         background = "2e3440";
