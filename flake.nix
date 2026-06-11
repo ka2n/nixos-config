@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-26.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs?ref=nixos-unstable";
 
     nixos-hardware = { url = "github:NixOS/nixos-hardware/master"; };
@@ -22,13 +22,8 @@
     # automatic MFA fallback.
     # Don't follow nixpkgs to use Cachix cache (built against nixpkgs-unstable).
     himmelblau.url = "github:himmelblau-idm/himmelblau/3.1.6";
-    inputactions = {
-      # Pinned to Dec 2025 revision compatible with nixos-25.11's Hyprland
-      url = "github:taj-ny/InputActions/2eb2a2450ddc85befb770c60d5baf9ced7d1197d";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-index-database = {

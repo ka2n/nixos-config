@@ -14,6 +14,7 @@ pkgs-unstable: llm-agents: final: prev: {
     inherit (final) libcskk fcitx5;
     inherit (final.qt6) qtbase wrapQtAppsHook;
     inherit (final.kdePackages) fcitx5-qt;
+    extra-cmake-modules = final.kdePackages.extra-cmake-modules;
   };
   # octorus: override nixpkgs-unstable version (0.3.5 -> 0.5.4)
   octorus = final.rustPlatform.buildRustPackage {
@@ -66,7 +67,10 @@ pkgs-unstable: llm-agents: final: prev: {
   go-readability = final.callPackage ./go-readability { };
   n = final.callPackage ./n { };
   mo = final.callPackage ./mo { };
-  inputactions-standalone = final.callPackage ./inputactions-standalone { };
+  inputactions-standalone = final.callPackage ./inputactions-standalone {
+    extra-cmake-modules = final.kdePackages.extra-cmake-modules;
+  };
+  inputactions-ctl = final.callPackage ./inputactions-ctl { };
   pencil = final.callPackage ./pencil { };
   jai = final.callPackage ./jai { };
 }

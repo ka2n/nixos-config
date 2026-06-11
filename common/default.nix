@@ -239,7 +239,7 @@ in {
 
     # Keyboard/Input
     warpd
-    inputs.inputactions.packages.x86_64-linux.inputactions-ctl
+    inputactions-ctl
     inputactions-standalone # Mouse/touchpad gestures standalone (for River)
 
     # Development
@@ -370,7 +370,7 @@ in {
   # GTK Emacs keybindings (Ctrl-W for word delete, etc.)
   environment.sessionVariables.GTK_KEY_THEME = "Emacs";
 
-  documentation.man.generateCaches = false;
+  documentation.man.cache.enable = false;
   documentation.info.enable = false;
   documentation.nixos.enable = false;
 
@@ -480,7 +480,6 @@ in {
   services.ollama = {
     enable = true;
     package = pkgs-unstable.ollama-vulkan;
-    acceleration = "vulkan";
   };
 
   # Audio (PipeWire)
