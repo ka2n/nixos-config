@@ -509,6 +509,12 @@ in {
   fonts.packages = (with pkgs; [
     noto-fonts
     noto-fonts-cjk-sans
+    (google-fonts.override {
+      fonts = [
+        "Noto Sans JP"
+        "Noto Serif JP"
+      ];
+    })
     noto-fonts-color-emoji
     nerd-fonts.jetbrains-mono # omarchy waybar font
   ]) ++ [ cica ];
@@ -516,8 +522,8 @@ in {
   fonts.fontconfig = {
     enable = true;
     defaultFonts = {
-      serif = [ "Noto Serif" "Noto Serif CJK JP" ];
-      sansSerif = [ "Noto Sans" "Noto Sans CJK JP" ];
+      serif = [ "Noto Serif" "Noto Serif JP" "Noto Serif CJK JP" ];
+      sansSerif = [ "Noto Sans" "Noto Sans JP" "Noto Sans CJK JP" ];
       monospace = [ "Cica" "Noto Sans Mono CJK JP" ];
       emoji = [ "Noto Color Emoji" ];
     };
@@ -525,7 +531,7 @@ in {
       <?xml version="1.0"?>
       <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
       <fontconfig>
-        <!-- lang=ja の場合、CJK JPフォントを優先 -->
+        <!-- lang=ja の場合、JP フォントを CJK JP より優先 -->
         <match target="pattern">
           <test name="lang" compare="contains">
             <string>ja</string>
@@ -534,6 +540,7 @@ in {
             <string>sans-serif</string>
           </test>
           <edit name="family" mode="prepend" binding="strong">
+            <string>Noto Sans JP</string>
             <string>Noto Sans CJK JP</string>
           </edit>
         </match>
@@ -545,6 +552,7 @@ in {
             <string>serif</string>
           </test>
           <edit name="family" mode="prepend" binding="strong">
+            <string>Noto Serif JP</string>
             <string>Noto Serif CJK JP</string>
           </edit>
         </match>
