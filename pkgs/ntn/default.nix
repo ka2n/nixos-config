@@ -3,6 +3,7 @@
   stdenvNoCC,
   fetchurl,
   autoPatchelfHook,
+  makeWrapper,
 }:
 
 let
@@ -38,13 +39,17 @@ stdenvNoCC.mkDerivation {
     inherit (targetInfo) hash;
   };
 
-  nativeBuildInputs = lib.optionals stdenvNoCC.hostPlatform.isLinux [ autoPatchelfHook ];
+  nativeBuildInputs =
+    lib.optionals stdenvNoCC.hostPlatform.isLinux [ autoPatchelfHook ]
+    ++ [ makeWrapper ];
 
   sourceRoot = "ntn-${targetInfo.target}";
 
   installPhase = ''
     runHook preInstall
     install -Dm755 ntn "$out/bin/ntn"
+    # Disable keyring because it does not work in this environment.
+    wrapProgram "$out/bin/ntn" --set NOTION_KEYRING 0
     runHook postInstall
   '';
 
