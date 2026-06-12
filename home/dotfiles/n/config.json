@@ -1,0 +1,5 @@
+{
+  "command": "obsidian daily:append content={content}",
+  "mem.command": "ntn-scratchpad-prepend {content}",
+  "task.command": "ntn-todo-add {content}"
+}

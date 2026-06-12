@@ -73,6 +73,7 @@ in {
     pkgs.go-readability
     pkgs.mo
     pkgs.n
+    pkgs.ntn
     pkgs.octorus
     (pkgs.writeShellScriptBin "octorus" ''
       exec ${pkgs.octorus}/bin/or "$@"
@@ -103,6 +104,34 @@ in {
     (pkgs.writeShellScriptBin "find-parent-package-dir"
       (builtins.replaceStrings [ "@git@" ] [ "${lib.getExe pkgs.git}" ]
         (builtins.readFile ./dotfiles/local/bin/find-parent-package-dir.sh)))
+
+    (pkgs.writeShellScriptBin "mem" ''
+      exec -a mem ${lib.getExe pkgs.n} "$@"
+    '')
+
+    (pkgs.writeShellScriptBin "task" ''
+      exec -a task ${lib.getExe pkgs.n} "$@"
+    '')
+
+    (pkgs.writeShellScriptBin "ntn-todo-add" (builtins.replaceStrings [
+      "@ntn@"
+      "@jq@"
+    ] [
+      (lib.getExe pkgs.ntn)
+      (lib.getExe pkgs.jq)
+    ] (builtins.readFile ./dotfiles/local/bin/ntn-todo-add.sh)))
+
+    (pkgs.writeShellScriptBin "ntn-scratchpad-prepend" (builtins.replaceStrings [
+      "@ntn@"
+      "@jq@"
+      "@mktemp@"
+      "@cat@"
+    ] [
+      (lib.getExe pkgs.ntn)
+      (lib.getExe pkgs.jq)
+      (lib.getExe' pkgs.coreutils "mktemp")
+      (lib.getExe' pkgs.coreutils "cat")
+    ] (builtins.readFile ./dotfiles/local/bin/ntn-scratchpad-prepend.sh)))
 
     x-open-url
 
@@ -231,6 +260,7 @@ in {
   xdg.configFile."tig/config".source = ./dotfiles/tig/config;
   xdg.configFile."atuin/config.toml".source = ./dotfiles/atuin/config.toml;
   xdg.configFile."gh/config.yml".source = ./dotfiles/gh/config.yml;
+  xdg.configFile."n/config.json".source = ./dotfiles/n/config.json;
   xdg.configFile."mako/config".source = ./dotfiles/mako/config;
   xdg.configFile."wlogout/layout".source = ./dotfiles/wlogout/layout;
   xdg.configFile."x-open-url/config.json".source =
