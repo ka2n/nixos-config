@@ -67,6 +67,7 @@ pkgs-unstable: llm-agents: final: prev: {
   git-wt = final.callPackage ./git-wt { go = final.go-bin.versions."1.25.7"; };
   go-readability = final.callPackage ./go-readability { };
   n = final.callPackage ./n { };
+  ntn = final.callPackage ./ntn { };
   mo = final.callPackage ./mo { };
   inputactions-standalone = final.callPackage ./inputactions-standalone {
     extra-cmake-modules = final.kdePackages.extra-cmake-modules;
