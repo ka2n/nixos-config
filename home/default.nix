@@ -124,13 +124,9 @@ in {
     (pkgs.writeShellScriptBin "ntn-scratchpad-prepend" (builtins.replaceStrings [
       "@ntn@"
       "@jq@"
-      "@mktemp@"
-      "@cat@"
     ] [
       (lib.getExe pkgs.ntn)
       (lib.getExe pkgs.jq)
-      (lib.getExe' pkgs.coreutils "mktemp")
-      (lib.getExe' pkgs.coreutils "cat")
     ] (builtins.readFile ./dotfiles/local/bin/ntn-scratchpad-prepend.sh)))
 
     x-open-url

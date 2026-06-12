@@ -3,8 +3,6 @@ set -eu
 
 ntn=@ntn@
 jq=@jq@
-mktemp=@mktemp@
-cat_cmd=@cat@
 
 SCRATCHPAD_PAGE_ID="c6907061-d316-8309-af67-01247566d65d"
 
@@ -19,18 +17,30 @@ if [ -z "$content" ]; then
   exit 1
 fi
 
-tmp=$("$mktemp")
-trap 'rm -f "$tmp"' EXIT
+payload=$(
+  "$jq" -cn \
+    --arg content "$content" \
+    '{
+      children: [
+        {
+          object: "block",
+          type: "paragraph",
+          paragraph: {
+            rich_text: [
+              {
+                type: "text",
+                text: {
+                  content: $content
+                }
+              }
+            ]
+          }
+        }
+      ],
+      position: {
+        type: "start"
+      }
+    }'
+)
 
-"$ntn" pages get "$SCRATCHPAD_PAGE_ID" --json \
-  | "$jq" -r '.markdown.markdown' > "$tmp"
-
-existing=$("$cat_cmd" "$tmp")
-
-if [ -n "$existing" ]; then
-  updated=$(printf '%s\n\n%s' "$content" "$existing")
-else
-  updated=$content
-fi
-
-exec "$ntn" pages update "$SCRATCHPAD_PAGE_ID" --content "$updated"
+exec "$ntn" api "/v1/blocks/$SCRATCHPAD_PAGE_ID/children" -X PATCH -d "$payload"
