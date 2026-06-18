@@ -35,6 +35,7 @@
     ntfs3g
     darktable
     shotwell
+    calibre
   ];
 
   # Display manager (greetd+tuigreet - Wayland native, lightweight TUI)
