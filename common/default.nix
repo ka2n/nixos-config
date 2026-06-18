@@ -47,6 +47,7 @@ in {
   system.configurationRevision = configRevision;
 
   # Nix settings
+  nix.settings.http-connections = 50;
   nix.settings.auto-optimise-store = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.settings.trusted-users = [ "root" "@wheel" ];
@@ -54,9 +55,10 @@ in {
 
   # Binary caches
   nix.settings.substituters = [
+    "https://nix-community.cachix.org"
     "https://cache.nixos.org"
-    "https://himmelblau.cachix.org"
     "https://cache.numtide.com"
+    "https://himmelblau.cachix.org"
   ];
   nix.settings.trusted-public-keys = [
     "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
