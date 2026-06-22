@@ -113,21 +113,17 @@ in {
       exec -a task ${lib.getExe pkgs.n} "$@"
     '')
 
-    (pkgs.writeShellScriptBin "ntn-todo-add" (builtins.replaceStrings [
-      "@ntn@"
-      "@jq@"
-    ] [
-      (lib.getExe pkgs.ntn)
-      (lib.getExe pkgs.jq)
-    ] (builtins.readFile ./dotfiles/local/bin/ntn-todo-add.sh)))
+    (pkgs.writeShellScriptBin "ntn-todo-add"
+      (builtins.replaceStrings [ "@ntn@" "@jq@" ] [
+        (lib.getExe pkgs.ntn)
+        (lib.getExe pkgs.jq)
+      ] (builtins.readFile ./dotfiles/local/bin/ntn-todo-add.sh)))
 
-    (pkgs.writeShellScriptBin "ntn-scratchpad-prepend" (builtins.replaceStrings [
-      "@ntn@"
-      "@jq@"
-    ] [
-      (lib.getExe pkgs.ntn)
-      (lib.getExe pkgs.jq)
-    ] (builtins.readFile ./dotfiles/local/bin/ntn-scratchpad-prepend.sh)))
+    (pkgs.writeShellScriptBin "ntn-scratchpad-prepend"
+      (builtins.replaceStrings [ "@ntn@" "@jq@" ] [
+        (lib.getExe pkgs.ntn)
+        (lib.getExe pkgs.jq)
+      ] (builtins.readFile ./dotfiles/local/bin/ntn-scratchpad-prepend.sh)))
 
     x-open-url
 
@@ -715,6 +711,7 @@ in {
     cp -rL ${./dotfiles/agents/skills/opsx-run} "$skills_dir/opsx-run"
     cp -rL ${./dotfiles/agents/skills/commit} "$skills_dir/commit"
     cp -rL ${./dotfiles/agents/skills/commit-push} "$skills_dir/commit-push"
+    cp -rL ${./dotfiles/agents/skills/rebase-main} "$skills_dir/rebase-main"
     cp -rL ${./dotfiles/agents/skills/pr-comments} "$skills_dir/pr-comments"
     cp -rL ${
       ./dotfiles/agents/skills/commit-push-pr
@@ -735,7 +732,7 @@ in {
     # Claude Code: symlink ~/.claude/skills/<name> -> ~/.agents/skills/<name>
     claude_skills_dir="$HOME/.claude/skills"
     mkdir -p "$claude_skills_dir"
-    claude_managed_skills="save-url-to-doc commit commit-push commit-push-pr organize-commits opsx-run pr-comments"
+    claude_managed_skills="save-url-to-doc commit commit-push commit-push-pr rebase-main organize-commits opsx-run pr-comments"
     for s in $claude_managed_skills; do
       rm -rf "$claude_skills_dir/$s"
       ln -s "$skills_dir/$s" "$claude_skills_dir/$s"
