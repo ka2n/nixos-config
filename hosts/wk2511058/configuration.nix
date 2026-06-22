@@ -111,6 +111,15 @@ in {
 
   services.mdatp.enable = true;
 
+  # Organization-managed Claude Code settings (highest precedence, overrides user/project).
+  # Encrypted with this host's age key only — see secrets/.sops.yaml.
+  sops.secrets.claude-code-managed-settings = {
+    sopsFile = ../../secrets/wk2511058/claude-code-managed-settings.enc;
+    format = "binary";
+    path = "/etc/claude-code/managed-settings.json";
+    mode = "0444";
+  };
+
   # Force RGB Full Range on HDMI (DELL S2722QC)
   hardware.display.dellS2722qcRgb.enable = true;
   hardware.display.outputs."HDMI-A-1".edid = config.hardware.display.dellS2722qcRgb.edidFilename;
