@@ -215,7 +215,7 @@ riverctl map normal None Print spawn 'grim -g "$(slurp)" ~/Desktop/$(date +%Y%m%
 riverctl map normal Control Print spawn 'grim -g "$(slurp)" - | wl-copy'
 
 # Notification (mako)
-riverctl map normal $mod+Control Period spawn "makoctl menu rofi -dmenu"
+riverctl map normal $mod+Control Period spawn "makoctl menu -- rofi -dmenu -p 'mako:'"
 riverctl map normal $mod+Control Comma spawn "makoctl restore"
 riverctl map normal $mod+Control C spawn "makoctl dismiss -a"
 
