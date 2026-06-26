@@ -18,6 +18,15 @@ Write the report to the scratchpad directory:
 
 After writing, print the absolute path and (optionally) open it with `google-chrome-stable <path> &` in the background.
 
+If the user mentions "artifact" / "アーティファクト" / "共有" / "share" / wanting to share the report (or otherwise asks for a hosted/shareable version), also publish it via the `Artifact` tool:
+
+- Pass the same HTML file path to `Artifact`.
+- Pick a stable favicon (e.g. `"📝"` for session reviews) and reuse it on redeploys.
+- Strip the outer `<!doctype>` / `<html>` / `<head>` / `<body>` tags before publishing — the Artifact harness wraps them in.
+- Print the returned artifact URL alongside the local path.
+
+Do **not** upload to Artifact by default — only when the user explicitly asks for it.
+
 ## Steps
 
 1. Collect the change set:
