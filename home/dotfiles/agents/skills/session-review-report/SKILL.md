@@ -28,7 +28,7 @@ After writing, print the absolute path and (optionally) open it with `google-chr
    - Touched files under frontend/UI paths (`.tsx`, `.jsx`, `.vue`, `.svelte`, `.css`, `.scss`, design tokens, theme configs)
    - User explicitly mentioned UI / visual / layout / style
 3. If UI-affecting, capture screenshots:
-   - Use the `screenshot-open` skill or invoke `agent-browser screenshot <path>` directly
+   - Use the `take-screenshot` skill or invoke `agent-browser screenshot <path>` directly
    - Save PNGs into the same scratchpad directory next to the HTML, reference with relative `<img src="...">`
    - Capture before/after if a dev server / preview is available; otherwise just the current state
 4. Build the HTML:
