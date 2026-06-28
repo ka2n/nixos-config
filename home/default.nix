@@ -92,7 +92,10 @@ in {
       ] (builtins.readFile ./dotfiles/local/bin/git-wt-hook.sh)))
 
     (pkgs.writeShellScriptBin "git-wt-deletehook"
-      (builtins.readFile ./dotfiles/local/bin/git-wt-deletehook.sh))
+      (builtins.replaceStrings [ "@mise@" "@jq@" ] [
+        (lib.getExe pkgs.mise)
+        (lib.getExe pkgs.jq)
+      ] (builtins.readFile ./dotfiles/local/bin/git-wt-deletehook.sh)))
 
     (pkgs.writeShellScriptBin "docker-compose-gc"
       (builtins.replaceStrings [ "@docker@" "@jq@" ] [

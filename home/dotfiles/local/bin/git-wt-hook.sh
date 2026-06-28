@@ -10,6 +10,6 @@ if [ -f .envrc ]; then
   $direnv allow
 fi
 
-if [ -f mise.toml ] || [ -f .mise.toml ]; then
-  $mise trust
-fi
+# Register the worktree root as a trusted prefix so all mise configs in the
+# monorepo (including descendants) auto-trust without per-file prompts.
+$mise settings add trusted_config_paths "$PWD"
