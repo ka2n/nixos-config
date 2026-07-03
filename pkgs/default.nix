@@ -10,6 +10,8 @@ pkgs-unstable: llm-agents: final: prev: {
     ] oldAttrs.postFixup;
   });
 
+  herdr = llm-agents.herdr;
+
   libcskk = final.callPackage ./libcskk { };
   fcitx5-cskk = final.callPackage ./fcitx5-cskk {
     inherit (final) libcskk fcitx5;

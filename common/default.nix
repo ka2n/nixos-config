@@ -249,6 +249,7 @@ in {
     python3
     nodejs
     pkgs.claude-code
+    pkgs.herdr
     llm-agents.codex
     llm-agents.gemini-cli
     llm-agents.ccusage
