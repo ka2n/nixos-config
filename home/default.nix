@@ -232,6 +232,11 @@ in {
     # GTK4 + Wayland uses text-input-v3 directly. Forcing GTK_IM_MODULE=fcitx
     # routes through the GTK IM module path instead, which breaks key events
     # for Ghostty and other GTK4 apps. See ghostty-org/ghostty#3628.
+
+    # Nix CA bundle for Node/workerd (Miniflare) TLS
+    NODE_EXTRA_CA_CERTS = "/etc/ssl/certs/ca-bundle.crt";
+    SSL_CERT_FILE = "/etc/ssl/certs/ca-bundle.crt";
+    NODE_OPTIONS = "--use-openssl-ca";
   };
 
   xdg.configFile."git/config".source = pkgs.replaceVars ./dotfiles/git/config {
