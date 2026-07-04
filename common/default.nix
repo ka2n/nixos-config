@@ -54,10 +54,14 @@ in {
   nix.settings.accept-flake-config = true;
 
   # Binary caches
+  # cache.numtide.com omits Priority in its nix-cache-info, so Nix treats it
+  # as priority 0 and prefers it over cache.nixos.org (priority 40) for every
+  # path it mirrors — including full nixpkgs closures like chromium. Pin it
+  # below cache.nixos.org so only llm-agents-specific paths come from it.
   nix.settings.substituters = [
     "https://nix-community.cachix.org"
     "https://cache.nixos.org"
-    "https://cache.numtide.com"
+    "https://cache.numtide.com?priority=60"
     "https://himmelblau.cachix.org"
   ];
   nix.settings.trusted-public-keys = [
@@ -65,6 +69,12 @@ in {
     "himmelblau.cachix.org-1:yu8mq/NIBYsZHWzo4SOge97gpf02qugdZFT/JdRkswc="
     "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
   ];
+  # This network intermittently kills long-lived HTTPS connections to
+  # Cloudflare (cache.numtide.com) mid-transfer; the 300 s default means each
+  # dead connection hangs the build for 5 minutes per retry. Fail fast and
+  # retry more often — retries resume from the last received offset.
+  nix.settings.stalled-download-timeout = 20;
+  nix.settings.download-attempts = 10;
   nixpkgs.config.allowUnfree = true;
 
   # nh - Nix helper
