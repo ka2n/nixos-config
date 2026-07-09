@@ -701,18 +701,18 @@ in {
   # jai (Jail for AI) config files
   home.file.".jai/default.conf".source = ./dotfiles/jai/default.conf;
 
-  # Agents/Codex Skills (copy as real files, not symlinks)
+  # Agents Skills (copy as real files, not symlinks)
   home.activation.agentsSkills = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     skills_dir="$HOME/.agents/skills"
     mkdir -p "$skills_dir"
 
     # Managed skills: remove and re-copy each individually to preserve unmanaged skills
-    managed_skills="save-url-to-doc code-reviewer simplify commit commit-push commit-push-pr pr-comments organize-commits opsx-run take-screenshot session-review-report"
+    managed_skills="save-url-to-doc code-reviewer simplify frontend-design commit commit-push commit-push-pr pr-comments organize-commits opsx-run rebase-main take-screenshot session-review-report"
     for s in $managed_skills; do
       rm -rf "$skills_dir/$s"
     done
 
-    # Shared skills (from agents/skills)
+    # Shared skills (agents/skills) — deployed to both Codex and Claude
     cp -rL ${
       ./dotfiles/agents/skills/save-url-to-doc
     } "$skills_dir/save-url-to-doc"
@@ -733,10 +733,12 @@ in {
     cp -rL ${
       ./dotfiles/agents/skills/session-review-report
     } "$skills_dir/session-review-report"
+    cp -rL ${./dotfiles/agents/skills/simplify} "$skills_dir/simplify"
 
-    # Codex-only skills
-    cp -rL ${./dotfiles/codex/skills/code-reviewer} "$skills_dir/code-reviewer"
-    cp -rL ${./dotfiles/codex/skills/simplify} "$skills_dir/simplify"
+    # Codex-only skills (Claude already has official equivalents)
+    cp -rL ${
+      ./dotfiles/codex/skills/code-reviewer
+    } "$skills_dir/code-reviewer"
     cp -rL ${
       ./dotfiles/codex/skills/frontend-design
     } "$skills_dir/frontend-design"
@@ -746,7 +748,7 @@ in {
     # Claude Code: symlink ~/.claude/skills/<name> -> ~/.agents/skills/<name>
     claude_skills_dir="$HOME/.claude/skills"
     mkdir -p "$claude_skills_dir"
-    claude_managed_skills="save-url-to-doc commit commit-push commit-push-pr rebase-main organize-commits opsx-run pr-comments take-screenshot session-review-report"
+    claude_managed_skills="save-url-to-doc commit commit-push commit-push-pr rebase-main organize-commits opsx-run pr-comments take-screenshot session-review-report simplify"
     for s in $claude_managed_skills; do
       rm -rf "$claude_skills_dir/$s"
       ln -s "$skills_dir/$s" "$claude_skills_dir/$s"
