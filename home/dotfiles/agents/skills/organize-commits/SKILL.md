@@ -45,14 +45,7 @@ Then selectively stage and commit each group:
 
 ```bash
 git add <files-for-group>
-git commit -m "$(cat <<'EOF'
-<type>: <concise description>
-
-<optional body explaining why, not what>
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
-EOF
-)"
+git commit -m "<type>: <concise description>"
 ```
 
 ### 4. Verify
