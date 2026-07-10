@@ -48,6 +48,10 @@
       url = "github:atuinsh/atuin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hunk = {
+      url = "github:modem-dev/hunk";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     gazelle-tui = {
       url = "github:Zeus-Deus/gazelle-tui";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -58,7 +62,8 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, ...
+    }@inputs:
     let
       system = "x86_64-linux";
       pkgs-unstable = import nixpkgs-unstable {
@@ -88,11 +93,14 @@
 
       templates.default = {
         path = ./templates/default;
-        description = "General web development environment with Node.js, Playwright, and Prisma";
+        description =
+          "General web development environment with Node.js, Playwright, and Prisma";
       };
 
       nixosConfigurations.nixos-vm = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs pkgs-unstable configRevision llm-agents; };
+        specialArgs = {
+          inherit inputs pkgs-unstable configRevision llm-agents;
+        };
         modules = commonModules ++ [
           { nixpkgs.hostPlatform = system; }
           ./hosts/nixos-vm/configuration.nix
@@ -100,7 +108,9 @@
       };
 
       nixosConfigurations.wk2511058 = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs pkgs-unstable configRevision llm-agents; };
+        specialArgs = {
+          inherit inputs pkgs-unstable configRevision llm-agents;
+        };
         modules = commonModules ++ [
           { nixpkgs.hostPlatform = system; }
           inputs.himmelblau.nixosModules.himmelblau
@@ -110,7 +120,9 @@
       };
 
       nixosConfigurations.junior = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs pkgs-unstable configRevision llm-agents; };
+        specialArgs = {
+          inherit inputs pkgs-unstable configRevision llm-agents;
+        };
         modules = commonModules ++ [
           { nixpkgs.hostPlatform = system; }
           inputs.disko.nixosModules.disko

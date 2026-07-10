@@ -270,7 +270,7 @@ in {
     llm-agents.pi
 
     delta
-    hunk
+    inputs.hunk.packages.${pkgs.stdenv.hostPlatform.system}.hunk
 
     # Build tools
     gcc
