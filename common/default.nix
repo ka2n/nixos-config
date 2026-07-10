@@ -119,11 +119,8 @@ in {
   time.timeZone = "Asia/Tokyo";
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = { LC_CTYPE = "ja_JP.UTF-8"; };
-  i18n.supportedLocales = [
-    "en_US.UTF-8/UTF-8"
-    "ja_JP.UTF-8/UTF-8"
-    "C.UTF-8/UTF-8"
-  ];
+  i18n.supportedLocales =
+    [ "en_US.UTF-8/UTF-8" "ja_JP.UTF-8/UTF-8" "C.UTF-8/UTF-8" ];
   i18n.inputMethod.enable = true;
   i18n.inputMethod.type = "fcitx5";
   i18n.inputMethod.fcitx5.waylandFrontend = true;
@@ -259,8 +256,9 @@ in {
     go
     python3
     nodejs
+
+    # NOTE: herdr should install via official script, I need live session migration.
     pkgs.claude-code
-    pkgs.herdr
     llm-agents.codex
     llm-agents.gemini-cli
     llm-agents.ccusage
@@ -272,7 +270,7 @@ in {
     llm-agents.pi
 
     delta
-    jujutsu
+    hunk
 
     # Build tools
     gcc
@@ -399,10 +397,7 @@ in {
   # File manager
   programs.thunar.enable = true;
   programs.xfconf.enable = true;
-  programs.thunar.plugins = with pkgs; [
-    thunar-archive-plugin
-    thunar-volman
-  ];
+  programs.thunar.plugins = with pkgs; [ thunar-archive-plugin thunar-volman ];
   services.gvfs.enable = true;
   services.tumbler.enable = true;
 
@@ -523,12 +518,7 @@ in {
   fonts.packages = (with pkgs; [
     noto-fonts
     noto-fonts-cjk-sans
-    (google-fonts.override {
-      fonts = [
-        "Noto Sans JP"
-        "Noto Serif JP"
-      ];
-    })
+    (google-fonts.override { fonts = [ "Noto Sans JP" "Noto Serif JP" ]; })
     noto-fonts-color-emoji
     nerd-fonts.jetbrains-mono # omarchy waybar font
   ]) ++ [ cica ];
