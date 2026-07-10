@@ -82,6 +82,9 @@ in {
     # GitHub
     llm-agents.copilot-cli
 
+    # Moshi: host-side daemon bridging AI coding agents to the Moshi mobile app
+    pkgs.moshi-hook
+
     # Docker
     pkgs.docker-credential-helpers
 

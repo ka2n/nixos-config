@@ -74,4 +74,5 @@ pkgs-unstable: llm-agents: final: prev: {
   };
   inputactions-ctl = final.callPackage ./inputactions-ctl { };
   jai = final.callPackage ./jai { };
+  moshi-hook = final.callPackage ./moshi-hook { };
 }
