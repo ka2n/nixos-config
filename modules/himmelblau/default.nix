@@ -260,21 +260,14 @@ in {
       };
     };
 
-    # NetworkManager dispatcher hook — workaround for himmelblau-idm/himmelblau#1206
-    # (resume/boot deadlock). Upstream ships
-    # platform/common/NetworkManager/dispatcher.d/99-himmelblau-restart-on-down
-    # which restarts himmelblaud whenever a physical interface goes down, so the
-    # daemon does not keep a stale HTTP connection pool that hangs the socket on
-    # the next auth (observed: Wi-Fi reconnect -> swaylock unlock ->
-    # login.microsoftonline.com Connect TimedOut -> socket hang). The script is
-    # only installed via the deb/rpm packaging (/usr/lib/NetworkManager/
-    # dispatcher.d/), so on NixOS it must be wired explicitly. The dispatcher
-    # PATH already provides systemctl, grep and logger. type = "basic" matches
-    # the upstream install location (receives the "down" action).
-    networking.networkmanager.dispatcherScripts = [{
-      source = "${inputs.himmelblau}/platform/common/NetworkManager/dispatcher.d/99-himmelblau-restart-on-down";
-      type = "basic";
-    }];
+    # NOTE: The NetworkManager dispatcher workaround for
+    # himmelblau-idm/himmelblau#1206 (resume/boot deadlock) was removed in the
+    # 3.1.9 bump. Upstream fixed the root cause in the resolver (releases the DB
+    # lock before the offline-auth fallback) and reverted the dispatcher script,
+    # deleting platform/common/NetworkManager/dispatcher.d/99-himmelblau-restart-on-down.
+    # Referencing it here would fail evaluation, and the workaround is now
+    # obsolete. If the socket-hang symptom ever returns, reintroduce a local copy
+    # of the script rather than pointing at the (now absent) upstream path.
 
     systemd.services.himmelblaud-tasks.serviceConfig = {
       RestartSec = "1s";
