@@ -26,6 +26,18 @@
       ]
     },
     {
+      "pattern": "^https://docs\\.google\\.com/(presentation|document|spreadsheets)/d/[^/]+/edit",
+      "mods": [
+        {
+          "action": "url_replace",
+          "data": [
+            "^(https://docs\\.google\\.com/(?:presentation|document|spreadsheets)/d/[^/]+)/edit.*",
+            "$1/preview"
+          ]
+        }
+      ]
+    },
+    {
       "pattern": "^https://meet.google.com",
       "cmd": "@google_chrome@"
     }
