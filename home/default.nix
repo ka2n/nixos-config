@@ -55,6 +55,7 @@ in {
     pkgs.ffmpegthumbnailer
     pkgs.chafa
     pkgs.imagemagick # for convert and identify
+    pkgs.gather # Gather desktop (Windows/Electron) via Wine+DXVK on XWayland
   ] ++ lib.optional (riverBackgroundColor != null) pkgs.swaybg ++ [
 
     # Phase 3: Additional packages
