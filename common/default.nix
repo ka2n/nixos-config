@@ -517,8 +517,13 @@ in {
 
   fonts.packages = (with pkgs; [
     noto-fonts
-    noto-fonts-cjk-sans
-    (google-fonts.override { fonts = [ "Noto Sans JP" "Noto Serif JP" ]; })
+    # 静的 per-weight の CJK を使う。可変フォント(VF)は Wine の dwrite が
+    # named instance を独立ファミリ(例 "Noto Sans JP Thin")として誤登録し、
+    # Wine 上の Chromium(Gather 等)が日本語を極細で描画してしまうため。
+    noto-fonts-cjk-sans-static
+    # google-fonts の "Noto Sans JP" は VF で上記問題の主因なので外す
+    # (Noto Sans JP 相当は noto-fonts-cjk-sans-static の "Noto Sans CJK JP" で代替)
+    (google-fonts.override { fonts = [ "Noto Serif JP" ]; })
     noto-fonts-color-emoji
     nerd-fonts.jetbrains-mono # omarchy waybar font
   ]) ++ [ cica ];
@@ -527,7 +532,7 @@ in {
     enable = true;
     defaultFonts = {
       serif = [ "Noto Serif" "Noto Serif JP" "Noto Serif CJK JP" ];
-      sansSerif = [ "Noto Sans" "Noto Sans JP" "Noto Sans CJK JP" ];
+      sansSerif = [ "Noto Sans" "Noto Sans CJK JP" ];
       monospace = [ "Cica" "Noto Sans Mono CJK JP" ];
       emoji = [ "Noto Color Emoji" ];
     };
@@ -544,7 +549,6 @@ in {
             <string>sans-serif</string>
           </test>
           <edit name="family" mode="prepend" binding="strong">
-            <string>Noto Sans JP</string>
             <string>Noto Sans CJK JP</string>
           </edit>
         </match>
