@@ -45,10 +45,13 @@ in {
       variant = "laptop";
       riverBackgroundColor = null;
     };
-    users.katsuma = { ... }: {
+    users.katsuma = { pkgs, ... }: {
       imports = [ ../../home ];
       home.username = "katsuma";
       home.homeDirectory = "/home/katsuma";
+      # Gather desktop (Windows/Electron) via Wine+DXVK on XWayland.
+      # Work laptop only; not needed on junior.
+      home.packages = [ pkgs.gather ];
     };
   };
 
