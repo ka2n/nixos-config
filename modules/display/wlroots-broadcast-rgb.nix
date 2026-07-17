@@ -16,13 +16,21 @@
 
   config = lib.mkIf config.hardware.display.wlrootsBroadcastRgbFull.enable {
     nixpkgs.overlays = [
-      (final: prev: {
-        wlroots_0_19 = prev.wlroots_0_19.overrideAttrs (oldAttrs: {
-          patches = (oldAttrs.patches or [ ]) ++ [
-            ./wlroots-broadcast-rgb.patch
-          ];
-        });
-      })
+      (final: prev:
+        let
+          patchWlroots = pkg:
+            pkg.overrideAttrs (oldAttrs: {
+              patches = (oldAttrs.patches or [ ]) ++ [
+                ./wlroots-broadcast-rgb.patch
+              ];
+            });
+          patched = patchWlroots prev.wlroots_0_20;
+        in {
+          # river depends on wlroots 0.20 (both `wlroots` and `wlroots_0_20`
+          # point at 0.20.0). Patching the old 0.19 attr had no effect.
+          wlroots_0_20 = patched;
+          wlroots = patched;
+        })
     ];
   };
 }
