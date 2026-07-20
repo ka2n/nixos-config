@@ -81,8 +81,11 @@ in {
   # nh - Nix helper
   programs.nh = {
     enable = true;
-    clean.enable = true;
-    clean.extraArgs = "--keep-since 4d --keep 3";
+    clean = {
+      enable = true;
+      dates = "weekly";
+      extraArgs = "--keep-since 30d --keep-one";
+    };
     flake = "/home/shared/nixos-config";
   };
 
