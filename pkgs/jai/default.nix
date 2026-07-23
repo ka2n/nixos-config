@@ -1,5 +1,5 @@
 { lib, gcc15Stdenv, fetchFromGitHub, autoreconfHook, pkg-config, pandoc
-, util-linux, acl, }:
+, util-linux, acl, untrustedUser ? "jai", }:
 
 gcc15Stdenv.mkDerivation {
   pname = "jai";
@@ -19,7 +19,9 @@ gcc15Stdenv.mkDerivation {
     acl # libacl
   ];
 
-  configureFlags = [ "--with-untrusted-user=nobody" ];
+  # Baked into the binary as kUntrustedUser; must match the system user
+  # created in modules/jai (GECOS "JAI sandbox untrusted user", home "/").
+  configureFlags = [ "--with-untrusted-user=${untrustedUser}" ];
 
   # Skip setuid install hooks (nix store is read-only)
   postInstall = ''
