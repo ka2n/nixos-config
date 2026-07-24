@@ -319,6 +319,10 @@ function grt
   cd (git rev-parse --show-toplevel; or echo "." )
 end
 
+function grrt
+  cd (git rev-parse --path-format=absolute --git-common-dir | path dirname; or echo ".")
+end
+
 function upp
   cd (find-parent-package-dir; or echo "." )
 end
