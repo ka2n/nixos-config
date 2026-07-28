@@ -17,6 +17,10 @@ When a command is not found, try these approaches:
 ### Available Tools
 - `gemini` is google gemini cli. You can use it for web search. Run web search via Task Tool with `gemini -p 'WebSearch: ...'`.
 - When you create git worktree, use `git wt`. How to use: `git-wt --help`
+  - `git wt` auto-trusts mise config via git-wt-hook. Worktrees created **without** it
+    (EnterWorktree / subagent isolation / plain `git worktree add`) are left untrusted,
+    so mise-based commands and lefthook hooks fail with `mise ERROR error parsing config file`.
+    Run `mise trust` in the worktree (and nested mise.toml if any) before working
 - Use Codex for analysis when bug fixes fail 3+ times
 - Consult Codex for architecture design discussions
 - Request Codex for code review large changes
