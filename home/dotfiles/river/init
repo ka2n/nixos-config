@@ -208,7 +208,7 @@ riverctl map normal $mod Z zoom
 ###################
 
 riverctl map normal $mod+Shift W spawn "$browser"
-riverctl map normal $mod+Shift O spawn "obsidian"
+riverctl map normal $mod+Shift O spawn "obsidian-gui"
 
 # Screenshot
 riverctl map normal None Print spawn 'grim -g "$(slurp)" ~/Desktop/$(date +%Y%m%d%H%M%S).png && thunar ~/Desktop/'

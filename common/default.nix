@@ -308,7 +308,16 @@ in {
     slack
 
     # Note-taking
-    pkgs-unstable.obsidian
+    # GUI wrapper is renamed to obsidian-gui so the bundled official CLI can
+    # own the `obsidian` name, as upstream docs/skills assume `obsidian <cmd>`
+    (pkgs-unstable.obsidian.overrideAttrs (old: {
+      postInstall = (old.postInstall or "") + ''
+        mv $out/bin/obsidian $out/bin/obsidian-gui
+        ln -s obsidian-cli $out/bin/obsidian
+        substituteInPlace $out/share/applications/obsidian.desktop \
+          --replace-fail "Exec=obsidian %u" "Exec=$out/bin/obsidian-gui %u"
+      '';
+    }))
 
     # Office
     libreoffice
