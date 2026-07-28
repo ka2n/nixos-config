@@ -52,13 +52,21 @@ SEVEN_DAY_RESET=$(echo "$INPUT" | jq -r '.rate_limits.seven_day.resets_at // emp
 format_reset() {
   local ts=$1
   if [ -z "$ts" ] || [ "$ts" = "null" ] || [ "$ts" = "0" ]; then return; fi
+  # resets_at is an ISO 8601 string in current Claude Code; older versions sent epoch seconds
+  case $ts in
+    ''|*[!0-9]*) ;;
+    *) ts="@$ts" ;;
+  esac
+  # NOTE: no TZ= override — TZDIR is often unset in the statusline shell on
+  # NixOS (zoneinfo lives in /etc/zoneinfo), so TZ=Asia/Tokyo silently falls
+  # back to UTC. System localtime is already JST.
   local today reset_date
-  today=$(TZ=Asia/Tokyo date +%Y-%m-%d)
-  reset_date=$(TZ=Asia/Tokyo date -d "@$ts" +%Y-%m-%d 2>/dev/null || return)
+  today=$(date +%Y-%m-%d)
+  reset_date=$(date -d "$ts" +%Y-%m-%d 2>/dev/null) || return 0
   if [ "$today" = "$reset_date" ]; then
-    TZ=Asia/Tokyo date -d "@$ts" "+%-l%P" 2>/dev/null
+    date -d "$ts" "+%-l%P" 2>/dev/null
   else
-    TZ=Asia/Tokyo date -d "@$ts" "+%-m/%-d %-l%P" 2>/dev/null
+    date -d "$ts" "+%-m/%-d %-l%P" 2>/dev/null
   fi
 }
 
