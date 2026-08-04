@@ -16,15 +16,16 @@
       url = "github:NitorCreations/nix-mdatp";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Pinned to 3.1.9 — fixes the himmelblau-idm/himmelblau#1206 resume/boot
-    # deadlock at its root (resolver now releases the DB lock before the
-    # offline-auth fallback), which let upstream revert the NetworkManager
-    # dispatcher workaround (that script is now deleted; see modules/himmelblau).
+    # Pinned to 3.1.10 — carries the #1206 resume/boot deadlock root fix from
+    # 3.1.9 (resolver releases the DB lock before the offline-auth fallback),
+    # which let upstream revert the NetworkManager dispatcher workaround (that
+    # script is now deleted; see modules/himmelblau). 3.1.10 adds an NSS shadow
+    # fix so GDM stops hiding Himmelblau users as "locked".
     # Also carries the #1344 NSS rate-limit fix (local-only names skip the Entra
     # GetCredentialType probe), on top of the PCR7-free HSM PIN sealing (Secure
     # Boot cert update safe) and automatic MFA fallback.
     # Don't follow nixpkgs to use Cachix cache (built against nixpkgs-unstable).
-    himmelblau.url = "github:himmelblau-idm/himmelblau/3.1.9";
+    himmelblau.url = "github:himmelblau-idm/himmelblau/3.1.10";
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
