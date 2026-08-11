@@ -13,7 +13,7 @@
 # Latest version:  curl -fsSL https://cdn.getmoshi.app/hook/latest/version.txt
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "moshi-hook";
-  version = "0.2.73";
+  version = "0.2.80";
 
   src =
     let
@@ -25,10 +25,10 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       }.${stdenvNoCC.hostPlatform.system}
         or (throw "moshi-hook: unsupported system ${stdenvNoCC.hostPlatform.system}");
       hash = {
-        x86_64-linux = "sha256-oeau2bA5dme1EGAqJ2xSkBbPSTpvhHqkfDdl5afkMtQ=";
-        aarch64-linux = "sha256-L0k+kjBXpM1NhdNhj7YTCdDUm91VCsKmg4GTQx6wulk=";
-        x86_64-darwin = "sha256-EYfeUyXFnnQ5cb+inEG3WpBxVYN/21xANZylGsoSkIE=";
-        aarch64-darwin = "sha256-O4M0WLXKjCYZ8Cdtvprxx77sQDYqcEMD3iR4JFHxDYY=";
+        x86_64-linux = "sha256-eeyDmYKT1G5cuFIvB3FOEKBrMeK9VhMc34RtITVL8aE=";
+        aarch64-linux = "sha256-VD/HXMC9HMT02LqTkxD6Y9vRSUhD1t+9h1CmqvNMFw4=";
+        x86_64-darwin = "sha256-g8YRmGBhEOGvsWxl1YT3D4GgJA2tdBzp4QG7T3TOjbQ=";
+        aarch64-darwin = "sha256-QaBGs/1omyrpvHaXsDonRKre98XBP7XEsEdiZihBPd8=";
       }.${stdenvNoCC.hostPlatform.system};
     in
     fetchurl {
