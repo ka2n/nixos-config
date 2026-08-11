@@ -1,0 +1,22 @@
+onboarding = false
+[ui.toast]
+delivery = "terminal"
+
+[ui]
+show_agent_labels_on_pane_borders = true
+
+agent_panel_sort = "spaces"
+[theme]
+name = "tokyo-night"
+auto_switch = false
+
+[experimental]
+pane_history = false
+
+[terminal]
+default_shell = "/home/katsuma/.nix-profile/bin/fish"
+
+[keys]
+prefix = "ctrl+t"
+next_agent = "alt+j"
+previous_agent = "alt+k"

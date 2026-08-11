@@ -284,6 +284,21 @@ in {
     executable = true;
   };
 
+  # herdr's config.toml is written by its Settings TUI, so it stays
+  # unmanaged. The Nix-managed default sits alongside for diffing
+  # (diff ~/.config/herdr/config{,.default}.toml) and seeds config.toml
+  # on first activation only.
+  xdg.configFile."herdr/config.default.toml".source =
+    ./dotfiles/herdr/config.default.toml;
+  home.activation.herdrConfigSeed = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    herdr_config="$HOME/.config/herdr/config.toml"
+    if [ ! -e "$herdr_config" ]; then
+      rm -f "$herdr_config" # clear a dangling symlink if present
+      mkdir -p "$HOME/.config/herdr"
+      cp ${./dotfiles/herdr/config.default.toml} "$herdr_config"
+      chmod u+w "$herdr_config"
+    fi
+  '';
 
   # Docker credential helpers configuration
   xdg.configFile."docker/config.json".text = builtins.toJSON {
