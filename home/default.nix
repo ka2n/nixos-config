@@ -272,6 +272,19 @@ in {
       google_chrome = lib.getExe pkgs.google-chrome;
     };
 
+  # herdr plugins are execute-only for herdr, so a read-only store symlink
+  # is fine; `herdr plugin link <dir>` is a one-time manual step per
+  # machine (registry lives in herdr-owned plugins.json).
+  xdg.configFile."herdr/plugins/pane-petname/herdr-plugin.toml".source =
+    ./dotfiles/herdr/plugins/pane-petname/herdr-plugin.toml;
+  xdg.configFile."herdr/plugins/pane-petname/rename-pane.sh" = {
+    source = pkgs.replaceVars ./dotfiles/herdr/plugins/pane-petname/rename-pane.sh {
+      jq = lib.getExe pkgs.jq;
+    };
+    executable = true;
+  };
+
+
   # Docker credential helpers configuration
   xdg.configFile."docker/config.json".text = builtins.toJSON {
     credsStore = "secretservice";
