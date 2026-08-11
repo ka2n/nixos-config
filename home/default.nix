@@ -283,6 +283,7 @@ in {
   xdg.configFile."herdr/plugins/pane-petname/rename-pane.sh" = {
     source = pkgs.replaceVars ./dotfiles/herdr/plugins/pane-petname/rename-pane.sh {
       jq = lib.getExe pkgs.jq;
+      grep = "${pkgs.gnugrep}/bin/grep";
     };
     executable = true;
   };
