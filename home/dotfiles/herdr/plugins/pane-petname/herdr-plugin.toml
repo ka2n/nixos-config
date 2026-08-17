@@ -7,4 +7,4 @@ platforms = ["linux"]
 
 [[events]]
 on = "pane.created"
-command = ["bash", "rename-pane.sh"]
+command = ["bash", "-c", "exec bash \"$HERDR_PLUGIN_ROOT/rename-pane.sh\""]
