@@ -27,10 +27,47 @@ let
     + "|[A-Za-z0-9][A-Za-z0-9._-]*#[0-9]+" + "|#[0-9]+";
   footGhRegex =
     "([^A-Za-z0-9_./#-](${footGhContent})|^(${footGhContent}))([^A-Za-z0-9_-]|$)";
+  # git-wt lifecycle hooks (wt.hook / wt.deletehook in ~/.gitconfig)
+  git-wt-hook = pkgs.writeShellScriptBin "git-wt-hook"
+    (builtins.replaceStrings [ "@direnv@" "@mise@" ] [
+      (lib.getExe pkgs.direnv)
+      (lib.getExe pkgs.mise)
+    ] (builtins.readFile ./dotfiles/local/bin/git-wt-hook.sh));
+  docker-compose-gc = pkgs.writeShellScriptBin "docker-compose-gc"
+    (builtins.replaceStrings [ "@docker@" "@jq@" ] [
+      (lib.getExe' pkgs.docker "docker")
+      (lib.getExe pkgs.jq)
+    ] (builtins.readFile ./dotfiles/local/bin/docker-compose-gc.sh));
+  git-wt-deletehook = pkgs.writeShellScriptBin "git-wt-deletehook"
+    (builtins.replaceStrings [ "@mise@" "@jq@" "@docker_compose_gc@" ] [
+      (lib.getExe pkgs.mise)
+      (lib.getExe pkgs.jq)
+      (lib.getExe docker-compose-gc)
+    ] (builtins.readFile ./dotfiles/local/bin/git-wt-deletehook.sh));
   claude-notify-waiting = pkgs.writeShellScriptBin "claude-notify-waiting"
     (builtins.readFile ./dotfiles/local/bin/claude-notify-waiting.sh);
   claude-notify-complete = pkgs.writeShellScriptBin "claude-notify-complete"
     (builtins.readFile ./dotfiles/local/bin/claude-notify-complete.sh);
+  # Claude Code WorktreeCreate/WorktreeRemove hooks -> git-wt
+  claude-worktree-hook = pkgs.writeShellScriptBin "claude-worktree-hook"
+    (builtins.replaceStrings [
+      "@cat@"
+      "@jq@"
+      "@git@"
+      "@git_wt@"
+      "@head@"
+      "@tail@"
+      "@hook_path@"
+    ] [
+      (lib.getExe' pkgs.coreutils "cat")
+      (lib.getExe pkgs.jq)
+      (lib.getExe pkgs.git)
+      (lib.getExe pkgs.git-wt)
+      (lib.getExe' pkgs.coreutils "head")
+      (lib.getExe' pkgs.coreutils "tail")
+      # git-wt resolves git and its wt.hook / wt.deletehook commands via PATH
+      "${git-wt-hook}/bin:${git-wt-deletehook}/bin:${pkgs.git}/bin:${pkgs.coreutils}/bin"
+    ] (builtins.readFile ./dotfiles/local/bin/claude-worktree-hook.sh));
   zenBrowser = pkgs.wrapFirefox
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped {
       pname = "zen-browser";
@@ -91,23 +128,9 @@ in {
     # Docker
     pkgs.docker-credential-helpers
 
-    (pkgs.writeShellScriptBin "git-wt-hook"
-      (builtins.replaceStrings [ "@direnv@" "@mise@" ] [
-        (lib.getExe pkgs.direnv)
-        (lib.getExe pkgs.mise)
-      ] (builtins.readFile ./dotfiles/local/bin/git-wt-hook.sh)))
-
-    (pkgs.writeShellScriptBin "git-wt-deletehook"
-      (builtins.replaceStrings [ "@mise@" "@jq@" ] [
-        (lib.getExe pkgs.mise)
-        (lib.getExe pkgs.jq)
-      ] (builtins.readFile ./dotfiles/local/bin/git-wt-deletehook.sh)))
-
-    (pkgs.writeShellScriptBin "docker-compose-gc"
-      (builtins.replaceStrings [ "@docker@" "@jq@" ] [
-        (lib.getExe' pkgs.docker "docker")
-        (lib.getExe pkgs.jq)
-      ] (builtins.readFile ./dotfiles/local/bin/docker-compose-gc.sh)))
+    git-wt-hook
+    git-wt-deletehook
+    docker-compose-gc
 
     # Local bin scripts
     (pkgs.writeShellScriptBin "find-parent-package-dir"
@@ -138,6 +161,7 @@ in {
 
     claude-notify-waiting
     claude-notify-complete
+    claude-worktree-hook
 
     (pkgs.writeShellScriptBin "claude-statusline"
       (builtins.readFile ./dotfiles/local/bin/claude-statusline.sh))
@@ -815,6 +839,20 @@ in {
         hooks = [{
           type = "command";
           command = lib.getExe claude-notify-waiting;
+        }];
+      }];
+      # Always create/remove worktrees via git-wt (wt.basedir layout,
+      # mise trust + direnv on create, docker-compose gc on remove).
+      WorktreeCreate = [{
+        hooks = [{
+          type = "command";
+          command = lib.getExe claude-worktree-hook;
+        }];
+      }];
+      WorktreeRemove = [{
+        hooks = [{
+          type = "command";
+          command = lib.getExe claude-worktree-hook;
         }];
       }];
     };

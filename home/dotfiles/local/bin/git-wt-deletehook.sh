@@ -3,10 +3,11 @@
 # Command paths (replaced by Nix)
 mise=@mise@
 jq=@jq@
+docker_compose_gc=@docker_compose_gc@
 
 set -euo pipefail
 
-docker-compose-gc
+$docker_compose_gc
 
 # Remove this worktree from mise trusted_config_paths (added by git-wt-hook).
 # mise has no per-element remove, so read → filter → unset → re-add.
