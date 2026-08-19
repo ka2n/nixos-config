@@ -16,16 +16,27 @@
       url = "github:NitorCreations/nix-mdatp";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Pinned to 3.1.10 — carries the #1206 resume/boot deadlock root fix from
+    # Pinned to 3.1.12 — carries the #1206 resume/boot deadlock root fix from
     # 3.1.9 (resolver releases the DB lock before the offline-auth fallback),
     # which let upstream revert the NetworkManager dispatcher workaround (that
-    # script is now deleted; see modules/himmelblau). 3.1.10 adds an NSS shadow
-    # fix so GDM stops hiding Himmelblau users as "locked".
-    # Also carries the #1344 NSS rate-limit fix (local-only names skip the Entra
-    # GetCredentialType probe), on top of the PCR7-free HSM PIN sealing (Secure
-    # Boot cert update safe) and automatic MFA fallback.
+    # script is now deleted; see modules/himmelblau), the 3.1.10 NSS shadow fix
+    # (GDM stops hiding Himmelblau users as "locked"), the #1344 NSS rate-limit
+    # fix (local-only names skip the Entra GetCredentialType probe), PCR7-free
+    # HSM PIN sealing (Secure Boot cert update safe) and automatic MFA fallback.
+    # 3.1.11 is a security release: PamChangeAuthToken now binds PIN changes to
+    # the calling peer's UID (GHSA-6gp8-pp9v-gx45), subuid/subgid names are
+    # sanitized (GHSA-x259-23ph-65m5), RFC2307 uid/gidNumber inside systemd's
+    # DynamicUser range 61184-65519 are rejected (ours is 1001, unaffected),
+    # the Office 365 URL handler only trusts real M365 origins
+    # (GHSA-4f5j-9xgm-8pvr), and pam_allow_groups denials are terminal in the
+    # PAM account phase (we don't set pam_allow_groups).
+    # 3.1.12 keeps a failed IdP password change re-promptable instead of
+    # discarding the old password, returns `ok` (not done) from the PAM account
+    # check so local modules stay reachable, skips Entra-only post-auth work
+    # (Kerberos cache, profile photo) under OIDC, and adds CacheDirectory to the
+    # himmelblaud-tasks sandbox — which retires our ReadWritePaths mkForce.
     # Don't follow nixpkgs to use Cachix cache (built against nixpkgs-unstable).
-    himmelblau.url = "github:himmelblau-idm/himmelblau/3.1.10";
+    himmelblau.url = "github:himmelblau-idm/himmelblau/3.1.12";
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";

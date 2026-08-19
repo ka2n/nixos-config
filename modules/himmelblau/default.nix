@@ -172,6 +172,21 @@ in {
       version = upstreamVersion;
       name = "${old.pname}-${upstreamVersion}";
       __intentionallyOverridingVersion = true;
+      # 3.1.11 added src/o365/tests/url_handler.rs (GHSA-4f5j-9xgm-8pvr), which
+      # spawns src/o365/src/o365-url-handler.sh plus stub scripts the test
+      # itself writes. All of them carry a `#!/usr/bin/env bash` shebang, which
+      # does not resolve inside the Nix build sandbox (no /usr/bin/env), so the
+      # three tests fail the checkPhase with ENOENT / "bad interpreter".
+      # Rewrite the shebangs to the store bash; patchShebangs would fix the
+      # installed scripts, but it only runs at fixup, i.e. after the tests.
+      postPatch = (old.postPatch or "") + ''
+        substituteInPlace \
+            src/o365/src/o365-url-handler.sh \
+            src/o365/src/o365-multi.sh \
+            src/o365/src/o365.sh \
+            src/o365/tests/url_handler.rs \
+          --replace-fail "#!/usr/bin/env bash" "#!${pkgs.bash}/bin/bash"
+      '';
     }));
 
     # TPM2 support for HSM binding (abrmd NOT needed - direct /dev/tpmrm0 access)
@@ -274,10 +289,10 @@ in {
       # IPv4 + Unix only — himmelblaud_tasks fails on IPv6 with
       # "federation provider not set" errors before falling back to IPv4.
       RestrictAddressFamilies = lib.mkForce "AF_INET AF_UNIX";
-      # Upstream omits /var/cache/himmelblau-policies, which is required
-      # whenever apply_policy = true.
-      ReadWritePaths = lib.mkForce
-        "/home /var/run/himmelblaud /tmp /etc/krb5.conf.d /etc /var/lib /var/cache/nss-himmelblau /var/cache/himmelblau-policies";
+      # NOTE: The ReadWritePaths mkForce that added /var/cache/himmelblau-policies
+      # (required whenever apply_policy = true) was dropped in the 3.1.12 bump —
+      # upstream now sets CacheDirectory = "himmelblau-policies" and lists the
+      # same path in ReadWritePaths itself.
       # Upstream nixosModule sets no CapabilityBoundingSet, whereas the
       # cargo-deb/rpm generator drops these caps. Apply the same set so
       # tasks can chown user dirs and switch UIDs for home creation.
