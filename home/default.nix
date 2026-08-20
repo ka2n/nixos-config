@@ -68,6 +68,17 @@ let
       # git-wt resolves git and its wt.hook / wt.deletehook commands via PATH
       "${git-wt-hook}/bin:${git-wt-deletehook}/bin:${pkgs.git}/bin:${pkgs.coreutils}/bin"
     ] (builtins.readFile ./dotfiles/local/bin/claude-worktree-hook.sh));
+  # ntn wrappers pinned to a Notion workspace. IDs come from
+  # ~/.config/notion/workspaces.json (both workspaces are already logged in).
+  ntnWorkspaces = {
+    ntn-mo = "26362da9-b5d4-4b76-84f2-aec290b3a933"; # Monicle
+    ntn-mr = "1ef75278-f025-8107-ba77-0003c5068ae4"; # Monicle Research
+  };
+  ntnWorkspaceBins = lib.mapAttrsToList (name: id:
+    pkgs.writeShellScriptBin name ''
+      export NOTION_WORKSPACE_ID=${id}
+      exec ${lib.getExe pkgs.ntn} "$@"
+    '') ntnWorkspaces;
   zenBrowser = pkgs.wrapFirefox
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped {
       pname = "zen-browser";
@@ -243,7 +254,7 @@ in {
       ] (builtins.readFile ./dotfiles/local/bin/tf-pr.sh)))
 
     pkgs.claude-desktop
-  ];
+  ] ++ ntnWorkspaceBins;
 
   home.sessionPath = [
     "$HOME/go/bin"
