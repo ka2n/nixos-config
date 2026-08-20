@@ -70,6 +70,8 @@ let
     ] (builtins.readFile ./dotfiles/local/bin/claude-worktree-hook.sh));
   # ntn wrappers pinned to a Notion workspace. IDs come from
   # ~/.config/notion/workspaces.json (both workspaces are already logged in).
+  # Resolves `ntn` via PATH on purpose: ~/.local/bin/ntn (self-updating install)
+  # wins over pkgs.ntn, and that is the one we want to run.
   ntnWorkspaces = {
     ntn-mo = "26362da9-b5d4-4b76-84f2-aec290b3a933"; # Monicle
     ntn-mr = "1ef75278-f025-8107-ba77-0003c5068ae4"; # Monicle Research
@@ -77,7 +79,7 @@ let
   ntnWorkspaceBins = lib.mapAttrsToList (name: id:
     pkgs.writeShellScriptBin name ''
       export NOTION_WORKSPACE_ID=${id}
-      exec ${lib.getExe pkgs.ntn} "$@"
+      exec ntn "$@"
     '') ntnWorkspaces;
   zenBrowser = pkgs.wrapFirefox
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped {
