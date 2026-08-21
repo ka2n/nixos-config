@@ -236,6 +236,13 @@ in {
     (pkgs.writeShellScriptBin "screenrec-status"
       (builtins.readFile ./dotfiles/local/bin/screenrec-status.sh))
 
+    (pkgs.writeShellScriptBin "satty-clipboard" (builtins.readFile
+      (pkgs.replaceVars ./dotfiles/local/bin/satty-clipboard.sh {
+        jq = lib.getExe pkgs.jq;
+        satty = lib.getExe pkgs.satty;
+        notify_send = lib.getExe' pkgs.libnotify "notify-send";
+      })))
+
     (pkgs.writeShellScriptBin "ralph"
       (builtins.readFile ./dotfiles/local/bin/ralph.sh))
 
@@ -293,6 +300,15 @@ in {
     pkgs.replaceVars ./dotfiles/tmux/tmux.conf {
       fish_path = lib.getExe pkgs.fish;
     };
+
+  # Desktop entries (rofi drun)
+  xdg.desktopEntries.satty-clipboard = {
+    name = "Satty (clipboard image)";
+    comment = "Annotate the most recent image from clipboard history";
+    exec = "satty-clipboard";
+    terminal = false;
+    categories = [ "Graphics" "Utility" ];
+  };
 
   # Config files
   xdg.configFile."inputactions/config.yaml".source =
