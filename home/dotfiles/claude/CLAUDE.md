@@ -15,7 +15,6 @@ When a command is not found, try these approaches:
 - e.g. gcloud command: `nix-shell -p google-cloud-sdk`
 
 ### Available Tools
-- `gemini` is google gemini cli. You can use it for web search. Run web search via Task Tool with `gemini -p 'WebSearch: ...'`.
 - When you create git worktree, use `git wt`. How to use: `git-wt --help`
   - `git wt` auto-trusts mise config via git-wt-hook.
   - EnterWorktree / subagent `isolation: worktree` also go through `git wt` via the
@@ -41,8 +40,20 @@ When a command is not found, try these approaches:
 
 ## Agent launch rules
 
+- Delegate implementation (code editing) to subagents (e.g. `Agent(subagent_type: general-purpose, model: 'sonnet'|'opus')`)
+  with concrete instructions: file paths, changes, verification commands, and any env caveats.
+  The main session focuses on research, planning, judging review results, and reporting.
+- Delegate commit / push / PR creation to a subagent as well (pre-push hooks are slow;
+  keep them out of the main context). Spell out the commit message, PR title/body,
+  files to stage, and constraints in the prompt. Multiple repos → parallel subagents.
 - After completing large code changes (3 or more files, or 100+ lines), you must launch the code-reviewer agent.
 - When changes span multiple files, launch code-reviewer agents in parallel.
+
+## Git
+
+- `git commit` / `git push` may print `.../mise/installs/ruby/...: symbol lookup error: ... GLIBC_PRIVATE`
+  from git hooks. This is harmless noise (mise ruby × nix glibc mismatch); the operation itself succeeds.
+  Judge success by exit code / `git log`, never retry because of this message.
 
 ## GitHub and CI
 
