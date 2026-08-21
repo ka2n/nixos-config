@@ -361,7 +361,7 @@ in {
     rofi
     grim
     slurp
-    swappy # Screenshot annotation tool
+    satty # Screenshot annotation tool
     mako # notification daemon (omarchy style)
     libnotify
     darkman
