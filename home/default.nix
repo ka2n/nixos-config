@@ -132,9 +132,6 @@ in {
     # GitHub
     llm-agents.copilot-cli
 
-    # ctx: context manager for coding agents (https://github.com/ctxrs/ctx)
-    llm-agents.ctx
-
     # Moshi: host-side daemon bridging AI coding agents to the Moshi mobile app
     pkgs.moshi-hook
 
