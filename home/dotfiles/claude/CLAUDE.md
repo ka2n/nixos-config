@@ -16,6 +16,8 @@ When a command is not found, try these approaches:
 
 ### Available Tools
 - When you create git worktree, use `git wt`. How to use: `git-wt --help`
+  - Add: `git wt <branch>` (create worktree/branch if needed), `git wt <branch> origin/main` (from start-point)
+  - Remove: `git wt -d <branch>` (safe, only if merged), `git wt -D <branch>` (force)
   - `git wt` auto-trusts mise config via git-wt-hook.
   - EnterWorktree / subagent `isolation: worktree` also go through `git wt` via the
     WorktreeCreate/WorktreeRemove hooks, so they are trusted too.
@@ -43,6 +45,10 @@ When a command is not found, try these approaches:
 - Delegate implementation (code editing) to subagents (e.g. `Agent(subagent_type: general-purpose, model: 'sonnet'|'opus')`)
   with concrete instructions: file paths, changes, verification commands, and any env caveats.
   The main session focuses on research, planning, judging review results, and reporting.
+- When a subagent needs an isolated working copy (parallel edits, risky changes, or
+  work that shouldn't touch the current tree), launch it with `isolation: worktree`
+  from the start — don't create a worktree manually first. It goes through `git wt`
+  via hooks, so mise config is trusted automatically.
 - Delegate commit / push / PR creation to a subagent as well (pre-push hooks are slow;
   keep them out of the main context). Spell out the commit message, PR title/body,
   files to stage, and constraints in the prompt. Multiple repos → parallel subagents.
