@@ -304,10 +304,12 @@ in {
   # Desktop entries (rofi drun)
   xdg.desktopEntries.satty-clipboard = {
     name = "Satty (clipboard image)";
-    comment = "Annotate the most recent image from clipboard history";
+    comment =
+      "Annotate a screenshot or captured image from clipboard history";
     exec = "satty-clipboard";
     terminal = false;
     categories = [ "Graphics" "Utility" ];
+    settings.Keywords = "screenshot;annotate;annotation;capture;markup;image;";
   };
 
   # Config files
