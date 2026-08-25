@@ -18,12 +18,13 @@ When a command is not found, try these approaches:
 - When you create git worktree, use `git wt`. How to use: `git-wt --help`
   - Add: `git wt <branch>` (create worktree/branch if needed), `git wt <branch> origin/main` (from start-point)
   - Remove: `git wt -d <branch>` (safe, only if merged), `git wt -D <branch>` (force)
-  - `git wt` auto-trusts mise config via git-wt-hook.
+  - Recent mise versions share trust across linked git worktrees. Trust the
+    equivalent config in the repository's main checkout with `mise trust`; the
+    worktree then inherits that trust automatically.
   - EnterWorktree / subagent `isolation: worktree` also go through `git wt` via the
-    WorktreeCreate/WorktreeRemove hooks, so they are trusted too.
-  - Only a plain `git worktree add` is left untrusted, and mise-based commands and
-    lefthook hooks then fail with `mise ERROR error parsing config file`. Run
-    `mise trust` in the worktree (and nested mise.toml if any) before working
+    WorktreeCreate/WorktreeRemove hooks, which additionally run direnv and cleanup.
+  - In paranoid mode, worktree trust sharing is disabled, so trust each config
+    explicitly in the worktree.
 - Use Codex for analysis when bug fixes fail 3+ times
 - Consult Codex for architecture design discussions
 - Request Codex for code review large changes
@@ -48,7 +49,8 @@ When a command is not found, try these approaches:
 - When a subagent needs an isolated working copy (parallel edits, risky changes, or
   work that shouldn't touch the current tree), launch it with `isolation: worktree`
   from the start — don't create a worktree manually first. It goes through `git wt`
-  via hooks, so mise config is trusted automatically.
+  via hooks, so the standard worktree layout and lifecycle hooks are applied
+  automatically.
 - Delegate commit / push / PR creation to a subagent as well (pre-push hooks are slow;
   keep them out of the main context). Spell out the commit message, PR title/body,
   files to stage, and constraints in the prompt. Multiple repos → parallel subagents.
