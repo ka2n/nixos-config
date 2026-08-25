@@ -797,7 +797,7 @@ in {
     mkdir -p "$skills_dir"
 
     # Managed skills: remove and re-copy each individually to preserve unmanaged skills
-    managed_skills="save-url-to-doc code-reviewer simplify frontend-design commit commit-push commit-push-pr pr-comments organize-commits opsx-run rebase-main take-screenshot session-review-report"
+    managed_skills="save-url-to-doc code-reviewer simplify frontend-design commit commit-push commit-push-pr pr-comments organize-commits opsx-run rebase-main take-screenshot session-review-report refine-test"
     for s in $managed_skills; do
       rm -rf "$skills_dir/$s"
     done
@@ -824,6 +824,7 @@ in {
       ./dotfiles/agents/skills/session-review-report
     } "$skills_dir/session-review-report"
     cp -rL ${./dotfiles/agents/skills/simplify} "$skills_dir/simplify"
+    cp -rL ${./dotfiles/agents/skills/refine-test} "$skills_dir/refine-test"
 
     # Codex-only skills (Claude already has official equivalents)
     cp -rL ${
@@ -838,7 +839,7 @@ in {
     # Claude Code: symlink ~/.claude/skills/<name> -> ~/.agents/skills/<name>
     claude_skills_dir="$HOME/.claude/skills"
     mkdir -p "$claude_skills_dir"
-    claude_managed_skills="save-url-to-doc commit commit-push commit-push-pr rebase-main organize-commits opsx-run pr-comments take-screenshot session-review-report simplify"
+    claude_managed_skills="save-url-to-doc commit commit-push commit-push-pr rebase-main organize-commits opsx-run pr-comments take-screenshot session-review-report simplify refine-test"
     for s in $claude_managed_skills; do
       rm -rf "$claude_skills_dir/$s"
       ln -s "$skills_dir/$s" "$claude_skills_dir/$s"
