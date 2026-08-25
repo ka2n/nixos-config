@@ -29,9 +29,8 @@ let
     "([^A-Za-z0-9_./#-](${footGhContent})|^(${footGhContent}))([^A-Za-z0-9_-]|$)";
   # git-wt lifecycle hooks (wt.hook / wt.deletehook in ~/.gitconfig)
   git-wt-hook = pkgs.writeShellScriptBin "git-wt-hook"
-    (builtins.replaceStrings [ "@direnv@" "@mise@" ] [
+    (builtins.replaceStrings [ "@direnv@" ] [
       (lib.getExe pkgs.direnv)
-      (lib.getExe pkgs.mise)
     ] (builtins.readFile ./dotfiles/local/bin/git-wt-hook.sh));
   docker-compose-gc = pkgs.writeShellScriptBin "docker-compose-gc"
     (builtins.replaceStrings [ "@docker@" "@jq@" ] [
@@ -39,9 +38,7 @@ let
       (lib.getExe pkgs.jq)
     ] (builtins.readFile ./dotfiles/local/bin/docker-compose-gc.sh));
   git-wt-deletehook = pkgs.writeShellScriptBin "git-wt-deletehook"
-    (builtins.replaceStrings [ "@mise@" "@jq@" "@docker_compose_gc@" ] [
-      (lib.getExe pkgs.mise)
-      (lib.getExe pkgs.jq)
+    (builtins.replaceStrings [ "@docker_compose_gc@" ] [
       (lib.getExe docker-compose-gc)
     ] (builtins.readFile ./dotfiles/local/bin/git-wt-deletehook.sh));
   claude-notify-waiting = pkgs.writeShellScriptBin "claude-notify-waiting"
@@ -874,7 +871,7 @@ in {
         }];
       }];
       # Always create/remove worktrees via git-wt (wt.basedir layout,
-      # mise trust + direnv on create, docker-compose gc on remove).
+      # direnv on create, docker-compose gc on remove).
       WorktreeCreate = [{
         hooks = [{
           type = "command";

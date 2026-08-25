@@ -1,6 +1,6 @@
 # claude-worktree-hook - Route Claude Code's WorktreeCreate/WorktreeRemove
 # hooks through git-wt, so agent isolation / EnterWorktree / --worktree all
-# get the same layout (wt.basedir) and hooks (mise trust, direnv, docker gc)
+# get the same layout (wt.basedir) and hooks (direnv, docker gc)
 # as worktrees created by hand.
 #
 # WorktreeCreate: stdin {"name": "<slug>", "cwd": "<repo>"} -> stdout: abs path
