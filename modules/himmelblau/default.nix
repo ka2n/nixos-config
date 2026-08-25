@@ -18,6 +18,11 @@ let
     (builtins.fromTOML
       (builtins.readFile "${inputs.himmelblau}/Cargo.toml")).workspace.package.version;
 
+  # linux-entra-sso Chrome extension (Entra ID SSO via the himmelblau broker).
+  # Must match allowed_origins in the native-messaging-host manifest that
+  # upstream installs at /etc/opt/chrome/native-messaging-hosts/linux_entra_sso.json.
+  ssoExtensionId = "jlnfnnolkbjieggibinobhkjdfbpcohn";
+
   # HSM PIN initialization — mirrors upstream
   # src/daemon/scripts/himmelblau-init-hsm-pin (3.1.6) which:
   #   - uses /var/lib/private/himmelblaud/hsm-pin-nopcr.enc (no PCR binding)
@@ -221,11 +226,28 @@ in {
       };
     in lib.genAttrs pamServiceNames passwordRule;
 
-    # User map file generation
-    environment.etc = lib.mkIf (cfg.userMap != { }) {
-      "himmelblau/user-map".text = lib.concatStringsSep "\n"
-        (lib.mapAttrsToList (local: upn: "${local}:${upn}") cfg.userMap);
-    };
+    environment.etc = lib.mkMerge [
+      # User map file generation
+      (lib.mkIf (cfg.userMap != { }) {
+        "himmelblau/user-map".text = lib.concatStringsSep "\n"
+          (lib.mapAttrsToList (local: upn: "${local}:${upn}") cfg.userMap);
+      })
+
+      # Force-install the linux-entra-sso extension in Google Chrome.
+      # Upstream sets programs.chromium.extensions, but every etc entry of the
+      # nixpkgs programs/chromium.nix module is gated on programs.chromium.enable
+      # (off here), so no policy file was ever written and the extension never
+      # appeared. Enabling that module would also write the same policy to
+      # /etc/chromium and /etc/brave; we only want google-chrome-stable, so write
+      # the managed policy directly. Managed policies are per-browser, not
+      # per-profile, so this covers every profile and every --user-data-dir
+      # (including chrome-debug's ~/chrome-agent-browser).
+      {
+        "opt/chrome/policies/managed/himmelblau.json".text = builtins.toJSON {
+          ExtensionInstallForcelist = [ ssoExtensionId ];
+        };
+      }
+    ];
 
     # Contribute the himmelblau package as a Native Messaging host source
     # for the system-level zen-browser wrapped by modules/zen-browser. The
