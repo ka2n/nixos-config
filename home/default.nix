@@ -517,6 +517,13 @@ in {
       ];
     };
   };
+  # hypridle stops (e.g. during a home-manager switch) can land while the
+  # screen-off listener has already run `wlopm --off '*'`, in which case its
+  # on-resume never fires and every output stays powered down. Always restore
+  # the outputs when the unit goes away.
+  systemd.user.services.hypridle.Service.ExecStopPost =
+    "${pkgs.wlopm}/bin/wlopm --on '*'";
+
   xdg.configFile."alacritty" = {
     source = ./dotfiles/alacritty;
     recursive = true;
