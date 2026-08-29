@@ -295,7 +295,9 @@ in {
 
   xdg.configFile."tmux/tmux.conf".source =
     pkgs.replaceVars ./dotfiles/tmux/tmux.conf {
-      fish_path = lib.getExe pkgs.fish;
+      # fish is installed at system level so this path is independent of
+      # Home Manager's useUserPackages setting.
+      fish_path = "/run/current-system/sw/bin/fish";
     };
 
   # Desktop entries (rofi drun)
@@ -353,6 +355,12 @@ in {
       mkdir -p "$HOME/.config/herdr"
       cp ${./dotfiles/herdr/config.default.toml} "$herdr_config"
       chmod u+w "$herdr_config"
+    elif ${pkgs.gnugrep}/bin/grep -qF 'default_shell = "/home/katsuma/.nix-profile/bin/fish"' "$herdr_config"; then
+      # Migrate the old Home Manager profile path without touching any other
+      # user-managed herdr settings.
+      ${pkgs.gnused}/bin/sed -i \
+        's#^default_shell = "/home/katsuma/\\.nix-profile/bin/fish"$#default_shell = "/run/current-system/sw/bin/fish"#' \
+        "$herdr_config"
     fi
   '';
 

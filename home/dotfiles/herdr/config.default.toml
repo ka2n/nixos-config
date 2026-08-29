@@ -14,7 +14,7 @@ auto_switch = false
 pane_history = false
 
 [terminal]
-default_shell = "/home/katsuma/.nix-profile/bin/fish"
+default_shell = "/run/current-system/sw/bin/fish"
 
 [keys]
 prefix = "ctrl+t"

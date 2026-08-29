@@ -247,6 +247,8 @@ in {
     (tmux.override { withSixel = true; })
 
     # Shell enhancements
+    # Keep the executable path stable across Home Manager profile layouts.
+    fish
     starship
     inputs.atuin.packages.x86_64-linux.atuin
 
