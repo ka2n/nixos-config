@@ -364,6 +364,29 @@ in {
     fi
   '';
 
+  # herdr's headless server holds every pane, so it must outlive the
+  # compositor. Launched by hand it lands in foot.service's cgroup, and
+  # foot.service uses the default KillMode=control-group -- so a river
+  # restart tears the foot server down and takes the whole herdr session
+  # with it. Bound to default.target rather than river-session.target for
+  # exactly that reason.
+  #
+  # The binary stays outside Nix (self-update; see NOTE in common/default.nix),
+  # hence the %h path and the guard. `herdr update --handoff` replaces the
+  # running server itself, so don't let systemd race it back up.
+  systemd.user.services.herdr = {
+    Unit = {
+      Description = "herdr headless server";
+      ConditionPathIsExecutable = "%h/.local/bin/herdr";
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "%h/.local/bin/herdr server";
+      Restart = "no";
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+
   # Docker credential helpers configuration
   xdg.configFile."docker/config.json".text = builtins.toJSON {
     credsStore = "secretservice";
