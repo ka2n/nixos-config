@@ -40,8 +40,11 @@ updated_file="$tmp_dir/default.nix"
 cp "$package_file" "$updated_file"
 
 sed -E -i "s/version = \"[0-9]+\.[0-9]+\.[0-9]+\";/version = \"$version\";/" "$updated_file"
+# Anchored on the whole `<system> = { arch = "..."; hash = "` prefix so only the
+# hash is touched -- a bare `<system> = "..."` pattern also matched the arch
+# suffix and rewrote it with the hash, producing 404 URLs.
 for system in "${!architectures[@]}"; do
-  sed -E -i "s|(${system} = \")[^\"]+(\";)|\1${hashes[$system]}\2|" "$updated_file"
+  sed -E -i "s|(${system} = \{ arch = \"[^\"]+\"; hash = \")[^\"]+(\";)|\1${hashes[$system]}\2|" "$updated_file"
 done
 
 mv "$updated_file" "$package_file"

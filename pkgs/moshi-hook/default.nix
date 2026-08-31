@@ -15,25 +15,23 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "moshi-hook";
   version = "0.3.14";
 
+  # One entry per system: the upstream archive's OS_ARCH suffix and its hash.
+  # Kept in a single attrset (not two parallel maps) so scripts/update.sh cannot
+  # rewrite the arch suffix with a hash -- see the sed in that script.
   src =
     let
-      arch = {
-        x86_64-linux = "sha256-kbH3T7+DHSTqvX6S+jpByHNrNc7p0mQ3jZrtK6TeWgI=";
-        aarch64-linux = "sha256-WGL9YrW2SoMMGREGrpVfEo4JklbR/EK3RNzDgFP5pIE=";
-        x86_64-darwin = "sha256-Syh+dWckJCELQRFbB5TzQEBf/I2A85TaaEIDWc8/5+k=";
-        aarch64-darwin = "sha256-mnwYJwbPmxNpg4MGcGsPnd+aH18D/DmzSt2s70yY6ws=";
-      }.${stdenvNoCC.hostPlatform.system}
+      sources = {
+        x86_64-linux = { arch = "Linux_x86_64"; hash = "sha256-kbH3T7+DHSTqvX6S+jpByHNrNc7p0mQ3jZrtK6TeWgI="; };
+        aarch64-linux = { arch = "Linux_arm64"; hash = "sha256-WGL9YrW2SoMMGREGrpVfEo4JklbR/EK3RNzDgFP5pIE="; };
+        x86_64-darwin = { arch = "Darwin_x86_64"; hash = "sha256-Syh+dWckJCELQRFbB5TzQEBf/I2A85TaaEIDWc8/5+k="; };
+        aarch64-darwin = { arch = "Darwin_arm64"; hash = "sha256-mnwYJwbPmxNpg4MGcGsPnd+aH18D/DmzSt2s70yY6ws="; };
+      };
+      source = sources.${stdenvNoCC.hostPlatform.system}
         or (throw "moshi-hook: unsupported system ${stdenvNoCC.hostPlatform.system}");
-      hash = {
-        x86_64-linux = "sha256-kbH3T7+DHSTqvX6S+jpByHNrNc7p0mQ3jZrtK6TeWgI=";
-        aarch64-linux = "sha256-WGL9YrW2SoMMGREGrpVfEo4JklbR/EK3RNzDgFP5pIE=";
-        x86_64-darwin = "sha256-Syh+dWckJCELQRFbB5TzQEBf/I2A85TaaEIDWc8/5+k=";
-        aarch64-darwin = "sha256-mnwYJwbPmxNpg4MGcGsPnd+aH18D/DmzSt2s70yY6ws=";
-      }.${stdenvNoCC.hostPlatform.system};
     in
     fetchurl {
-      url = "https://cdn.getmoshi.app/hook/v${finalAttrs.version}/moshi-hook_${arch}.tar.gz";
-      inherit hash;
+      url = "https://cdn.getmoshi.app/hook/v${finalAttrs.version}/moshi-hook_${source.arch}.tar.gz";
+      inherit (source) hash;
     };
 
   sourceRoot = ".";
