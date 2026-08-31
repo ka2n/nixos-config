@@ -374,17 +374,28 @@ in {
   # The binary stays outside Nix (self-update; see NOTE in common/default.nix),
   # hence the %h path and the guard. `herdr update --handoff` replaces the
   # running server itself, so don't let systemd race it back up.
+  #
+  # Pulled in by river-session.target, not default.target: the server's
+  # environment is what every pane inherits, and WAYLAND_DISPLAY only lands in
+  # the systemd user manager once river's init runs
+  # dbus-update-activation-environment (just before it starts that target).
+  # Started from default.target the server came up first and every pane ended
+  # up without WAYLAND_DISPLAY / DISPLAY -- wl-copy and wl-paste then fail.
+  # WantedBy alone still keeps the decoupling: Wants= propagates start but not
+  # stop, so a river restart no longer takes the session down with it (only
+  # PartOf/BindsTo would). After= just orders it behind the target.
   systemd.user.services.herdr = {
     Unit = {
       Description = "herdr headless server";
       ConditionPathIsExecutable = "%h/.local/bin/herdr";
+      After = [ "river-session.target" ];
     };
     Service = {
       Type = "simple";
       ExecStart = "%h/.local/bin/herdr server";
       Restart = "no";
     };
-    Install.WantedBy = [ "default.target" ];
+    Install.WantedBy = [ "river-session.target" ];
   };
 
   # Docker credential helpers configuration

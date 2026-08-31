@@ -43,7 +43,9 @@ fileManager="thunar"
 
 # Session initialization
 # Import environment to D-Bus and systemd (must run directly, not via riverctl spawn)
-dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
+# DISPLAY is included for XWayland clients started from user services (herdr
+# panes, wine); it is unset on the first run before XWayland comes up.
+dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
 systemctl --user start river-session.target
 
 # Kill existing processes on reload to prevent duplicates
