@@ -400,6 +400,15 @@ in {
     Install.WantedBy = [ "default.target" ];
   };
 
+  # environment.d is read by the systemd user manager, so this reaches
+  # herdr.service (started at boot, long before any shell) as well as every
+  # login shell. environment.sessionVariables alone only lands in /etc/profile,
+  # which no user unit sources -- hence NH_FLAKE was set under foot but not in
+  # herdr panes. Value comes from the system option so the path stays in one
+  # place.
+  xdg.configFile."environment.d/20-nh.conf".text =
+    "NH_FLAKE=${osConfig.programs.nh.flake}\n";
+
   # Docker credential helpers configuration
   xdg.configFile."docker/config.json".text = builtins.toJSON {
     credsStore = "secretservice";
