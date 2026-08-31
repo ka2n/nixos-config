@@ -2,6 +2,41 @@ set fish_greeting
 
 set -g fish_escape_delay_ms 600
 
+# The herdr server runs as a systemd user service and lingering is on, so it
+# starts at boot -- before river exists. Its environment is what every pane
+# inherits, which left panes with no WAYLAND_DISPLAY / DISPLAY and broke
+# wl-copy, wl-paste and anything else talking to the compositor. Resolving the
+# sockets per-shell instead also survives a river restart that lands on a
+# different socket number, which inheritance never would.
+#
+# Globs are walked with `for`, never inside a command substitution: fish leaves
+# an unmatched glob empty in `set` and `for`, but makes it an error in a
+# substitution, which would print "Unmatched wildcard" on every shell start on a
+# machine with no compositor. Builtins only, so a headless shell forks nothing.
+if not set -q WAYLAND_DISPLAY; and set -q XDG_RUNTIME_DIR
+    # Highest-numbered socket wins: a restart leaving a stale wayland-1 behind
+    # means the live compositor is on wayland-2. The .lock files fail the match.
+    set -l best -1
+    for sock in $XDG_RUNTIME_DIR/wayland-*
+        set -l n (string match -rg 'wayland-([0-9]+)$' -- $sock)
+        if set -q n[1]; and test $n[1] -gt $best
+            set best $n[1]
+        end
+    end
+    test $best -ge 0; and set -gx WAYLAND_DISPLAY wayland-$best
+end
+
+if not set -q DISPLAY
+    # XWayland, lowest display first (river's is :0).
+    for xsock in /tmp/.X11-unix/X*
+        set -l n (string match -rg '/X([0-9]+)$' -- $xsock)
+        if set -q n[1]
+            set -gx DISPLAY :$n[1]
+            break
+        end
+    end
+end
+
 function fish_title
     set -q argv[1]; or set argv fish
     echo (fish_prompt_pwd_dir_length=2 prompt_pwd): $argv;

@@ -375,27 +375,29 @@ in {
   # hence the %h path and the guard. `herdr update --handoff` replaces the
   # running server itself, so don't let systemd race it back up.
   #
-  # Pulled in by river-session.target, not default.target: the server's
-  # environment is what every pane inherits, and WAYLAND_DISPLAY only lands in
-  # the systemd user manager once river's init runs
-  # dbus-update-activation-environment (just before it starts that target).
-  # Started from default.target the server came up first and every pane ended
-  # up without WAYLAND_DISPLAY / DISPLAY -- wl-copy and wl-paste then fail.
-  # WantedBy alone still keeps the decoupling: Wants= propagates start but not
-  # stop, so a river restart no longer takes the session down with it (only
-  # PartOf/BindsTo would). After= just orders it behind the target.
+  # default.target, not river-session.target: lingering is on, so this comes up
+  # at boot and a machine reached only over SSH still finds a server in its own
+  # cgroup. Bound to river-session.target instead, a headless boot would leave
+  # no server at all and the first `herdr` over SSH would spawn one inside that
+  # session's scope -- the same teardown trap the unit exists to avoid, just
+  # moved from foot.service to the SSH session.
+  #
+  # The cost is that the server predates the compositor, so its environment
+  # (which every pane inherits) has no WAYLAND_DISPLAY. That cannot be fixed by
+  # inheritance -- a boot-time process cannot hold a value that only exists once
+  # river starts -- so panes resolve it themselves; see the wayland block in
+  # dotfiles/fish/conf.d-custom.fish.
   systemd.user.services.herdr = {
     Unit = {
       Description = "herdr headless server";
       ConditionPathIsExecutable = "%h/.local/bin/herdr";
-      After = [ "river-session.target" ];
     };
     Service = {
       Type = "simple";
       ExecStart = "%h/.local/bin/herdr server";
       Restart = "no";
     };
-    Install.WantedBy = [ "river-session.target" ];
+    Install.WantedBy = [ "default.target" ];
   };
 
   # Docker credential helpers configuration

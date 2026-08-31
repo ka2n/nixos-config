@@ -43,8 +43,10 @@ fileManager="thunar"
 
 # Session initialization
 # Import environment to D-Bus and systemd (must run directly, not via riverctl spawn)
-# DISPLAY is included for XWayland clients started from user services (herdr
-# panes, wine); it is unset on the first run before XWayland comes up.
+# DISPLAY is included for XWayland clients started from user services pulled in
+# by river-session.target; it is unset on the first run before XWayland comes up.
+# Units that start at boot (herdr.service) run too early to see any of this --
+# those resolve the sockets themselves, see dotfiles/fish/conf.d-custom.fish.
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
 systemctl --user start river-session.target
 
