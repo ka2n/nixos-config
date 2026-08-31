@@ -51,9 +51,11 @@ When a command is not found, try these approaches:
   from the start — don't create a worktree manually first. It goes through `git wt`
   via hooks, so the standard worktree layout and lifecycle hooks are applied
   automatically.
-- Delegate commit / push / PR creation to a subagent as well (pre-push hooks are slow;
-  keep them out of the main context). Spell out the commit message, PR title/body,
-  files to stage, and constraints in the prompt. Multiple repos → parallel subagents.
+- Delegate branch creation / commit / push / PR creation to a subagent as well
+  (pre-push hooks are slow; keep them out of the main context). Always launch these with
+  `model: 'sonnet'` — it is mechanical work and doesn't need Opus. Spell out the branch
+  name, commit message, PR title/body, files to stage, and constraints in the prompt.
+  Multiple repos → parallel subagents.
 - After completing large code changes (3 or more files, or 100+ lines), you must launch the code-reviewer agent.
 - When changes span multiple files, launch code-reviewer agents in parallel.
 
