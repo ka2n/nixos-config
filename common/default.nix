@@ -31,6 +31,7 @@ let
   };
 in {
   imports = [
+    ../modules/network-tuning.nix
     ../modules/zen-browser
     ../modules/mise
     ../modules/wayland-scripts

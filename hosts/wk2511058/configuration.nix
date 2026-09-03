@@ -14,7 +14,6 @@ in {
   imports = [
     ./hardware-configuration.nix
     ../../common
-    ../../modules/network-tuning.nix
     ../../modules/himmelblau
     inputs.mdatp.nixosModules.mdatp
     inputs.home-manager.nixosModules.home-manager
