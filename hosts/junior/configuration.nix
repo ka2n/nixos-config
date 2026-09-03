@@ -6,6 +6,7 @@
     ./disko.nix
     ./hardware-configuration.nix
     ../../common
+    ../../modules/network-tuning.nix
     ../../modules/display-switch.nix
     ../../modules/display/dell-s2722qc-edid.nix
     ../../modules/hardware/amdgpu-polaris.nix
