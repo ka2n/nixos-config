@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Meet 通話中に実行して、ローカル起因のパケットドロップを捕まえる
+# usage: meet-diag [秒数]  (既定 120秒)
+DUR=${1:-120}; IFACE=$(ip route show default | awk '{print $5; exit}')
+log=$(mktemp /tmp/meet-diag-XXXX.tsv)
+echo -e "t\tin_pps\tout_pps\trcvbuf6+\trcvbuf4+\tifdrop+\tload\tchrome%" > "$log"
+rd6(){ awk '/Udp6InDatagrams/{a=$2}/Udp6OutDatagrams/{b=$2}/Udp6RcvbufErrors/{c=$2}END{print a,b,c}' /proc/net/snmp6; }
+rd4(){ awk '/^Udp:/{if(++n==2)print $6}' /proc/net/snmp; }
+ifd(){ ip -s link show "$IFACE" | awk '/RX:/{getline;print $4}'; }
+read pi po pr <<<"$(rd6)"; pr4=$(rd4); pd=$(ifd)
+for ((t=1;t<=DUR;t++)); do
+  sleep 1
+  read i o r <<<"$(rd6)"; r4=$(rd4); d=$(ifd)
+  ch=$(ps -eo pcpu,comm --no-headers | awk '$2=="chrome"{s+=$1}END{printf "%.0f",s}')
+  printf "%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\n" "$t" $((i-pi)) $((o-po)) $((r-pr)) $((r4-pr4)) $((d-pd)) \
+    "$(cut -d' ' -f1 /proc/loadavg)" "$ch" >> "$log"
+  pi=$i; po=$o; pr=$r; pr4=$r4; pd=$d
+done
+echo "--- サマリ (${DUR}s) ---"
+awk -F'\t' 'NR>1{n++;i+=$2;o+=$3;r6+=$4;r4+=$5;dd+=$6;if($7>ml)ml=$7;if($4>0)bad++}
+END{printf "受信 平均 %.0f pps / 送信 平均 %.0f pps\n",i/n,o/n;
+printf "UDPバッファ溢れ  IPv6=%d  IPv4=%d   （%d 秒で発生）\n",r6,r4,bad;
+printf "NICドロップ %d   最大load %s\n",dd,ml;
+if(r6+r4>0) print ">>> ローカル起因のドロップを検出。CPU競合が原因の可能性が高い";
+else print ">>> ローカルドロップ無し。原因はネットワーク側かMeetサーバ側";}' "$log"
+echo "詳細: $log"

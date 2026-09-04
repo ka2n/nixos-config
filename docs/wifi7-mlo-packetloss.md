@@ -1,5 +1,10 @@
 # Wi-Fi 7 (MLO) による Zoom/Meet のパケロス
 
+> **関連**: 同じ「Meet が不安定」でも原因が別の事例がある。
+> TV の Wi-Fi Direct とメッシュバックホールのエアタイム競合については
+> [wifi-meet-packetloss/](wifi-meet-packetloss/README.md) を参照。
+> 本ページの MLO 無効化は引き続き有効。
+
 ## 症状
 
 - wk2511058 (Intel BE201 / iwlwifi) で Zoom・Google Meet など WebRTC 通話が
