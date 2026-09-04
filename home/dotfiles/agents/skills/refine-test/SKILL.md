@@ -1,6 +1,6 @@
 ---
 name: refine-test
-description: Use after code changes to refine tests with the four pillars: remove low-value tests, improve weak ones, and add missing coverage for important code. Also use whenever tests need review or refinement.
+description: "Use after code changes to refine tests with the four pillars: remove low-value tests, improve weak ones, and add missing coverage for important code. Also use whenever tests need review or refinement."
 ---
 
 # Refine Test
