@@ -25,6 +25,7 @@ When a command is not found, try these approaches:
     WorktreeCreate/WorktreeRemove hooks, which additionally run direnv and cleanup.
   - In paranoid mode, worktree trust sharing is disabled, so trust each config
     explicitly in the worktree.
+- For browser automation, use `agent-browser` with the system `google-chrome-stable`.
 - Use Codex for analysis when bug fixes fail 3+ times
 - Consult Codex for architecture design discussions
 - Request Codex for code review large changes
@@ -43,7 +44,7 @@ When a command is not found, try these approaches:
 
 ## Agent launch rules
 
-- Delegate implementation (code editing) to subagents (e.g. `Agent(subagent_type: general-purpose, model: 'sonnet'|'opus')`)
+- Delegate implementation (code editing) to subagents (e.g. `Agent(subagent_type: general-purpose, model: 'lighter'|'stronger')`)
   with concrete instructions: file paths, changes, verification commands, and any env caveats.
   The main session focuses on research, planning, judging review results, and reporting.
 - When a subagent needs an isolated working copy (parallel edits, risky changes, or
@@ -53,11 +54,16 @@ When a command is not found, try these approaches:
   automatically.
 - Delegate branch creation / commit / push / PR creation to a subagent as well
   (pre-push hooks are slow; keep them out of the main context). Always launch these with
-  `model: 'sonnet'` — it is mechanical work and doesn't need Opus. Spell out the branch
+  `model: 'lighter'` for mechanical work that does not need deep reasoning. Spell out the branch
   name, commit message, PR title/body, files to stage, and constraints in the prompt.
   Multiple repos → parallel subagents.
 - After completing large code changes (3 or more files, or 100+ lines), you must launch the code-reviewer agent.
 - When changes span multiple files, launch code-reviewer agents in parallel.
+
+## Code style
+
+- Do not narrate code in comments. Keep comments only when they explain a why that cannot be recovered from the code.
+- Before review, perform a fresh comment-focused pass. Remove comments whose content is recoverable from the code, and preserve only justified constraints or non-obvious why.
 
 ## Git
 
@@ -74,9 +80,5 @@ When a command is not found, try these approaches:
   1. Start `gh run watch $(gh run list -L 1 --json databaseId -q '.[0].databaseId') --exit-status` with `Bash(run_in_background=true)`
   2. Continue with other work (no report needed on CI success)
   3. On failure only: Check logs → Fix issue → Commit & push → Return to step 1 (max 3 attempts)
-
-## Browser
-
-- agent-browser: always use system google-chrome-stable
 
 @RTK.md
