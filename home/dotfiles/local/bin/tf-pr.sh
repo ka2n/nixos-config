@@ -9,9 +9,13 @@ jq=@jq@
 show_help() {
     cat <<'EOF'
 Usage:
-  tf-pr <PR_NUM> [plan|apply]     Direct PR number mode
-  tf-pr plan --guess              Auto-detect PR from git log
-  tf-pr apply --guess             Auto-detect PR from git log
+  tf-pr <PR_NUM> [plan|apply] [-- TERRAFORM_ARGS...]  Direct PR number mode
+  tf-pr plan --guess [-- TERRAFORM_ARGS...]           Auto-detect PR from git log
+  tf-pr apply --guess [-- TERRAFORM_ARGS...]          Auto-detect PR from git log
+
+Examples:
+  tf-pr 123 plan -- -target=module.example
+  tf-pr plan --guess -- -target=module.example
 EOF
 }
 
@@ -23,8 +27,9 @@ get_repo_info() {
 run_tfcmt() {
     pr_num="$1"
     action="$2"
+    shift 2
     terraform init
-    exec tfcmt -owner "$OWNER" -repo "$REPO" -pr "$pr_num" "$action" -- terraform "$action"
+    exec tfcmt -owner "$OWNER" -repo "$REPO" -pr "$pr_num" "$action" -- terraform "$action" "$@"
 }
 
 guess_pr() {
@@ -92,26 +97,43 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
-# Check for --guess mode: tf-pr plan --guess / tf-pr apply --guess
-if [ $# -eq 2 ] && [ "$2" = "--guess" ]; then
+# Check for --guess mode: tf-pr plan --guess [-- TERRAFORM_ARGS...]
+if [ $# -ge 2 ] && [ "$2" = "--guess" ]; then
     ACTION="$1"
     if [ "$ACTION" != "plan" ] && [ "$ACTION" != "apply" ]; then
         echo "Error: action must be 'plan' or 'apply'" >&2
         exit 1
     fi
+    shift 2
+    if [ $# -gt 0 ]; then
+        if [ "$1" != "--" ]; then
+            show_help >&2
+            exit 1
+        fi
+        shift
+    fi
     get_repo_info
     guess_pr
-    run_tfcmt "$SELECTED_PR" "$ACTION"
+    run_tfcmt "$SELECTED_PR" "$ACTION" "$@"
 fi
 
-# Direct mode: tf-pr <PR_NUM> [plan|apply]
+# Direct mode: tf-pr <PR_NUM> [plan|apply] [-- TERRAFORM_ARGS...]
 PR_NUM="$1"
-ACTION="${2:-plan}"
+shift
 
-if [ "$ACTION" != "plan" ] && [ "$ACTION" != "apply" ]; then
-    echo "Error: action must be 'plan' or 'apply'" >&2
-    exit 1
+ACTION="plan"
+if [ $# -gt 0 ] && { [ "$1" = "plan" ] || [ "$1" = "apply" ]; }; then
+    ACTION="$1"
+    shift
+fi
+
+if [ $# -gt 0 ]; then
+    if [ "$1" != "--" ]; then
+        echo "Error: action must be 'plan' or 'apply'" >&2
+        exit 1
+    fi
+    shift
 fi
 
 get_repo_info
-run_tfcmt "$PR_NUM" "$ACTION"
+run_tfcmt "$PR_NUM" "$ACTION" "$@"
