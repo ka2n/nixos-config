@@ -124,7 +124,13 @@ in {
 
     # Hardware watchdog integration via sp5100-tco (AMD TCO watchdog, present on this system)
     # systemd kicks the watchdog every runtimeTime; if it stops (frozen), hardware reboots at rebootTime.
-    systemd.watchdog.runtimeTime = "60s";
+    #
+    # 180s, not 60s: it must lose the race against the kernel's own detectors above,
+    # otherwise the hardware resets the box before hung_task_panic (default
+    # hung_task_timeout_secs = 120s) can fire - and a hardware reset writes no crash
+    # record at all, while a panic does. This ordering is a candidate explanation for
+    # /sys/fs/pstore having stayed empty across every unclean reset so far.
+    systemd.watchdog.runtimeTime = "180s";
     systemd.watchdog.rebootTime = "3min";
 
     # Wayland environment variables for AMD GPU stability
