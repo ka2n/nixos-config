@@ -9,6 +9,7 @@
     ../../modules/display-switch.nix
     ../../modules/display/dell-s2722qc-edid.nix
     ../../modules/hardware/amdgpu-polaris.nix
+    ../../modules/hardware/crash-capture.nix
     inputs.home-manager.nixosModules.home-manager
   ];
 
@@ -47,6 +48,10 @@
 
   # AMD Polaris GPU fixes
   hardware.amdgpu.polaris.enable = true;
+
+  # Capture kernel panics across the unclean resets this box takes every 1-3 days.
+  # efi_pstore has recorded nothing, so use ramoops (reserved DRAM) instead.
+  hardware.crashCapture.enable = true;
 
   # Enable display-switch service
   services.display-switch = {
