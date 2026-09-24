@@ -204,6 +204,7 @@ in {
   environment.systemPackages = (with pkgs; [
     # Editors
     neovim
+    tree-sitter # required by nvim-treesitter (main) to build parsers
 
     # CLI tools
     coreutils

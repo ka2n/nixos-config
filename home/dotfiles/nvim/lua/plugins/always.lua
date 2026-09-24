@@ -9,9 +9,4 @@ return {
             require('nord').set()
         end,
     },
-    {
-        "vhyrro/luarocks.nvim",
-        priority = 1000,
-        config = true,
-    }
 }

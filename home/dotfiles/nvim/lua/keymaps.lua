@@ -46,12 +46,6 @@ vim.keymap.set("n", "\\r", "<cmd>QuickRun<CR>")
 vim.keymap.set("n", "\\x", "<cmd>QuickRun >>message<CR>")
 
 
--- copilot
---vim.keymap.set('i', "<C-j>", "<Plug>(copilot-next)")
---vim.keymap.set('i', "<C-k>", "<Plug>(copilot-previous)")
---vim.keymap.set('i', "<C-o>", "<Plug>(copilot-dismiss)")
---vim.keymap.set('i', "<C-s>", "<Plug>(copilot-suggest)")
---vim.keymap.set('i', "<C-l>", 'copilot#Accept("<CR>")', { silent = true, expr = true, script = true, replace_keycodes = false })
 vim.keymap.set('n', '<Leader>ip',
     function()
         return vim.bo.filetype == "AvanteInput" and require("avante.clipboard").paste_image()
@@ -61,7 +55,6 @@ vim.keymap.set('n', '<Leader>ip',
 if pcall(require, "telescope") then
     local telescope_bindings = {
         { desc = "telescope keymaps",   key = ";;", f = function() require('telescope.builtin').keymaps() end },
-        --    { desc = "telescope coc-commands", key = ";c", f = function() vim.cmd(':Telescope coc commands') end },
         { desc = "telescope resume",    key = ";r", f = function() require('telescope.builtin').resume() end },
         { desc = "telescope frecency",  key = ";f", f = function() require('telescope').extensions.frecency.frecency() end },
         { desc = "telescope live_grep", key = ";/", f = function() require('telescope.builtin').live_grep() end },
@@ -70,7 +63,6 @@ if pcall(require, "telescope") then
         vim.keymap.set('n', s.key, s.f, { desc = s.desc, noremap = true, silent = true })
     end
 
-    -- keymap にtelescopeの機能を追加して ;; で呼び出せるようにする
     for k, v in pairs(require("telescope.builtin")) do
         if type(v) == "function" then
             vim.keymap.set('n', '<Plug>(telescope.' .. k .. ')', v)
@@ -79,4 +71,4 @@ if pcall(require, "telescope") then
 end
 
 ---- Most used functions
-vim.keymap.set('', ';o', '<cmd>ObsidianQuickSwitch<CR>')
+vim.keymap.set('', ';o', '<cmd>Obsidian quick_switch<CR>')

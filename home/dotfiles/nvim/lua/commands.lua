@@ -1,20 +1,22 @@
--- make readonly
-vim.cmd('autocmd BufRead,BufNewFile *.gen.* setlocal readonly')
+local group = vim.api.nvim_create_augroup("ReadonlyGenerated", { clear = true })
 
-function checkDoNotEdit()
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+    group = group,
+    pattern = "*.gen.*",
+    callback = function()
+        vim.bo.readonly = true
+    end,
+})
+
+local function checkDoNotEdit()
     local first = vim.fn.getline(1)
     if first and string.find(first, "DO NOT EDIT") then
-        vim.cmd('setlocal readonly')
+        vim.bo.readonly = true
     end
 end
-vim.cmd('autocmd BufReadPost * lua checkDoNotEdit()')
 
--- change color scheme if buffer is readonly
--- function updateColorScheme()
---     if vim.bo.readonly and vim.bo.buftype == "" then
---         vim.cmd('colorscheme pablo')
---     else
---         vim.cmd('colorscheme nord')
---     end
--- end
--- vim.cmd('autocmd BufReadPost,BufEnter * lua updateColorScheme()')
+vim.api.nvim_create_autocmd("BufReadPost", {
+    group = group,
+    pattern = "*",
+    callback = checkDoNotEdit,
+})

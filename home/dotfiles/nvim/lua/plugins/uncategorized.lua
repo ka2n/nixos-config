@@ -9,13 +9,12 @@ return {
 		},
 	},
 	{
-		"epwalsh/obsidian.nvim",
+		"obsidian-nvim/obsidian.nvim",
 		version = "*",
 		ft = "markdown",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-		},
+		cmd = "Obsidian",
 		opts = {
+			legacy_commands = false,
 			workspaces = {
 				{
 					name = "notes",
@@ -30,24 +29,16 @@ return {
 				date_format = "%Y-%m-%d",
 			},
 			completion = {
-				nvim_cmp = true,
 				min_chars = 2,
 			},
 		},
-		event = "VeryLazy",
 	},
 	{
-		"lukas-reineke/headlines.nvim",
-		dependencies = "nvim-treesitter/nvim-treesitter",
+		"MeanderingProgrammer/render-markdown.nvim",
+		ft = { "markdown", "Avante" },
 		opts = {
-			markdown = {
-				bullets = {},
-				coldeblock_highlight = "CodeBlock",
-				dash_highlight = "Dash",
-				quote_highlight = "Quote",
-			},
+			file_types = { "markdown", "Avante" },
 		},
-		event = "VeryLazy",
 	},
 	{
 		"nvim-neo-tree/neo-tree.nvim",
@@ -68,22 +59,6 @@ return {
 			},
 		},
 	},
-	{
-		"folke/lsp-colors.nvim",
-		lazy = false,
-	},
-	-- TODO: ctrl-y を変える
-	-- {
-	--     'mattn/vim-sonictemplate',
-	--     cmd = 'Template',
-	--     init = function()
-	--         vim.g.sonictemplate_vim_template_dir = os.getenv('HOME') .. '/.templates'
-	--     end,
-	-- },
-	-- {
-	--     'mattn/emmet-vim',
-	--     event = 'VeryLazy',
-	-- },
 	{ "thinca/vim-quickrun", cmd = "QuickRun" },
 	{ "tpope/vim-repeat", event = "VeryLazy" },
 	{ "kylechui/nvim-surround", event = "VeryLazy", config = true },
