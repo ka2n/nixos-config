@@ -335,6 +335,8 @@ in {
     vlc
     feh
     wl-screenrec
+    mplayer # lolcommits (webcam capture)
+    imagemagick # lolcommits (image overlay)
 
     # System utilities
     blueman
