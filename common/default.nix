@@ -144,10 +144,8 @@ in {
     };
     # Disable the Unicode addon's GTK-compatible Ctrl+Shift+U hex-input
     # mode so it doesn't shadow foot's show-urls-launch binding.
-    addons.unicode = {
-      globalSection = { };
-      sections.Unicode.DirectUnicodeMode = "";
-    };
+    # DirectUnicodeMode is a top-level option; under [Unicode] it is ignored.
+    addons.unicode.globalSection.DirectUnicodeMode = "";
   };
 
   # River session target (for River compositor)
