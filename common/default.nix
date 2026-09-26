@@ -450,6 +450,8 @@ in {
   # Codex reads /etc/codex/config.toml as the system layer beneath ~/.codex/config.toml
   # (which Codex itself rewrites, so it can't be nix-managed). It has no include directive.
   environment.etc."codex/config.toml".source = (pkgs.formats.toml { }).generate "codex-config.toml" {
+    # Remove once the package layout is fixed: https://github.com/numtide/llm-agents.nix/issues/9887
+    features.daemon_auto_start = false;
     tui.keymap.global.open_external_editor = [ "ctrl-g" "alt-e" ];
   };
 
