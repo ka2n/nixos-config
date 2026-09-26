@@ -845,6 +845,8 @@ in {
   # Codex CLI: AGENTS.md (share same source as CLAUDE.md)
   home.file.".codex/AGENTS.md".source = ./dotfiles/claude/CLAUDE.md;
 
+  home.file.".pi/agent/keybindings.json".source = ./dotfiles/pi/keybindings.json;
+
   # jai (Jail for AI) config files
   home.file.".jai/default.conf".source = ./dotfiles/jai/default.conf;
 
