@@ -447,6 +447,12 @@ in {
     mode = "0755";
   };
 
+  # Codex reads /etc/codex/config.toml as the system layer beneath ~/.codex/config.toml
+  # (which Codex itself rewrites, so it can't be nix-managed). It has no include directive.
+  environment.etc."codex/config.toml".source = (pkgs.formats.toml { }).generate "codex-config.toml" {
+    tui.keymap.global.open_external_editor = [ "ctrl-g" "alt-e" ];
+  };
+
   # mise - polyglot runtime manager
   programs.mise.enable = true;
 
