@@ -118,6 +118,7 @@ in {
     pkgs.curlie
     pkgs.git-wt
     pkgs.go-readability
+    inputs.miru.packages.${pkgs.stdenv.hostPlatform.system}.default
     pkgs.mo
     pkgs.n
     pkgs.ntn

@@ -71,6 +71,10 @@
       url = "github:Zeus-Deus/gazelle-tui";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    miru = {
+      url = "github:ka2n/miru";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     claude-desktop = {
       url = "github:aaddrick/claude-desktop-debian";
       inputs.nixpkgs.follows = "nixpkgs";
