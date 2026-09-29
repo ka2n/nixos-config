@@ -3,6 +3,8 @@ pkgs-unstable: llm-agents: final: prev: {
   # `nh os build` doesn't recompile every time.
   mise = pkgs-unstable.mise;
 
+  gh = pkgs-unstable.gh;
+
   # claude-code: add gh to PATH, set env vars (single wrapProgram, no double-wrapping)
   claude-code = llm-agents.claude-code.overrideAttrs (oldAttrs: {
     postFixup = builtins.replaceStrings [ "--argv0 claude" ] [
