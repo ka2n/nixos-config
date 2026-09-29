@@ -53,6 +53,13 @@
   # efi_pstore has recorded nothing, so use ramoops (reserved DRAM) instead.
   hardware.crashCapture.enable = true;
 
+  # Trial workaround for those resets: the CPUs stop dead (no panic, hung_task silent
+  # for 10 min until the hardware watchdog fires), and BIOS 1.S3 did not help. Keep the
+  # Ryzen 3900X out of the deep ACPI C2 state it otherwise spends ~98% of idle in.
+  # Same intent as BIOS "Power Supply Idle Control = Typical Current Idle", which the
+  # BIOS UI can't currently show over HDMI. See docs/crash/junior-20260925-hw-watchdog-reset.md
+  boot.kernelParams = [ "processor.max_cstate=1" ];
+
   # Enable display-switch service
   services.display-switch = {
     enable = true;
