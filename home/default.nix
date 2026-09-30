@@ -130,9 +130,6 @@ in {
     # GitHub
     llm-agents.copilot-cli
 
-    # Plannotator: visual plan review for coding agents
-    llm-agents.plannotator
-
     # Moshi: host-side daemon bridging AI coding agents to the Moshi mobile app
     pkgs.moshi-hook
 
