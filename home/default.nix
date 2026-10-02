@@ -17,6 +17,7 @@ let
       (pkgs.replaceVars ./dotfiles/local/bin/foot-open-github-ref.sh {
         x_open_url = lib.getExe x-open-url;
         git = lib.getExe pkgs.git;
+        jq = lib.getExe pkgs.jq;
       }));
   # Single POSIX-ERE regex used by foot for Ctrl+Shift+o. Capture group 1
   # carries the match (foot uses `matches[1]`); it includes at most one

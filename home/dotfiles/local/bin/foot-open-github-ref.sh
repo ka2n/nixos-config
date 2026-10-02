@@ -17,9 +17,20 @@ esac
 # Resolve <host>/<org>/<repo> from the current git repository's `origin` remote.
 # Only the inference cases (#num and repo#num) call this. Sets host/org/repo
 # and returns 0 on success, non-zero if not in a git repo or no origin.
+# herdr does not forward OSC 7, so foot's tracked cwd is stale when the shell
+# runs inside it; fall back to herdr's focused pane cwd.
 infer_from_origin() {
-  local origin path
-  origin=$(@git@ -C "$PWD" remote get-url origin 2>/dev/null) || return 1
+  local origin path dir herdr
+  origin=$(@git@ -C "$PWD" remote get-url origin 2>/dev/null)
+  if [ -z "$origin" ]; then
+    herdr=$(command -v herdr || true)
+    [ -n "$herdr" ] || herdr=$HOME/.local/bin/herdr
+    [ -x "$herdr" ] || return 1
+    dir=$(env -u HERDR_PANE_ID -u HERDR_TAB_ID -u HERDR_WORKSPACE_ID \
+      "$herdr" pane current 2>/dev/null | @jq@ -r '.result.pane.cwd // empty' 2>/dev/null)
+    [ -n "$dir" ] || return 1
+    origin=$(@git@ -C "$dir" remote get-url origin 2>/dev/null) || return 1
+  fi
   case "$origin" in
     git@*:*)
       host=${origin#git@}; host=${host%%:*}
