@@ -269,7 +269,8 @@ in {
     llm-agents.ccusage
     llm-agents.openspec
     llm-agents.ralph-tui
-    llm-agents.agent-browser
+    agent-browser
+    lightpanda
     llm-agents.rtk
     llm-agents.pi
 

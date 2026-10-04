@@ -1,4 +1,34 @@
-pkgs-unstable: llm-agents: final: prev: {
+pkgs-unstable: llm-agents: final: prev:
+let
+  # llm-agents' agent-browser forces AGENT_BROWSER_EXECUTABLE_PATH to chromium via
+  # `wrapProgram --set`, which breaks `--engine lightpanda`. Re-wrap the unwrapped
+  # binary so the chromium path is only applied for non-lightpanda engines.
+  # No rebuild: the original package is reused as-is.
+  # Lightpanda must be selected via `--engine lightpanda` or AGENT_BROWSER_ENGINE on
+  # every call; config-file `engine` is not seen here and chromium would win.
+  upstreamAgentBrowser = llm-agents.agent-browser;
+  chromiumPath =
+    let
+      m = builtins.match ".*--set AGENT_BROWSER_EXECUTABLE_PATH ([^[:space:]]+).*" upstreamAgentBrowser.postInstall;
+    in
+    if m == null then
+      throw "agent-browser: cannot extract chromium path from llm-agents postInstall; upstream changed, update pkgs/default.nix"
+    else
+      builtins.appendContext (builtins.head m) (builtins.getContext upstreamAgentBrowser.postInstall);
+  agentBrowserWrapper = final.writeShellScript "agent-browser" ''
+    engine="''${AGENT_BROWSER_ENGINE:-chrome}"
+    prev=
+    for a in "$@"; do
+      [ "$prev" = --engine ] && engine="$a"
+      prev="$a"
+    done
+    if [ "$engine" != lightpanda ]; then
+      export AGENT_BROWSER_EXECUTABLE_PATH="''${AGENT_BROWSER_EXECUTABLE_PATH:-${chromiumPath}}"
+    fi
+    exec -a agent-browser ${upstreamAgentBrowser}/bin/.agent-browser-wrapped "$@"
+  '';
+in
+{
   # mise: use nixpkgs-unstable's prebuilt package so cache.nixos.org hits and
   # `nh os build` doesn't recompile every time.
   mise = pkgs-unstable.mise;
@@ -11,6 +41,18 @@ pkgs-unstable: llm-agents: final: prev: {
       "--prefix PATH : ${final.gh}/bin --set CLAUDE_CODE_NO_FLICKER 1 --argv0 claude"
     ] oldAttrs.postFixup;
   });
+
+  agent-browser = final.symlinkJoin {
+    inherit (upstreamAgentBrowser) pname version meta;
+    paths = [ upstreamAgentBrowser ];
+    postBuild = ''
+      test -x ${upstreamAgentBrowser}/bin/.agent-browser-wrapped
+      rm $out/bin/agent-browser
+      ln -s ${agentBrowserWrapper} $out/bin/agent-browser
+    '';
+  };
+
+  lightpanda = final.callPackage ./lightpanda { };
 
   libcskk = final.callPackage ./libcskk { };
   fcitx5-cskk = final.callPackage ./fcitx5-cskk {
