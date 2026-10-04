@@ -539,8 +539,10 @@ in {
       suspendTimeout = if variant == "laptop" then 1800 else 48 * 60 * 60;
     in {
       general = {
+        # Own scope: stopping hypridle.service must not kill swaylock, or the
+        # compositor stays locked with no lock surface (black screen).
         lock_cmd =
-          "${pkgs.procps}/bin/pidof swaylock || ${pkgs.swaylock-effects}/bin/swaylock -f --grace 10";
+          "${pkgs.procps}/bin/pidof swaylock || ${pkgs.systemd}/bin/systemd-run --user --scope ${pkgs.swaylock-effects}/bin/swaylock -f --grace 10";
         before_sleep_cmd = "loginctl lock-session";
         after_sleep_cmd = "${pkgs.wlopm}/bin/wlopm --on '*'";
       };
