@@ -67,6 +67,7 @@
       url = "github:modem-dev/hunk";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    herdr-gpui.url = "github:penso/herdr-gpui";
     gazelle-tui = {
       url = "github:Zeus-Deus/gazelle-tui";
       inputs.nixpkgs.follows = "nixpkgs";

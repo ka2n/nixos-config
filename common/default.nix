@@ -263,6 +263,7 @@ in {
     nodejs
 
     # NOTE: herdr should install via official script, I need live session migration.
+    inputs.herdr-gpui.packages.${pkgs.stdenv.hostPlatform.system}.default
     pkgs.claude-code
     llm-agents.codex
     llm-agents.gemini-cli
