@@ -29,8 +29,7 @@
     "format": " {}"
   },
   "clock": {
-    "format": "{:L%A %H:%M}",
-    "format-alt": "{:L%d %B W%V %Y}",
+    "format": "{:%Y/%m/%d %H:%M}",
     "tooltip": false
   },
   "power-profiles-daemon": {
