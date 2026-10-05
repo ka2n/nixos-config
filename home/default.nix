@@ -218,6 +218,11 @@ in {
     (pkgs.writeShellScriptBin "toggle-internal-keyboard"
       (builtins.readFile ./dotfiles/local/bin/toggle-internal-keyboard.sh))
 
+    (pkgs.writeShellScriptBin "wifi-best-bssid" (builtins.readFile
+      (pkgs.replaceVars ./dotfiles/local/bin/wifi-best-bssid.sh {
+        nmcli = lib.getExe' pkgs.networkmanager "nmcli";
+      })))
+
     (pkgs.writeShellScriptBin "caffeine-status"
       (builtins.readFile ./dotfiles/local/bin/caffeine-status.sh))
 
