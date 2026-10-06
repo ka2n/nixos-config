@@ -106,6 +106,14 @@
             inputs.go-overlay.overlays.default
             (import ./pkgs pkgs-unstable llm-agents)
             inputs.claude-desktop.overlays.default
+            # aaddrick/claude-desktop-debian#920: 2.19675.1's claude-native
+            # binding needs libpipewire, but upstream only lists pipewire in
+            # runtimeDependencies, so autoPatchelf fails. Drop once fixed.
+            (final: prev: {
+              claude-desktop = prev.claude-desktop.overrideAttrs (old: {
+                buildInputs = old.buildInputs ++ [ final.pipewire ];
+              });
+            })
           ];
         }
         inputs.sops-nix.nixosModules.sops
