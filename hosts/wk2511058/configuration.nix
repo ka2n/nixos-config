@@ -84,7 +84,7 @@ in {
       domain = [ (builtins.head (privateConfig.domains or [ "example.onmicrosoft.com" ])) ];
       # Enroll the device in Intune and apply its policies so the device
       # reports compliant in Entra. Needs /var/cache/himmelblau-policies
-      # (provided by modules/himmelblau) and request_timeout below.
+      # (upstream himmelblaud-tasks CacheDirectory) and request_timeout below.
       apply_policy = true;
       cn_name_mapping = true;
       connection_timeout = 30;
