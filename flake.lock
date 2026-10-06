@@ -457,16 +457,16 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1786626903,
-        "narHash": "sha256-egFr+Guix/ug8OTvubw0fBpXyHZiZC+7+8Yov5ghTVY=",
+        "lastModified": 1789071760,
+        "narHash": "sha256-IJs+HPixkxYrU2U3lFXQas1damvi8neR9QjY7JxHxDg=",
         "owner": "himmelblau-idm",
         "repo": "himmelblau",
-        "rev": "bd4adfd79654a3644ef711bc617f1413990e9ed2",
+        "rev": "7d1ea961cae172dd844018171e4fbd8d343bfa08",
         "type": "github"
       },
       "original": {
         "owner": "himmelblau-idm",
-        "ref": "3.1.12",
+        "ref": "3.1.14",
         "repo": "himmelblau",
         "type": "github"
       }
