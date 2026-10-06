@@ -1,9 +1,8 @@
 #!/bin/sh
-# Waybar custom module for caffeine status
-# Outputs JSON: active when hypridle is stopped (caffeine ON)
+set -eu
 
-if systemctl --user is-active --quiet hypridle.service; then
-    printf '{"text": "󰒲", "tooltip": "Caffeine OFF", "class": "off"}\n'
-else
+if [ -e "${XDG_RUNTIME_DIR:?}/caffeine-enabled" ]; then
     printf '{"text": "󰒳", "tooltip": "Caffeine ON", "class": "on"}\n'
+else
+    printf '{"text": "󰒲", "tooltip": "Caffeine OFF", "class": "off"}\n'
 fi
