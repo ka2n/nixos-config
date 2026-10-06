@@ -526,14 +526,21 @@ in {
   };
   xdg.configFile."waybar/config.jsonc".source = ./dotfiles/waybar/config.jsonc;
   xdg.configFile."waybar/style.css".source = ./dotfiles/waybar/style.css;
-  xdg.configFile."swaylock/config".source = let
+  xdg.configFile."gtklock/config.ini".text = ''
+    [main]
+    time-format=%H:%M
+  '';
+  xdg.configFile."gtklock/style.css".text = let
     lockColor = if riverBackgroundColor != null then
-      builtins.replaceStrings [ "#" ] [ "" ] riverBackgroundColor
+      riverBackgroundColor
     else
-      "232136";
-    configContent = builtins.replaceStrings [ "@lock_color@" ] [ lockColor ]
-      (builtins.readFile ./dotfiles/swaylock/config);
-  in pkgs.writeText "swaylock-config" configContent;
+      "#232136";
+  in ''
+    window { background-color: ${lockColor}; color: #ffffff; }
+    #clock-label { font-size: 72px; font-family: monospace; }
+    #date-label { font-size: 0; }
+    #warning-label, #error-label, #input-label { color: #ffffff; }
+  '';
   # hypridle - idle management (works with both Hyprland and River)
   services.hypridle = {
     enable = true;
@@ -544,10 +551,10 @@ in {
       suspendTimeout = if variant == "laptop" then 1800 else 48 * 60 * 60;
     in {
       general = {
-        # Own scope: stopping hypridle.service must not kill swaylock, or the
+        # Own scope: stopping hypridle.service must not kill gtklock, or the
         # compositor stays locked with no lock surface (black screen).
         lock_cmd =
-          "${pkgs.procps}/bin/pidof swaylock || ${pkgs.systemd}/bin/systemd-run --user --scope ${pkgs.swaylock-effects}/bin/swaylock -f --grace 10";
+          "${pkgs.procps}/bin/pidof gtklock || ${pkgs.systemd}/bin/systemd-run --user --scope ${pkgs.gtklock}/bin/gtklock -d";
         before_sleep_cmd = "loginctl lock-session";
         after_sleep_cmd = "${pkgs.wlopm}/bin/wlopm --on '*'";
       };

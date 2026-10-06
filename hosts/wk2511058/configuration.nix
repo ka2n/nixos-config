@@ -22,7 +22,7 @@ in {
   networking.hostName = "wk2511058";
 
   # Suppress "Last MLO scan was too long ago" iwlmld WARNINGs that delay
-  # screen restore after swaylock unlock on Lunar Lake / Wi-Fi 7 (BE-series).
+  # screen restore after gtklock unlock on Lunar Lake / Wi-Fi 7 (BE-series).
   # See docs/himmelblau-troubleshooting.md (問題5).
   # Wi-Fi 7 MLO による Zoom/Meet パケロスの調査と対処は
   # docs/wifi7-mlo-packetloss.md（対処はルーター側で MLO のみ無効化）。
@@ -76,7 +76,7 @@ in {
   services.himmelblau = {
     enable = true;
     debugFlag = true;
-    pamServices = [ "passwd" "login" "systemd-user" "swaylock" "greetd" ];
+    pamServices = [ "passwd" "login" "systemd-user" "gtklock" "greetd" ];
     userMap = lib.optionalAttrs (privateConfig ? username) {
       katsuma = privateConfig.username;
     };

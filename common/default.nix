@@ -231,7 +231,7 @@ in {
     wiremix # PipeWire TUI mixer
     alsa-utils # arecord, aplay
     sox # rec, play, sox
-    swaylock-effects # Screen locker (wlroots-compatible)
+    gtklock # Screen locker (ext-session-lock-v1)
     libsecret
     gcr
     playerctl
@@ -425,7 +425,7 @@ in {
   programs.river-with-fallback.enable = true;
 
   # Screen locker (PAM authentication)
-  security.pam.services.swaylock = { };
+  security.pam.services.gtklock = { };
 
   # Polkit
   security.polkit.enable = true;
