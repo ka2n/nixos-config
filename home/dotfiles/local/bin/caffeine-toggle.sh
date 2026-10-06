@@ -1,22 +1,13 @@
 #!/bin/sh
 set -eu
 
-state_file="${XDG_RUNTIME_DIR:?}/caffeine-enabled"
-exec 9> "$XDG_RUNTIME_DIR/caffeine-toggle.lock"
-flock -x 9
+rm -f "${XDG_RUNTIME_DIR:?}/caffeine-enabled" # legacy state file
 
-if [ -e "$state_file" ]; then
-    rm "$state_file"
-    if ! systemctl --user start hypridle.service; then
-        touch "$state_file"
-        exit 1
-    fi
+if systemctl --user is-active --quiet caffeine.service; then
+    systemctl --user stop caffeine.service
     notify-send -t 2000 "Caffeine OFF" "Idle management restored"
 else
-    touch "$state_file"
-    if ! systemctl --user stop hypridle.service; then
-        rm "$state_file"
-        exit 1
-    fi
+    systemd-run --user --collect --unit=caffeine --description="Caffeine idle inhibitor" \
+        systemd-inhibit --what=idle --who=caffeine --why="Caffeine mode" sleep infinity
     notify-send -t 2000 "Caffeine ON" "Idle inhibition active"
 fi
