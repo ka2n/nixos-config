@@ -734,7 +734,7 @@ in {
       "text/plain" = "nvim.desktop";
       "x-scheme-handler/about" = "google-chrome.desktop";
       "x-scheme-handler/unknown" = "google-chrome.desktop";
-      "x-scheme-handler/obsidian" = "obsidian.desktop";
+      "x-scheme-handler/obsidian" = "md.obsidian.Obsidian.desktop";
     };
   };
 

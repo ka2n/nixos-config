@@ -317,7 +317,7 @@ in {
       postInstall = (old.postInstall or "") + ''
         mv $out/bin/obsidian $out/bin/obsidian-gui
         ln -s obsidian-cli $out/bin/obsidian
-        substituteInPlace $out/share/applications/obsidian.desktop \
+        substituteInPlace $out/share/applications/md.obsidian.Obsidian.desktop \
           --replace-fail "Exec=obsidian %u" "Exec=$out/bin/obsidian-gui %u"
       '';
     }))
