@@ -200,11 +200,6 @@ in {
       abrmd.enable = false;
     };
 
-    # Required for apply_policy = true
-    systemd.tmpfiles.rules = [
-      "d /var/cache/himmelblau-policies 0600 root root -"
-    ];
-
     # Upstream nixosModules.himmelblau only wires pam_himmelblau into
     # account/auth/session — the password stack is missing, so `passwd`
     # cannot update the Hello PIN. Add it for every configured pamService
