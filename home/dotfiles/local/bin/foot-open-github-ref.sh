@@ -3,11 +3,13 @@
 #   <host>/<org>/<repo>[#<num>]   e.g. github.com/foo/bar, github.com/foo/bar#42
 #   <org>/<repo>#<num>            e.g. org/repo#123
 #   <repo>#<num>                  e.g. mscfb#1   (host/org inferred from git origin)
+#   <repo> #<num>                 e.g. mr-tf #4884 (same; falls back to #<num> if
+#                                 <repo> is not a GitHub repo, e.g. "request #917")
 #   #<num>                        e.g. #123     (host/org/repo inferred from git origin)
 # The match may start with a single boundary character (whitespace or
 # punctuation) — strip it before parsing.
 
-ref="$1"
+ref="$*"
 
 case "$ref" in
   [A-Za-z0-9#]*) ;;
@@ -70,6 +72,16 @@ case "$ref" in
     ;;
   */*#*)
     url="https://github.com/${ref%#*}/issues/${ref##*#}"
+    ;;
+  *' #'*)
+    r=${ref%% *}
+    num=${ref##*#}
+    if infer_from_origin; then
+      if [ "$host" != github.com ] || @gh@ api "repos/$org/$r" --silent 2>/dev/null; then
+        repo=$r
+      fi
+      url="https://$host/$org/$repo/issues/$num"
+    fi
     ;;
   *#*)
     r=${ref%#*}

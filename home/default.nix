@@ -10,14 +10,15 @@ let
     ${builtins.readFile ./dotfiles/local/bin/x-open-url.js}
   '';
   # Expand foot regex matches into a GitHub-ish URL and hand off to x-open-url.
-  # Handles: host/org/repo[#num], org/repo#num, repo#num, and #num. For the
-  # last two the host/org/repo is inferred from $PWD = .../src/<host>/<org>/<repo>/...
+  # Handles: host/org/repo[#num], org/repo#num, repo#num, repo #num, and #num.
+  # For the last three the host/org/repo is inferred from the git origin.
   foot-open-github-ref = pkgs.writeShellScript "foot-open-github-ref"
     (builtins.readFile
       (pkgs.replaceVars ./dotfiles/local/bin/foot-open-github-ref.sh {
         x_open_url = lib.getExe x-open-url;
         git = lib.getExe pkgs.git;
         jq = lib.getExe pkgs.jq;
+        gh = lib.getExe pkgs.gh;
       }));
   # Single POSIX-ERE regex used by foot for Ctrl+Shift+o. Capture group 1
   # carries the match (foot uses `matches[1]`); it includes at most one
@@ -25,7 +26,7 @@ let
   footGhContent =
     "[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}/[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9._-]+(#[0-9]+)?"
     + "|[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+#[0-9]+"
-    + "|[A-Za-z0-9][A-Za-z0-9._-]*#[0-9]+" + "|#[0-9]+";
+    + "|[A-Za-z0-9][A-Za-z0-9._-]* ?#[0-9]+" + "|#[0-9]+";
   footGhRegex =
     "([^A-Za-z0-9_./#-](${footGhContent})|^(${footGhContent}))([^A-Za-z0-9_-]|$)";
   # git-wt lifecycle hooks (wt.hook / wt.deletehook in ~/.gitconfig)
