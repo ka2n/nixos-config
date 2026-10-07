@@ -2,9 +2,9 @@
 # via x-open-url. The regex captures one of:
 #   <host>/<org>/<repo>[#<num>]   e.g. github.com/foo/bar, github.com/foo/bar#42
 #   <org>/<repo>#<num>            e.g. org/repo#123
-#   <repo>#<num>                  e.g. mscfb#1   (host/org inferred from git origin)
+#   <repo>#<num>                  e.g. mscfb#1   (org from ~/src checkout, else git origin)
 #   <repo> #<num>                 e.g. mr-tf #4884 (same; falls back to #<num> if
-#                                 <repo> is not a GitHub repo, e.g. "request #917")
+#                                 <repo> is neither local nor a GitHub repo, e.g. "request #917")
 #   #<num>                        e.g. #123     (host/org/repo inferred from git origin)
 # The match may start with a single boundary character (whitespace or
 # punctuation) — strip it before parsing.
@@ -53,6 +53,14 @@ infer_from_origin() {
   [ -n "$host" ] && [ -n "$org" ] && [ -n "$repo" ]
 }
 
+# The referenced repo often lives in a different org than the current one, so
+# prefer the org of a unique local checkout at ~/src/<host>/<org>/<repo>.
+find_local_org() {
+  set -- "$HOME/src/$host"/*/"$1"
+  [ $# -eq 1 ] && [ -d "$1" ] || return 1
+  org=${1%/*}; org=${org##*/}
+}
+
 url=""
 case "$ref" in
   http://*|https://*)
@@ -77,7 +85,8 @@ case "$ref" in
     r=${ref%% *}
     num=${ref##*#}
     if infer_from_origin; then
-      if [ "$host" != github.com ] || @gh@ api "repos/$org/$r" --silent 2>/dev/null; then
+      if find_local_org "$r" || [ "$host" != github.com ] \
+          || @gh@ api "repos/$org/$r" --silent 2>/dev/null; then
         repo=$r
       fi
       url="https://$host/$org/$repo/issues/$num"
@@ -87,6 +96,7 @@ case "$ref" in
     r=${ref%#*}
     num=${ref##*#}
     if infer_from_origin; then
+      find_local_org "$r" || true
       url="https://$host/$org/$r/issues/$num"
     fi
     ;;
