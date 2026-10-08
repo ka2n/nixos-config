@@ -40,6 +40,10 @@ return {
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"MunifTanjim/nui.nvim",
+			{
+				"ColinKennedy/mega.cmdparse",
+				dependencies = { "ColinKennedy/mega.logging" },
+			},
 			"nvim-tree/nvim-web-devicons",
 			{
 				"HakonHarnes/img-clip.nvim",
