@@ -561,19 +561,20 @@ in {
         before_sleep_cmd = "loginctl lock-session";
         after_sleep_cmd = "${pkgs.wlopm}/bin/wlopm --on '*'";
       };
+      # Invalid ScreenSaver UnInhibit calls can corrupt hypridle's inhibitor counter.
       listener = [
         {
           timeout = lockTimeout;
-          on-timeout = "loginctl lock-session";
+          on-timeout = "if ! ${pkgs.systemd}/bin/systemctl --user is-active --quiet caffeine.service; then loginctl lock-session; fi";
         }
         {
           timeout = screenOffTimeout;
-          on-timeout = "${pkgs.wlopm}/bin/wlopm --off '*'";
+          on-timeout = "if ! ${pkgs.systemd}/bin/systemctl --user is-active --quiet caffeine.service; then ${pkgs.wlopm}/bin/wlopm --off '*'; fi";
           on-resume = "${pkgs.wlopm}/bin/wlopm --on '*'";
         }
         {
           timeout = suspendTimeout;
-          on-timeout = "systemctl suspend";
+          on-timeout = "if ! ${pkgs.systemd}/bin/systemctl --user is-active --quiet caffeine.service; then systemctl suspend; fi";
         }
       ];
     };
