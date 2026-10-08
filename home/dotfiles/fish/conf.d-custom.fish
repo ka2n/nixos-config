@@ -84,7 +84,7 @@ set -gx MIRU_PAGER_STYLE pink
 set -U FZF_DEFAULT_OPTS --ansi --height=40% --layout=reverse
 
 
-if type -q fzf
+if test -x @fzf@
     function fzf_ghq_select_repository
         set -l query (commandline)
         set -l fzf_flags $FZF_DEFAULT_OPTS
@@ -96,7 +96,7 @@ if type -q fzf
         set -a fzf_flags --preview "bat --color=always --style=header,grid --line-range :80 (ghq root)/{}/README.*"
         set -a roots_flags --ignore-dir "node_modules,vendor,testdata,external-docs,examples"
 
-        ghq list --full-path | roots $roots_flags | fzf $fzf_flags | read line
+        ghq list --full-path | roots $roots_flags | @fzf@ $fzf_flags | read line
 
         if [ $line ]
             cd "$line"
@@ -122,7 +122,7 @@ if type -q fzf
 
         # fd を使ってディレクトリのみを検索
         set -l fd_cmd (command -v fd || echo "fd")
-        set -l select ($fd_cmd --hidden --type d --color=always . $dir 2>/dev/null | fzf +m --prompt="Directory> " $FZF_DEFAULT_OPTS --query "$fzf_query")
+        set -l select ($fd_cmd --hidden --type d --color=always . $dir 2>/dev/null | @fzf@ +m --prompt="Directory> " $FZF_DEFAULT_OPTS --query "$fzf_query")
 
         if not test -z "$select"
             cd "$select"
@@ -152,7 +152,7 @@ if type -q fzf
         # fd を使用してファイルとディレクトリを検索
         set -l fd_cmd (command -v fd || echo "fd")
         set -l results
-        $fd_cmd --hidden --color=always . $dir 2>/dev/null | fzf -m $FZF_DEFAULT_OPTS --query "$fzf_query" | while read -l s
+        $fd_cmd --hidden --color=always . $dir 2>/dev/null | @fzf@ -m $FZF_DEFAULT_OPTS --query "$fzf_query" | while read -l s
             set results $results $s
         end
 
@@ -180,7 +180,7 @@ if type -q fzf
         end
 
         # Format: "* branch  path" (current) or "  branch  path"
-        git wt --json 2>/dev/null | jq -r '.[] | (if .current then "* " else "  " end) + .branch + "\t" + .path' | fzf $fzf_flags | read line
+        git wt --json 2>/dev/null | jq -r '.[] | (if .current then "* " else "  " end) + .branch + "\t" + .path' | @fzf@ $fzf_flags | read line
 
         if [ $line ]
             set -l branch (echo $line | sed 's/^[* ] *//' | cut -f1)
