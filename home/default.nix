@@ -270,15 +270,12 @@ in {
   home.sessionPath = [
     "$HOME/go/bin"
     "$HOME/.local/bin"
-    "$HOME/.local/share/aquaproj-aqua/bin"
   ];
 
   home.sessionVariables = {
     SSH_AUTH_SOCK = "$XDG_RUNTIME_DIR/ssh-agent.socket";
     GITHUB_USER = "ka2n";
     EDITOR = "nvim";
-    AQUA_GLOBAL_CONFIG = "$HOME/.config/aquaproj-aqua/aqua.yaml";
-    AQUA_POLICY_CONFIG = "$HOME/.config/aquaproj-aqua/aqua-policy.yaml";
 
     # GTK_IM_MODULE is intentionally NOT set: with fcitx5 waylandFrontend=true,
     # GTK4 + Wayland uses text-input-v3 directly. Forcing GTK_IM_MODULE=fcitx
@@ -477,12 +474,6 @@ in {
 
   # Phase 1: Starship
   xdg.configFile."starship.toml".source = ./dotfiles/starship.toml;
-
-  # Phase 2: Aqua package manager
-  xdg.configFile."aquaproj-aqua/aqua.yaml".source =
-    ./dotfiles/aquaproj-aqua/aqua.yaml;
-  xdg.configFile."aquaproj-aqua/aqua-policy.yaml".source =
-    ./dotfiles/aquaproj-aqua/aqua-policy.yaml;
 
   # Phase 3: fcitx5-cskk辞書設定 (XDG_DATA_HOME, key=value format)
   home.file.".local/share/fcitx5/cskk/dictionary_list".text =
