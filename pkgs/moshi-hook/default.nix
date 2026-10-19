@@ -13,7 +13,7 @@
 # Latest version:  curl -fsSL https://cdn.getmoshi.app/hook/latest/version.txt
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "moshi-hook";
-  version = "0.4.27";
+  version = "0.4.32";
 
   # One entry per system: the upstream archive's OS_ARCH suffix and its hash.
   # Kept in a single attrset (not two parallel maps) so scripts/update.sh cannot
@@ -21,10 +21,10 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   src =
     let
       sources = {
-        x86_64-linux = { arch = "Linux_x86_64"; hash = "sha256-TeM83cCRdxczujUEVbmYVpqBmgxc21vc1K9BeMLlR+M="; };
-        aarch64-linux = { arch = "Linux_arm64"; hash = "sha256-u7Ve9+yUSFRI+NGo6i5gACjVej41NvYiB6CUsgENZAs="; };
-        x86_64-darwin = { arch = "Darwin_x86_64"; hash = "sha256-feu9F+ZLsrYhAdiGe2wqLB050m5kW7FKaxnK+Z/3yQQ="; };
-        aarch64-darwin = { arch = "Darwin_arm64"; hash = "sha256-K2kADiXuSMq2HEXLNrNbFp4uD+g5k0rFZ0BiFgMQ8F0="; };
+        x86_64-linux = { arch = "Linux_x86_64"; hash = "sha256-Ov0duFUXLX9PRQB+mcr7+y91Ar0peYH1x5L8WS/VtjI="; };
+        aarch64-linux = { arch = "Linux_arm64"; hash = "sha256-cvA8OaLN3g6fjIzX6hiXFFQ3LZx20/uHqzCt3wJX7kk="; };
+        x86_64-darwin = { arch = "Darwin_x86_64"; hash = "sha256-gzsI6EJe1g4oUUu0FUOQBiV4+eN9gOgezc2O3fp8BqU="; };
+        aarch64-darwin = { arch = "Darwin_arm64"; hash = "sha256-dns4Q6WU6MuoxRH6z0gsu3c7w+tFMLFzuBH6gzNFDQY="; };
       };
       source = sources.${stdenvNoCC.hostPlatform.system}
         or (throw "moshi-hook: unsupported system ${stdenvNoCC.hostPlatform.system}");
