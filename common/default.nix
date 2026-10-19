@@ -266,7 +266,7 @@ in {
     inputs.herdr-gpui.packages.${pkgs.stdenv.hostPlatform.system}.default
     pkgs.claude-code
     llm-agents.codex
-    llm-agents.gemini-cli
+    llm-agents.antigravity-cli
     llm-agents.ccusage
     llm-agents.openspec
     llm-agents.ralph-tui
