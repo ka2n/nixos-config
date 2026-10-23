@@ -5,6 +5,18 @@ let
   hasHimmelblau = osConfig.services.himmelblau.enable or false;
   himmelblauPkg =
     if hasHimmelblau then osConfig.services.himmelblau.package else null;
+  agentInstructionFragments =
+    map (name: builtins.readFile (./dotfiles/agents/instructions + "/${name}.md")) [
+      "principal"
+      "tools"
+      "documents"
+      "agent-launch"
+      "code-style"
+      "git"
+      "github"
+    ];
+  mkAgentInstructions = rtkRef:
+    lib.concatStrings agentInstructionFragments + "@${rtkRef}\n";
   x-open-url = pkgs.writeScriptBin "x-open-url" ''
     #!${lib.getExe' pkgs.nodejs "node"}
     ${builtins.readFile ./dotfiles/local/bin/x-open-url.js}
@@ -850,8 +862,11 @@ in {
     recursive = true;
   };
 
-  # Codex CLI: AGENTS.md (share same source as CLAUDE.md)
-  home.file.".codex/AGENTS.md".source = ./dotfiles/claude/CLAUDE.md;
+  # CLAUDE.md / AGENTS.md share fragments; only the RTK.md reference differs
+  # (`rtk init --codex` requires an absolute path)
+  home.file.".claude/CLAUDE.md".text = mkAgentInstructions "RTK.md";
+  home.file.".codex/AGENTS.md".text =
+    mkAgentInstructions "${config.home.homeDirectory}/.codex/RTK.md";
 
   home.file.".pi/agent/keybindings.json".source = ./dotfiles/pi/keybindings.json;
 
