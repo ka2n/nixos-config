@@ -854,7 +854,7 @@ in {
     recursive = true;
   };
 
-  # Codex needs an absolute RTK.md path (`rtk init --codex`)
+  # Codex needs an absolute RTK.md path (`rtk init --codex`); pi uses an rtk extension instead.
   home.file.".claude/CLAUDE.md".text = concatInstructionFragments [
     "principal"
     "tools"
@@ -874,6 +874,33 @@ in {
     "git"
     "github"
   ] + "@${config.home.homeDirectory}/.codex/RTK.md\n";
+  home.file.".pi/agent/AGENTS.md".text = concatInstructionFragments [
+    "principal"
+    "tools"
+    "documents"
+    "code-style"
+    "git"
+    "github"
+  ];
+
+  # Codex custom subagent role. config.toml is written by Codex itself, so the
+  # role registration is appended once instead of managing the whole file.
+  home.file.".codex/agents/tech-researcher.toml".source =
+    ./dotfiles/codex/agents/tech-researcher.toml;
+  home.activation.codexAgentRoles = lib.hm.dag.entryAfter [ "writeBoundary" ] (
+    let grep = "${pkgs.gnugrep}/bin/grep";
+    in ''
+      codex_config="$HOME/.codex/config.toml"
+      mkdir -p "$HOME/.codex"
+      if [ ! -e "$codex_config" ] || ! ${grep} -qxF '[agents.tech-researcher]' "$codex_config"; then
+        cat >> "$codex_config" <<'EOF'
+
+      [agents.tech-researcher]
+      description = "Find, fetch and organize external documentation and reference repos into external-docs/ (version-aware)."
+      config_file = "${config.home.homeDirectory}/.codex/agents/tech-researcher.toml"
+      EOF
+      fi
+    '');
 
   home.file.".pi/agent/keybindings.json".source = ./dotfiles/pi/keybindings.json;
 

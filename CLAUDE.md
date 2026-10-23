@@ -54,4 +54,4 @@
 - Skills: `home/dotfiles/claude/skills/<name>/SKILL.md`
 - Agents: `home/dotfiles/claude/agents/<name>.md`
 - To add skill to agent: add `skills: <skill-name>` in frontmatter
-- Global agent instructions: fragments in `home/dotfiles/agents/instructions/*.md`, assembled in `home/default.nix` into `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`
+- Global agent instructions: fragments in `home/dotfiles/agents/instructions/*.md`; each agent lists its fragments in `home/default.nix` (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.pi/agent/AGENTS.md`)
