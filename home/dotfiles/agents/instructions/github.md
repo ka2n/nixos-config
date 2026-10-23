@@ -1,6 +1,7 @@
 ## GitHub and CI
 
 - Use `gh` command for all GitHub-related operations
+- Split multi-part work into stacked PRs with `gh stack` (`gh stack --help`)
 - PR descriptions: Do not include "Test plan" section
 - Never use `git push --force` on main branch
 - Post-push CI monitoring:

@@ -16,13 +16,7 @@ When a command is not found, try these approaches:
   - Recent mise versions share trust across linked git worktrees. Trust the
     equivalent config in the repository's main checkout with `mise trust`; the
     worktree then inherits that trust automatically.
-  - EnterWorktree / subagent `isolation: worktree` also go through `git wt` via the
-    WorktreeCreate/WorktreeRemove hooks, which additionally run direnv and cleanup.
   - In paranoid mode, worktree trust sharing is disabled, so trust each config
     explicitly in the worktree.
 - For browser automation, use `agent-browser` with the system `google-chrome-stable`.
-- Use Codex for analysis when bug fixes fail 3+ times
-- Consult Codex for architecture design discussions
-- Request Codex for code review large changes
-- Use Codex for existing code analysis and implementation planning
 
