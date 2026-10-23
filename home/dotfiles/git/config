@@ -89,6 +89,8 @@
   hook = git-wt-hook
   deletehook = git-wt-deletehook
   nocopy = **/node_modules
+  nocopy = .turbo
+  symlink = external-docs
 
 [credential]
   helper = !gh auth git-credential
