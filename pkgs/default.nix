@@ -7,14 +7,15 @@ let
   # Lightpanda must be selected via `--engine lightpanda` or AGENT_BROWSER_ENGINE on
   # every call; config-file `engine` is not seen here and chromium would win.
   upstreamAgentBrowser = llm-agents.agent-browser;
-  chromiumPath =
-    let
-      m = builtins.match ".*--set AGENT_BROWSER_EXECUTABLE_PATH ([^[:space:]]+).*" upstreamAgentBrowser.postInstall;
-    in
-    if m == null then
-      throw "agent-browser: cannot extract chromium path from llm-agents postInstall; upstream changed, update pkgs/default.nix"
-    else
-      builtins.appendContext (builtins.head m) (builtins.getContext upstreamAgentBrowser.postInstall);
+  chromiumPath = let
+    m = builtins.match ".*--set AGENT_BROWSER_EXECUTABLE_PATH ([^[:space:]]+).*"
+      upstreamAgentBrowser.postInstall;
+  in if m == null then
+    throw
+    "agent-browser: cannot extract chromium path from llm-agents postInstall; upstream changed, update pkgs/default.nix"
+  else
+    builtins.appendContext (builtins.head m)
+    (builtins.getContext upstreamAgentBrowser.postInstall);
   agentBrowserWrapper = final.writeShellScript "agent-browser" ''
     engine="''${AGENT_BROWSER_ENGINE:-chrome}"
     prev=
@@ -27,8 +28,7 @@ let
     fi
     exec -a agent-browser ${upstreamAgentBrowser}/bin/.agent-browser-wrapped "$@"
   '';
-in
-{
+in {
   # mise: use nixpkgs-unstable's prebuilt package so cache.nixos.org hits and
   # `nh os build` doesn't recompile every time.
   mise = pkgs-unstable.mise;
@@ -84,25 +84,6 @@ in
       homepage = "https://github.com/ushironoko/octorus";
       license = final.lib.licenses.mit;
       mainProgram = "octorus";
-    };
-  };
-
-  # tsshd: build from source (7918c43) for XDG_CONFIG_HOME/tsshd/sshd_config support
-  tsshd = final.buildGoModule {
-    pname = "tsshd";
-    version = "0.1.6-unstable-2026-03-22";
-    src = final.fetchFromGitHub {
-      owner = "trzsz";
-      repo = "tsshd";
-      rev = "7918c43b00253873523707c5011a625117c994d6";
-      hash = "sha256-6F7nCAHq9vR0L/RnEHNK2TPi5SbYdr8IjZiwBwdghY8=";
-    };
-    vendorHash = "sha256-c/6jBMrCPYfdWAefN/FQi+gCjejAvNJY/7aI+un6HxE=";
-    meta = {
-      description = "trzsz SSH daemon over UDP";
-      homepage = "https://github.com/trzsz/tsshd";
-      license = final.lib.licenses.mit;
-      mainProgram = "tsshd";
     };
   };
 
