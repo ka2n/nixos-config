@@ -263,7 +263,6 @@ in {
     nodejs
 
     # NOTE: herdr should install via official script, I need live session migration.
-    inputs.herdr-gpui.packages.${pkgs.stdenv.hostPlatform.system}.default
     pkgs.claude-code
     llm-agents.codex
     llm-agents.antigravity-cli
@@ -451,11 +450,12 @@ in {
 
   # Codex reads /etc/codex/config.toml as the system layer beneath ~/.codex/config.toml
   # (which Codex itself rewrites, so it can't be nix-managed). It has no include directive.
-  environment.etc."codex/config.toml".source = (pkgs.formats.toml { }).generate "codex-config.toml" {
-    # Remove once the package layout is fixed: https://github.com/numtide/llm-agents.nix/issues/9887
-    features.daemon_auto_start = false;
-    tui.keymap.global.open_external_editor = [ "ctrl-g" "alt-e" ];
-  };
+  environment.etc."codex/config.toml".source =
+    (pkgs.formats.toml { }).generate "codex-config.toml" {
+      # Remove once the package layout is fixed: https://github.com/numtide/llm-agents.nix/issues/9887
+      features.daemon_auto_start = false;
+      tui.keymap.global.open_external_editor = [ "ctrl-g" "alt-e" ];
+    };
 
   # mise - polyglot runtime manager
   programs.mise.enable = true;
@@ -593,10 +593,8 @@ in {
     '';
   };
 
-  security.pki.caCertificateBlacklist = [
-    "Comodo AAA Services root"
-    "emSign ECC Root CA - G3"
-  ];
+  security.pki.caCertificateBlacklist =
+    [ "Comodo AAA Services root" "emSign ECC Root CA - G3" ];
 
   # Local CA for HTTPS development (Caddy)
   security.localCA = {

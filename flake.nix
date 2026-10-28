@@ -72,7 +72,6 @@
       url = "github:modem-dev/hunk";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    herdr-gpui.url = "github:penso/herdr-gpui";
     gazelle-tui = {
       url = "github:Zeus-Deus/gazelle-tui";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -110,9 +109,8 @@
             # binding needs libpipewire, but upstream only lists pipewire in
             # runtimeDependencies, so autoPatchelf fails. Drop once fixed.
             (final: prev: {
-              claude-desktop = prev.claude-desktop.overrideAttrs (old: {
-                buildInputs = old.buildInputs ++ [ final.pipewire ];
-              });
+              claude-desktop = prev.claude-desktop.overrideAttrs
+                (old: { buildInputs = old.buildInputs ++ [ final.pipewire ]; });
             })
           ];
         }
