@@ -1,10 +1,9 @@
 { config, pkgs, pkgs-unstable, inputs, lib, llm-agents, osConfig ? null
 , variant ? "desktop", riverBackgroundColor ? null, ... }:
 let
-  # Check if himmelblau is enabled via NixOS module and get package from there
   hasHimmelblau = osConfig.services.himmelblau.enable or false;
-  himmelblauPkg =
-    if hasHimmelblau then osConfig.services.himmelblau.package else null;
+  himmelblauSsoPackage =
+    if hasHimmelblau then osConfig.services.himmelblau.ssoPackage else null;
   concatInstructionFragments = names:
     lib.concatMapStrings
     (name: builtins.readFile (./dotfiles/agents/instructions + "/${name}.md"))
@@ -252,9 +251,6 @@ in {
     (pkgs.writeShellScriptBin "ralph"
       (builtins.readFile ./dotfiles/local/bin/ralph.sh))
 
-    (pkgs.writeShellScriptBin "himmelblau-status"
-      (builtins.readFile ./dotfiles/local/bin/himmelblau-status.sh))
-
     (pkgs.writeShellScriptBin "git-delete-merged"
       (builtins.replaceStrings [ "@git@" "@git_wt@" ] [
         (lib.getExe pkgs.git)
@@ -269,7 +265,12 @@ in {
       ] (builtins.readFile ./dotfiles/local/bin/tf-pr.sh)))
 
     pkgs.claude-desktop
-  ] ++ ntnWorkspaceBins;
+  ] ++ ntnWorkspaceBins ++ lib.optional hasHimmelblau
+    (pkgs.writeShellScriptBin "himmelblau-status" (builtins.readFile
+      (pkgs.replaceVars ./dotfiles/local/bin/himmelblau-status.sh {
+        aad_tool = lib.getExe' inputs.himmelblau.packages.${pkgs.stdenv.hostPlatform.system}.aad-tool "aad-tool";
+        sso_helper = lib.getExe' himmelblauSsoPackage "linux-entra-sso";
+      })));
 
   home.sessionPath = [
     "$HOME/go/bin"
@@ -1140,7 +1141,7 @@ in {
   programs.firefox = {
     enable = true;
     nativeMessagingHosts = [ pkgs.tridactyl-native ]
-      ++ lib.optional hasHimmelblau himmelblauPkg;
+      ++ lib.optional hasHimmelblau himmelblauSsoPackage;
     package = zenBrowser;
     configPath = ".zen";
 

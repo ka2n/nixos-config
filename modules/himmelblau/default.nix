@@ -1,23 +1,8 @@
-# Supplemental configuration for the upstream himmelblau NixOS module.
-# The upstream module (inputs.himmelblau.nixosModules.himmelblau) provides:
-#   himmelblau.conf generation, NSS, PAM (account/auth/session), systemd
-#   services (himmelblaud + himmelblaud-tasks + user-scope broker), Chromium
-#   native-messaging-host manifests, D-Bus broker service activation, and the
-#   typed options under services.himmelblau.settings (auto-generated from
-#   docs-xml).
-# This module adds what the upstream still misses for our setup.
 { config, lib, pkgs, inputs, ... }:
 
 let
   cfg = config.services.himmelblau;
   system = pkgs.stdenv.hostPlatform.system;
-  upstreamPackage = inputs.himmelblau.packages.${system}.himmelblau;
-  # Upstream nix/packages/himmelblau.nix hardcodes version = "3.0.0" across all
-  # 3.x releases; read the real version from the workspace Cargo.toml instead.
-  upstreamVersion =
-    (builtins.fromTOML
-      (builtins.readFile "${inputs.himmelblau}/Cargo.toml")).workspace.package.version;
-
   # linux-entra-sso Chrome extension (Entra ID SSO via the himmelblau broker).
   # Must match allowed_origins in the native-messaging-host manifest that
   # upstream installs at /etc/opt/chrome/native-messaging-hosts/linux_entra_sso.json.
@@ -166,33 +151,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    # Upstream nix/packages/himmelblau.nix does not enable the `tpm` cargo
-    # feature for himmelblau_unix_common, so the daemon falls back to a
-    # software HSM even with TPM hardware available. Force-enable it and
-    # add tpm2-tss so the resulting binary can talk to /dev/tpmrm0.
-    # Also override the hardcoded "3.0.0" upstream sets in nix/packages.
-    services.himmelblau.package = lib.mkForce (upstreamPackage.overrideAttrs (old: {
-      buildInputs = (old.buildInputs or []) ++ [ pkgs.tpm2-tss ];
-      cargoBuildFeatures = "himmelblau_unix_common/tpm";
-      version = upstreamVersion;
-      name = "${old.pname}-${upstreamVersion}";
-      __intentionallyOverridingVersion = true;
-      # 3.1.11 added src/o365/tests/url_handler.rs (GHSA-4f5j-9xgm-8pvr), which
-      # spawns src/o365/src/o365-url-handler.sh plus stub scripts the test
-      # itself writes. All of them carry a `#!/usr/bin/env bash` shebang, which
-      # does not resolve inside the Nix build sandbox (no /usr/bin/env), so the
-      # three tests fail the checkPhase with ENOENT / "bad interpreter".
-      # Rewrite the shebangs to the store bash; patchShebangs would fix the
-      # installed scripts, but it only runs at fixup, i.e. after the tests.
-      postPatch = (old.postPatch or "") + ''
-        substituteInPlace \
-            src/o365/src/o365-url-handler.sh \
-            src/o365/src/o365-multi.sh \
-            src/o365/src/o365.sh \
-            src/o365/tests/url_handler.rs \
-          --replace-fail "#!/usr/bin/env bash" "#!${pkgs.bash}/bin/bash"
-      '';
-    }));
+    environment.systemPackages = [ inputs.himmelblau.packages.${system}.aad-tool ];
 
     # TPM2 support for HSM binding (abrmd NOT needed - direct /dev/tpmrm0 access)
     security.tpm2 = {
@@ -209,20 +168,23 @@ in {
       pamServiceNames = cfg.pamServices
         ++ lib.optional config.security.sudo.enable "sudo"
         ++ lib.optional config.security.doas.enable "doas"
+        ++ lib.optional config.security.polkit.enable "polkit-1"
         ++ lib.optional config.services.sshd.enable "sshd";
-      passwordRule = service: {
+      pamRules = service: {
+        # Preserve 3.1.15 abort handling, missing from the 4.x NixOS module.
+        rules.auth.himmelblau.control = lib.mkForce
+          "[success=done new_authtok_reqd=done abort=die default=ignore]";
         rules.password.himmelblau = {
           order = config.security.pam.services.${service}.rules.password.unix.order - 10;
           control = "sufficient";
-          modulePath = "${cfg.package}/lib/libpam_himmelblau.so";
+          modulePath = "${cfg.pamPackage.lib}/lib/libpam_himmelblau.so";
           settings.ignore_unknown_user = true;
           settings.debug = cfg.debugFlag;
         };
       };
-    in lib.genAttrs pamServiceNames passwordRule;
+    in lib.genAttrs pamServiceNames pamRules;
 
     environment.etc = lib.mkMerge [
-      # User map file generation
       (lib.mkIf (cfg.userMap != { }) {
         "himmelblau/user-map".text = lib.concatStringsSep "\n"
           (lib.mapAttrsToList (local: upn: "${local}:${upn}") cfg.userMap);
@@ -250,10 +212,17 @@ in {
     # home-manager's `programs.firefox.nativeMessagingHosts`. Upstream's
     # nixosModules.himmelblau only wires `programs.firefox`, so this hook
     # is still required.
-    programs.zen-browser.nativeMessagingHosts.packages = [ cfg.package ];
+    programs.zen-browser.nativeMessagingHosts.packages = [ cfg.ssoPackage ];
 
-    # HSM PIN initialization — encrypts hsm-pin with TPM via systemd-creds.
-    # Only runs if the encrypted credential does not yet exist (matching upstream).
+    # 4.0.8 regresses the upstream policy URL to 1.7.1; retain 3.1.15's version.
+    programs.firefox.policies.Extensions.Install = lib.mkForce [
+      "https://github.com/siemens/linux-entra-sso/releases/download/v1.9.1/linux_entra_sso-1.9.1.xpi"
+    ];
+
+    # The broker discovers these at runtime for interactive authentication.
+    systemd.user.services.himmelblau-broker.path = [ pkgs.pinentry-gnome3 pkgs.xdg-utils ];
+
+
     systemd.services.himmelblau-hsm-pin-init = {
       description = "Himmelblau HSM PIN Initialization";
       wantedBy = [ "multi-user.target" ];
@@ -270,46 +239,30 @@ in {
       };
     };
 
-    # Systemd service hardening not covered by upstream module
     systemd.services.himmelblaud = {
       wants = [ "himmelblau-hsm-pin-init.service" ];
       after = [ "himmelblau-hsm-pin-init.service" ];
       serviceConfig = {
         # PRT preservation across service restarts
         FileDescriptorStoreMax = 10;
-        # TPM access via tss group
-        SupplementaryGroups = [ "tss" ];
-        CacheDirectoryMode = "0700";
+        FileDescriptorStorePreserve = "restart";
+        CacheDirectoryMode = lib.mkForce "0700";
         StateDirectoryMode = "0700";
         # Pass the encrypted HSM PIN to himmelblaud via systemd credentials.
         # systemd decrypts it (using TPM if bound) and exposes at
         # /run/credentials/himmelblaud.service/hsm-pin.
         LoadCredentialEncrypted = "hsm-pin:/var/lib/private/himmelblaud/hsm-pin-nopcr.enc";
       };
-      # Tell himmelblaud to read the HSM PIN from systemd's credential store.
       environment = {
         HIMMELBLAU_HSM_PIN_PATH = "/run/credentials/himmelblaud.service/hsm-pin";
       };
     };
-
-    # NOTE: The NetworkManager dispatcher workaround for
-    # himmelblau-idm/himmelblau#1206 (resume/boot deadlock) was removed in the
-    # 3.1.9 bump. Upstream fixed the root cause in the resolver (releases the DB
-    # lock before the offline-auth fallback) and reverted the dispatcher script,
-    # deleting platform/common/NetworkManager/dispatcher.d/99-himmelblau-restart-on-down.
-    # Referencing it here would fail evaluation, and the workaround is now
-    # obsolete. If the socket-hang symptom ever returns, reintroduce a local copy
-    # of the script rather than pointing at the (now absent) upstream path.
 
     systemd.services.himmelblaud-tasks.serviceConfig = {
       RestartSec = "1s";
       # IPv4 + Unix only — himmelblaud_tasks fails on IPv6 with
       # "federation provider not set" errors before falling back to IPv4.
       RestrictAddressFamilies = lib.mkForce "AF_INET AF_UNIX";
-      # NOTE: The ReadWritePaths mkForce that added /var/cache/himmelblau-policies
-      # (required whenever apply_policy = true) was dropped in the 3.1.12 bump —
-      # upstream now sets CacheDirectory = "himmelblau-policies" and lists the
-      # same path in ReadWritePaths itself.
       # Upstream nixosModule sets no CapabilityBoundingSet, whereas the
       # cargo-deb/rpm generator drops these caps. Apply the same set so
       # tasks can chown user dirs and switch UIDs for home creation.

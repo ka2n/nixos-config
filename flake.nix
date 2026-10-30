@@ -16,34 +16,8 @@
       url = "github:NitorCreations/nix-mdatp";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Pinned to 3.1.15 — carries the #1206 resume/boot deadlock root fix from
-    # 3.1.9 (resolver releases the DB lock before the offline-auth fallback),
-    # which let upstream revert the NetworkManager dispatcher workaround (that
-    # script is now deleted; see modules/himmelblau), the 3.1.10 NSS shadow fix
-    # (GDM stops hiding Himmelblau users as "locked"), the #1344 NSS rate-limit
-    # fix (local-only names skip the Entra GetCredentialType probe), PCR7-free
-    # HSM PIN sealing (Secure Boot cert update safe) and automatic MFA fallback.
-    # 3.1.11 is a security release: PamChangeAuthToken now binds PIN changes to
-    # the calling peer's UID (GHSA-6gp8-pp9v-gx45), subuid/subgid names are
-    # sanitized (GHSA-x259-23ph-65m5), RFC2307 uid/gidNumber inside systemd's
-    # DynamicUser range 61184-65519 are rejected (ours is 1001, unaffected),
-    # the Office 365 URL handler only trusts real M365 origins
-    # (GHSA-4f5j-9xgm-8pvr), and pam_allow_groups denials are terminal in the
-    # PAM account phase (we don't set pam_allow_groups).
-    # 3.1.12 keeps a failed IdP password change re-promptable instead of
-    # discarding the old password, returns `ok` (not done) from the PAM account
-    # check so local modules stay reachable, skips Entra-only post-auth work
-    # (Kerberos cache, profile photo) under OIDC, and adds CacheDirectory to the
-    # himmelblaud-tasks sandbox — which retires our ReadWritePaths mkForce.
-    # 3.1.13 hardens Hello/SSPR fallback (local logins only, no offline remote
-    # Hello PIN/password reauth), delays breakglass password caching until MFA
-    # succeeds, and authenticates the systemd daemon-call bypass. 3.1.14 fixes
-    # auth for tenants with the Intune service principal disabled (#1683) and
-    # idmap bindgen with newer rustc.
-    # 3.1.15 replaces the vulnerable RSA implementation, hardens cache DB
-    # permissions, fixes broker token expiry units and NixOS PAM auth ordering.
-    # Don't follow nixpkgs to use Cachix cache (built against nixpkgs-unstable).
-    himmelblau.url = "github:himmelblau-idm/himmelblau/3.1.15";
+    # Keep upstream nixpkgs for the Himmelblau Cachix binaries.
+    himmelblau.url = "github:himmelblau-idm/himmelblau/4.0.8";
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
