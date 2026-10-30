@@ -371,40 +371,22 @@ in {
     fi
   '';
 
-  # herdr's headless server holds every pane, so it must outlive the
-  # compositor. Launched by hand it lands in foot.service's cgroup, and
-  # foot.service uses the default KillMode=control-group -- so a river
-  # restart tears the foot server down and takes the whole herdr session
-  # with it. Bound to default.target rather than river-session.target for
-  # exactly that reason.
-  #
-  # The binary stays outside Nix (self-update; see NOTE in common/default.nix),
-  # hence the %h path and the guard. `herdr update --handoff` replaces the
-  # running server itself, so don't let systemd race it back up.
-  #
-  # default.target, not river-session.target: lingering is on, so this comes up
-  # at boot and a machine reached only over SSH still finds a server in its own
-  # cgroup. Bound to river-session.target instead, a headless boot would leave
-  # no server at all and the first `herdr` over SSH would spawn one inside that
-  # session's scope -- the same teardown trap the unit exists to avoid, just
-  # moved from foot.service to the SSH session.
-  #
-  # The cost is that the server predates the compositor, so its environment
-  # (which every pane inherits) has no WAYLAND_DISPLAY. That cannot be fixed by
-  # inheritance -- a boot-time process cannot hold a value that only exists once
-  # river starts -- so panes resolve it themselves; see the wayland block in
-  # dotfiles/fish/conf.d-custom.fish.
+  # Restoring panes can launch agents that request keyring credentials. Start
+  # after river imports its display environment so unlock prompts can open.
+  # WantedBy does not stop the server when river exits; keep it independent
+  # of foot.service so compositor restarts preserve panes.
+  # The binary stays outside Nix to support live self-update handoff.
   systemd.user.services.herdr = {
     Unit = {
       Description = "herdr headless server";
-      ConditionPathIsExecutable = "%h/.local/bin/herdr";
+      ConditionFileIsExecutable = "%h/.local/bin/herdr";
     };
     Service = {
       Type = "simple";
       ExecStart = "%h/.local/bin/herdr server";
       Restart = "no";
     };
-    Install.WantedBy = [ "default.target" ];
+    Install.WantedBy = [ "river-session.target" ];
   };
 
   # environment.d is read by the systemd user manager, so this reaches
