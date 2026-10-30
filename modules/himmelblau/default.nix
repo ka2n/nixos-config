@@ -60,12 +60,12 @@ let
 
       if ${tpm2_createprimary} \
               -C o -G ecc256:aes128cfb \
-              -a "DECRYPT|FIXEDPARENT|FIXEDTPM|NODA|RESTRICTED|SENSITIVEDATAORIGIN|USERWITHAUTH" \
+              -a "decrypt|fixedparent|fixedtpm|noda|restricted|sensitivedataorigin|userwithauth" \
               -c "$CTX" >/dev/null 2>&1; then
         echo "SRK: created ECC P-256 primary key"
       elif ${tpm2_createprimary} \
               -C o -G rsa2048:aes128cfb \
-              -a "DECRYPT|FIXEDPARENT|FIXEDTPM|NODA|RESTRICTED|SENSITIVEDATAORIGIN|USERWITHAUTH" \
+              -a "decrypt|fixedparent|fixedtpm|noda|restricted|sensitivedataorigin|userwithauth" \
               -c "$CTX" >/dev/null 2>&1; then
         echo "SRK: ECC not supported, created RSA-2048 primary key"
       else

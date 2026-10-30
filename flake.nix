@@ -16,7 +16,7 @@
       url = "github:NitorCreations/nix-mdatp";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Pinned to 3.1.14 — carries the #1206 resume/boot deadlock root fix from
+    # Pinned to 3.1.15 — carries the #1206 resume/boot deadlock root fix from
     # 3.1.9 (resolver releases the DB lock before the offline-auth fallback),
     # which let upstream revert the NetworkManager dispatcher workaround (that
     # script is now deleted; see modules/himmelblau), the 3.1.10 NSS shadow fix
@@ -40,8 +40,10 @@
     # succeeds, and authenticates the systemd daemon-call bypass. 3.1.14 fixes
     # auth for tenants with the Intune service principal disabled (#1683) and
     # idmap bindgen with newer rustc.
+    # 3.1.15 replaces the vulnerable RSA implementation, hardens cache DB
+    # permissions, fixes broker token expiry units and NixOS PAM auth ordering.
     # Don't follow nixpkgs to use Cachix cache (built against nixpkgs-unstable).
-    himmelblau.url = "github:himmelblau-idm/himmelblau/3.1.14";
+    himmelblau.url = "github:himmelblau-idm/himmelblau/3.1.15";
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
