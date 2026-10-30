@@ -94,6 +94,7 @@ in {
       # never MDM-enrolled. 30 lets enrollment complete.
       request_timeout = 30;
       enable_hello = true;
+      enable_passwordless_security_key = true;
       enable_sfa_fallback = false;
       enable_experimental_mfa = true;
       hello_pin_min_length = 6;
