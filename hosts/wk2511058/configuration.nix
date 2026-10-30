@@ -75,7 +75,7 @@ in {
 
   services.himmelblau = {
     enable = true;
-    debugFlag = true;
+    debugFlag = false;
     pamServices = [ "passwd" "login" "systemd-user" "gtklock" "greetd" ];
     userMap = lib.optionalAttrs (privateConfig ? username) {
       katsuma = privateConfig.username;
