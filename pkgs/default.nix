@@ -53,6 +53,7 @@ in {
   };
 
   lightpanda = final.callPackage ./lightpanda { };
+  rustxng = final.callPackage ./rustxng { };
 
   libcskk = final.callPackage ./libcskk { };
   fcitx5-cskk = final.callPackage ./fcitx5-cskk {

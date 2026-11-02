@@ -123,6 +123,7 @@ in {
     pkgs.curlie
     pkgs.git-wt
     pkgs.go-readability
+    pkgs.rustxng
     inputs.miru.packages.${pkgs.stdenv.hostPlatform.system}.default
     pkgs.mo
     pkgs.n
@@ -367,6 +368,22 @@ in {
         "$herdr_config"
     fi
   '';
+
+  systemd.user.services.rustxng = {
+    Unit = {
+      Description = "RustXNG local search engine";
+      After = [ "network-online.target" ];
+    };
+    Service = {
+      ExecStart = "${lib.getExe pkgs.rustxng} --bind 127.0.0.1 --port 8888";
+      Environment = [ "RUSTXNG_IDLE_TIMEOUT=0" ];
+      Restart = "on-failure";
+      RestartSec = 5;
+      NoNewPrivileges = true;
+      PrivateTmp = true;
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
 
   # Restoring panes can launch agents that request keyring credentials. Start
   # after river imports its display environment so unlock prompts can open.
