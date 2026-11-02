@@ -8,6 +8,12 @@ let
     lib.concatMapStrings
     (name: builtins.readFile (./dotfiles/agents/instructions + "/${name}.md"))
     names;
+  web-search = pkgs.writeShellScriptBin "web-search"
+    (builtins.readFile
+      (pkgs.replaceVars ./dotfiles/local/bin/web-search.sh {
+        curl = lib.getExe pkgs.curl;
+        jq = lib.getExe pkgs.jq;
+      }));
   x-open-url = pkgs.writeScriptBin "x-open-url" ''
     #!${lib.getExe' pkgs.nodejs "node"}
     ${builtins.readFile ./dotfiles/local/bin/x-open-url.js}
@@ -124,6 +130,7 @@ in {
     pkgs.git-wt
     pkgs.go-readability
     pkgs.rustxng
+    web-search
     inputs.miru.packages.${pkgs.stdenv.hostPlatform.system}.default
     pkgs.mo
     pkgs.n

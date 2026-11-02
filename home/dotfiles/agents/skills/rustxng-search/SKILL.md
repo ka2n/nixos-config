@@ -5,17 +5,16 @@ description: Search the public web using the local RustXNG service, with optiona
 
 # RustXNG search
 
-RustXNG runs at `http://127.0.0.1:8888`. Use the bundled script with Bash;
-resolve its path relative to this skill directory (shared by Claude and Codex).
-Requires `curl` and `jq`.
+RustXNG runs at `http://127.0.0.1:8888`. Use the Nix-installed `web-search`
+command, shared by Claude and Codex.
 
 ```bash
-bash ~/.agents/skills/rustxng-search/scripts/search.sh 'NixOS Home Manager'
-bash ~/.agents/skills/rustxng-search/scripts/search.sh 'tokio runtime' include_domains=tokio.rs include_raw_content=1
-bash ~/.agents/skills/rustxng-search/scripts/search.sh 'Rust release' time_range=week max_results=3
+web-search 'NixOS Home Manager'
+web-search 'tokio runtime' include_domains=tokio.rs include_raw_content=1
+web-search 'Rust release' time_range=week max_results=3
 ```
 
-The script returns JSON with titles, URLs, snippets, optional `raw_content`, and
+The command returns JSON with titles, URLs, snippets, optional `raw_content`, and
 unresponsive engines. It defaults to five results; request page text only when
 needed to support the answer. Domain filters accept comma-separated domains.
 Other supported parameters: `exclude_domains`, `language`, `categories`, and

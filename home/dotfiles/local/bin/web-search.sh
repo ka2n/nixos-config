@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+curl=@curl@
+jq=@jq@
+
 if (( $# == 0 )) || [[ -z $1 ]]; then
-  echo 'Usage: search.sh QUERY [max_results=5] [include_raw_content=1] [include_domains=example.com] [time_range=week] ...' >&2
+  echo 'Usage: web-search QUERY [max_results=5] [include_raw_content=1] [include_domains=example.com] [time_range=week] ...' >&2
   exit 2
 fi
 
@@ -31,10 +34,10 @@ if [[ ! $limit =~ ^[0-9]{1,3}$ ]] || (( 10#$limit < 1 || 10#$limit > 200 )); the
 fi
 
 base_url=${RUSTXNG_URL:-http://127.0.0.1:8888}
-curl --fail-with-body --silent --show-error --connect-timeout 5 --max-time 60 \
+"$curl" --fail-with-body --silent --show-error --connect-timeout 5 --max-time 60 \
   --get "${base_url%/}/search" \
   --data-urlencode "q=$query" --data-urlencode 'format=json' \
   --data-urlencode "max_results=$limit" "${params[@]}" |
-  jq '{query, results: [.results[] | {title, url, content} +
+  "$jq" '{query, results: [.results[] | {title, url, content} +
     (if .raw_content then {raw_content} else {} end)],
     unresponsive_engines: (.unresponsive_engines // [])}'
