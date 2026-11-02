@@ -1,5 +1,5 @@
 ---
-name: rustxng-search
+name: web-search
 description: Search the web to find sources, verify facts, and research current information. Use for explicit search or lookup requests, recent news and developments, information that may have changed, unfamiliar or uncertain topics, and finding official documentation or references. Supports page text retrieval and domain or date filters. Not for local files or private account searches.
 ---
 

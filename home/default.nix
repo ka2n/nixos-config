@@ -915,15 +915,16 @@ in {
   home.activation.agentsSkills = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     skills_dir="$HOME/.agents/skills"
     mkdir -p "$skills_dir"
+    rm -rf "$skills_dir/rustxng-search"
 
     # Managed skills: remove and re-copy each individually to preserve unmanaged skills
-    managed_skills="save-url-to-doc code-reviewer simplify frontend-design commit commit-push commit-push-pr pr-comments organize-commits opsx-run rebase-main take-screenshot session-review-report refine-test rustxng-search"
+    managed_skills="save-url-to-doc code-reviewer simplify frontend-design commit commit-push commit-push-pr pr-comments organize-commits opsx-run rebase-main take-screenshot session-review-report refine-test web-search"
     for s in $managed_skills; do
       rm -rf "$skills_dir/$s"
     done
 
     # Shared skills (agents/skills) — deployed to both Codex and Claude
-    cp -rL ${./dotfiles/agents/skills/rustxng-search} "$skills_dir/rustxng-search"
+    cp -rL ${./dotfiles/agents/skills/web-search} "$skills_dir/web-search"
     cp -rL ${
       ./dotfiles/agents/skills/save-url-to-doc
     } "$skills_dir/save-url-to-doc"
@@ -960,7 +961,8 @@ in {
     # Claude Code: symlink ~/.claude/skills/<name> -> ~/.agents/skills/<name>
     claude_skills_dir="$HOME/.claude/skills"
     mkdir -p "$claude_skills_dir"
-    claude_managed_skills="save-url-to-doc commit commit-push commit-push-pr rebase-main organize-commits opsx-run pr-comments take-screenshot session-review-report simplify refine-test rustxng-search"
+    rm -f "$claude_skills_dir/rustxng-search"
+    claude_managed_skills="save-url-to-doc commit commit-push commit-push-pr rebase-main organize-commits opsx-run pr-comments take-screenshot session-review-report simplify refine-test web-search"
     for s in $claude_managed_skills; do
       rm -rf "$claude_skills_dir/$s"
       ln -s "$skills_dir/$s" "$claude_skills_dir/$s"
