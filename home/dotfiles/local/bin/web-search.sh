@@ -4,8 +4,43 @@ set -euo pipefail
 curl=@curl@
 jq=@jq@
 
+usage() {
+  cat <<'EOF'
+Usage: web-search QUERY [PARAMETER=VALUE ...]
+       web-search --help
+
+Search the public web through RustXNG and return JSON.
+
+Options:
+  -h, --help                Show this help and exit
+
+Parameters:
+  max_results=5             Number of results (1-200; default: 5)
+  include_raw_content=1     Include text from the top pages
+  include_domains=DOMAIN   Only these domains (comma-separated)
+  exclude_domains=DOMAIN   Exclude these domains (comma-separated)
+  time_range=week          Date filter: day, week, month, or year
+  language=ja              Search language
+  categories=general       Search category, e.g. general, news, or science
+  pageno=1                 Result page number
+
+Environment:
+  RUSTXNG_URL               Base URL (default: http://127.0.0.1:8888)
+
+Examples:
+  web-search 'NixOS Home Manager'
+  web-search 'tokio runtime' include_domains=tokio.rs include_raw_content=1
+  web-search 'Rust release' time_range=week max_results=3
+EOF
+}
+
+if [[ ${1:-} == --help || ${1:-} == -h ]]; then
+  usage
+  exit 0
+fi
+
 if (( $# == 0 )) || [[ -z $1 ]]; then
-  echo 'Usage: web-search QUERY [max_results=5] [include_raw_content=1] [include_domains=example.com] [time_range=week] ...' >&2
+  usage >&2
   exit 2
 fi
 
