@@ -2,6 +2,14 @@ set fish_greeting
 
 set -g fish_escape_delay_ms 600
 
+# Tailscale SSH can launch Herdr without the runtime directory in its environment.
+if not set -q XDG_RUNTIME_DIR; or test -z "$XDG_RUNTIME_DIR"
+    set -l runtime_dir /run/user/(id -u)
+    if test -d "$runtime_dir"; and test -O "$runtime_dir"
+        set -gx XDG_RUNTIME_DIR "$runtime_dir"
+    end
+end
+
 # The herdr server runs as a systemd user service and lingering is on, so it
 # starts at boot -- before river exists. Its environment is what every pane
 # inherits, which left panes with no WAYLAND_DISPLAY / DISPLAY and broke
