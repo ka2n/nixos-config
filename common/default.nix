@@ -270,6 +270,7 @@ in {
     llm-agents.ralph-tui
     agent-browser
     lightpanda
+    osewa
     llm-agents.rtk
     llm-agents.pi
 
