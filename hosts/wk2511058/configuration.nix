@@ -13,6 +13,7 @@ in {
 
   imports = [
     ./hardware-configuration.nix
+    ./work-browser.nix
     ../../common
     ../../modules/himmelblau
     inputs.mdatp.nixosModules.mdatp
