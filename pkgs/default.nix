@@ -101,5 +101,4 @@ in {
   };
   inputactions-ctl = final.callPackage ./inputactions-ctl { };
   jai = final.callPackage ./jai { };
-  gather = final.callPackage ./gather { };
 }

@@ -3,10 +3,10 @@
 
 let
   privateConfigPath = ../../private/laptop.nix;
-  privateConfig =
-    if builtins.pathExists privateConfigPath
-    then import privateConfigPath
-    else { };
+  privateConfig = if builtins.pathExists privateConfigPath then
+    import privateConfigPath
+  else
+    { };
 in {
   # Use latest stable kernel instead of zen for better thermal management
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -32,10 +32,7 @@ in {
     options iwlwifi disable_11be=1 power_save=0
   '';
 
-  environment.systemPackages = [
-    pkgs.foot
-    pkgs.brightnessctl
-  ];
+  environment.systemPackages = [ pkgs.foot pkgs.brightnessctl ];
 
   home-manager = {
     useGlobalPkgs = true;
@@ -50,9 +47,6 @@ in {
       imports = [ ../../home ];
       home.username = "katsuma";
       home.homeDirectory = "/home/katsuma";
-      # Gather desktop (Windows/Electron) via Wine+DXVK on XWayland.
-      # Work laptop only; not needed on junior.
-      home.packages = [ pkgs.gather ];
     };
   };
 
@@ -70,7 +64,8 @@ in {
   # Display manager (greetd+tuigreet - Wayland native, supports himmelblau PAM_TEXT_INFO for MFA)
   services.greetd = {
     enable = true;
-    settings.default_session.command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --sessions ${config.services.displayManager.sessionData.desktops}/share/wayland-sessions";
+    settings.default_session.command =
+      "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --sessions ${config.services.displayManager.sessionData.desktops}/share/wayland-sessions";
   };
   security.pam.services.greetd.enableGnomeKeyring = true;
 
@@ -82,7 +77,9 @@ in {
       katsuma = privateConfig.username;
     };
     settings = {
-      domain = [ (builtins.head (privateConfig.domains or [ "example.onmicrosoft.com" ])) ];
+      domain = [
+        (builtins.head (privateConfig.domains or [ "example.onmicrosoft.com" ]))
+      ];
       # Enroll the device in Intune and apply its policies so the device
       # reports compliant in Entra. Needs /var/cache/himmelblau-policies
       # (upstream himmelblaud-tasks CacheDirectory) and request_timeout below.
@@ -127,7 +124,8 @@ in {
 
   # Force RGB Full Range on HDMI (DELL S2722QC)
   hardware.display.dellS2722qcRgb.enable = true;
-  hardware.display.outputs."HDMI-A-1".edid = config.hardware.display.dellS2722qcRgb.edidFilename;
+  hardware.display.outputs."HDMI-A-1".edid =
+    config.hardware.display.dellS2722qcRgb.edidFilename;
   hardware.display.wlrootsBroadcastRgbFull.enable = true;
 
   # Webcam flicker prevention (50Hz for East Japan)
