@@ -1,0 +1,136 @@
+--- a/include/screencast_common.h
++++ b/include/screencast_common.h
+@@ -149,6 +149,7 @@
+ struct xdpw_screencast_restore_data {
+ 	uint32_t version;
+ 	const char *output_name;
++	const char *toplevel_identifier;
+ };
+ 
+ struct xdpw_format_modifier_pair {
+--- a/src/screencast/wlr_screencast.c
++++ b/src/screencast/wlr_screencast.c
+@@ -173,8 +173,24 @@
+ 
+ bool xdpw_wlr_target_from_data(struct xdpw_screencast_context *ctx, struct xdpw_screencast_target *target,
+ 		struct xdpw_screencast_restore_data *data) {
+-	struct xdpw_wlr_output *out = NULL;
+-	out = xdpw_wlr_output_find_by_name(&ctx->output_list, data->output_name);
++	if (data->toplevel_identifier) {
++		if (data->version != 2 || data->output_name) {
++			return false;
++		}
++		struct xdpw_toplevel *toplevel;
++		wl_list_for_each(toplevel, &ctx->toplevels, link) {
++			if (toplevel->identifier && strcmp(toplevel->identifier, data->toplevel_identifier) == 0) {
++				target->type = WINDOW;
++				target->toplevel = toplevel;
++				return true;
++			}
++		}
++		return false;
++	}
++	if (!data->output_name) {
++		return false;
++	}
++	struct xdpw_wlr_output *out = xdpw_wlr_output_find_by_name(&ctx->output_list, data->output_name);
+ 
+ 	if (!out) {
+ 		return false;
+--- a/src/screencast/screencast.c
++++ b/src/screencast/screencast.c
+@@ -159,30 +159,33 @@
+ 		return false;
+ 	}
+ 	target->with_cursor = sess->screencast_data.cursor_mode == EMBEDDED;
+-	if (data) {
++	if (data && (data->version == 1 || data->version == 2) &&
++			((data->toplevel_identifier && (type_mask & WINDOW)) ||
++			(!data->toplevel_identifier && (type_mask & MONITOR)))) {
+ 		target_initialized = xdpw_wlr_target_from_data(ctx, target, data);
+ 	}
+ 	if (!target_initialized) {
+ 		target_initialized = xdpw_wlr_target_chooser(ctx, target, type_mask);
+-		//TODO: Chooser option to confirm the persist mode
+-		const char *env_persist_str = getenv("XDPW_PERSIST_MODE");
+-		if (env_persist_str) {
+-			if (strcmp(env_persist_str, "transient") == 0) {
+-				sess->screencast_data.persist_mode = sess->screencast_data.persist_mode > PERSIST_TRANSIENT
+-					? PERSIST_TRANSIENT : sess->screencast_data.persist_mode;
+-			} else if (strcmp(env_persist_str, "permanent") == 0) {
+-				sess->screencast_data.persist_mode = sess->screencast_data.persist_mode > PERSIST_PERMANENT
+-					? PERSIST_PERMANENT : sess->screencast_data.persist_mode;
+-			} else {
+-				sess->screencast_data.persist_mode = PERSIST_NONE;
+-			}
+-
++	}
++	//TODO: Chooser option to confirm the persist mode
++	const char *env_persist_str = getenv("XDPW_PERSIST_MODE");
++	if (env_persist_str) {
++		if (strcmp(env_persist_str, "transient") == 0) {
++			sess->screencast_data.persist_mode = sess->screencast_data.persist_mode > PERSIST_TRANSIENT
++				? PERSIST_TRANSIENT : sess->screencast_data.persist_mode;
++		} else if (strcmp(env_persist_str, "permanent") == 0) {
++			sess->screencast_data.persist_mode = sess->screencast_data.persist_mode > PERSIST_PERMANENT
++				? PERSIST_PERMANENT : sess->screencast_data.persist_mode;
+ 		} else {
+ 			sess->screencast_data.persist_mode = PERSIST_NONE;
+ 		}
++
++	} else {
++		sess->screencast_data.persist_mode = PERSIST_NONE;
+ 	}
+-	if (!target_initialized) {
+-		logprint(ERROR, "wlroots: no output found");
++
++	if (!target_initialized || !(target->type & type_mask)) {
++		logprint(ERROR, "wlroots: no supported target selected");
+ 		free(target);
+ 		return false;
+ 	}
+@@ -417,7 +420,7 @@
+ 				continue;
+ 			}
+ 			sd_bus_message_read(msg, "u", &restore_data.version);
+-			if (restore_data.version == 1) {
++			if (restore_data.version == 1 || restore_data.version == 2) {
+ 				innerRet = sd_bus_message_enter_container(msg, 'v', "a{sv}");
+ 				if (innerRet < 0) {
+ 					return innerRet;
+@@ -437,6 +440,8 @@
+ 					if (strcmp(rdKey, "output_name") == 0) {
+ 						sd_bus_message_read(msg, "v", "s", &restore_data.output_name);
+ 						logprint(INFO, "dbus: option restore_data.output_name: %s", restore_data.output_name);
++					} else if (strcmp(rdKey, "toplevel_identifier") == 0 && restore_data.version == 2) {
++						sd_bus_message_read(msg, "v", "s", &restore_data.toplevel_identifier);
+ 					} else {
+ 						logprint(WARN, "dbus: unknown option %s", rdKey);
+ 						sd_bus_message_skip(msg, "v");
+@@ -583,6 +588,7 @@
+ 		if (strcmp(sess->session_handle, session_handle) == 0) {
+ 				logprint(DEBUG, "dbus: start: found matching session %s", sess->session_handle);
+ 				cast = sess->screencast_data.screencast_instance;
++				break;
+ 		}
+ 	}
+ 	if (!cast) {
+@@ -688,13 +694,13 @@
+ 	if (ret < 0) {
+ 		return ret;
+ 	}
+-	if (sess->screencast_data.persist_mode != PERSIST_NONE && cast->target->output) {
+-		struct xdpw_screencast_restore_data restore_data;
+-		restore_data.output_name = cast->target->output->name;
++	if (sess->screencast_data.persist_mode != PERSIST_NONE) {
++		bool window = cast->target->type == WINDOW;
++		const char *identifier = window ? cast->target->toplevel->identifier : cast->target->output->name;
+ 		ret = sd_bus_message_append(reply, "{sv}",
+ 			"restore_data", "(suv)",
+-			"wlroots", XDP_CAST_DATA_VER,
+-			"a{sv}", 1, "output_name", "s", restore_data.output_name);
++			"wlroots", window ? 2 : XDP_CAST_DATA_VER,
++			"a{sv}", 1, window ? "toplevel_identifier" : "output_name", "s", identifier);
+ 		if (ret < 0) {
+ 			return ret;
+ 		}

@@ -472,9 +472,11 @@ in {
   xdg.portal.wlr = {
     enable = true;
     settings.screencast = {
-      chooser_type = "default"; # auto-detect slurp/wofi/rofi/bemenu
+      chooser_type = "simple";
+      chooser_cmd = lib.getExe pkgs.wlr-chooser;
     };
   };
+  systemd.user.services.xdg-desktop-portal-wlr.environment.XDPW_PERSIST_MODE = "transient";
   # System-level portal configuration
   # Note: User-level config (home-manager) overrides this via NIX_XDG_DESKTOP_PORTAL_DIR
   xdg.portal.config = {

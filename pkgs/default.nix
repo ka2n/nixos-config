@@ -29,6 +29,12 @@ let
     exec -a agent-browser ${upstreamAgentBrowser}/bin/.agent-browser-wrapped "$@"
   '';
 in {
+  wlr-chooser = final.callPackage ./wlr-chooser { };
+
+  xdg-desktop-portal-wlr = prev.xdg-desktop-portal-wlr.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./xdg-desktop-portal-wlr/window-restore.patch ];
+  });
+
   # mise: use nixpkgs-unstable's prebuilt package so cache.nixos.org hits and
   # `nh os build` doesn't recompile every time.
   mise = pkgs-unstable.mise;
