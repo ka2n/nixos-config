@@ -273,6 +273,7 @@ in {
   ] ++ ntnWorkspaceBins ++ lib.optional hasHimmelblau
     (pkgs.writeShellScriptBin "himmelblau-status" (builtins.readFile
       (pkgs.replaceVars ./dotfiles/local/bin/himmelblau-status.sh {
+        himmelblaud = lib.getExe' osConfig.services.himmelblau.daemonPackage "himmelblaud";
         aad_tool = lib.getExe' inputs.himmelblau.packages.${pkgs.stdenv.hostPlatform.system}.aad-tool "aad-tool";
         sso_helper = lib.getExe' himmelblauSsoPackage "linux-entra-sso";
       })));

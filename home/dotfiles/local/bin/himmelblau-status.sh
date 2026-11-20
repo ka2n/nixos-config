@@ -1,5 +1,9 @@
 #!/bin/sh
 
+echo "=== Himmelblau version ==="
+"@himmelblaud@" --version
+
+echo ""
 echo "=== aad-tool status ==="
 sudo "@aad_tool@" status
 
