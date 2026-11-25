@@ -20,3 +20,13 @@ When a command is not found, try these approaches:
     explicitly in the worktree.
 - For browser automation, use `agent-browser` with the system `google-chrome-stable`.
 
+### Heavy Compute
+- Run CPU- or memory-heavy jobs (model checking such as Quint/TLC/Apalache, mutation testing,
+  large builds or benchmarks) on the `junior` host (24 cores, 62 GB RAM), unless `hostname` is already `junior`.
+  - Open a pane with herdr and attach a tmux session on junior:
+    `herdr pane run <pane> "ssh -t junior 'tmux new -A -s <name>'"`. Jobs inside tmux survive ssh drops.
+  - Copy only the files the job needs with `rsync` into a scratch directory on junior (e.g. `~/<job>-runs/`),
+    not into junior's own repository checkouts. Never copy secrets.
+  - Get tools with `nix shell` / `npx`, pinned to the same versions as locally. Leave a few cores free.
+  - Bring results back with `rsync`, and stop any local run of the same job once junior's run starts.
+
